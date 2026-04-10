@@ -1,2 +1,0 @@
-cumulative_procurement_cost,cost_volatility,cvar95,hedge_error,avg_adjustment_mwh,max_drawdown,mean_reward,strategy
-5795511288.789504,0.0,4131545.2949161595,312.46914763621794,0.0,0.0,-5795.759785668743,ppo_validation

@@ -1,2 +1,0 @@
-month,lock_ratio,hedge_intensity,q_lt_target_mwh,lt_price_m,procurement_cost_m,trading_cost_m,risk_term_m,hedge_error_m,avg_adjustment_mwh,reward,strategy
-2026-03-01,0.01023830659687519,0.0,99688.93493466033,398.49527529761906,4031736315.638957,0.0,2457809.85449671,228.5880078125,0.0,-4031.960370988254,ppo
