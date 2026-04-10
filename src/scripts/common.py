@@ -43,10 +43,10 @@ def prepare_project_context(project_root: str | Path) -> dict[str, Any]:
     )
     dump_yaml(config, output_paths["logs"] / "config_snapshot.yaml")
 
-    logger.info("Loaded data from %s", csv_path)
-    logger.info("Training months: %s", [month.strftime("%Y-%m") for month in split.train])
-    logger.info("Validation months: %s", [month.strftime("%Y-%m") for month in split.val])
-    logger.info("Test months: %s", [month.strftime("%Y-%m") for month in split.test])
+    logger.info("已加载数据文件: %s", csv_path)
+    logger.info("训练月份: %s", [month.strftime("%Y-%m") for month in split.train])
+    logger.info("验证月份: %s", [month.strftime("%Y-%m") for month in split.val])
+    logger.info("回测月份: %s", [month.strftime("%Y-%m") for month in split.test])
 
     return {
         "config": config,

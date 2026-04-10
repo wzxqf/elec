@@ -17,7 +17,7 @@ def configure_logging(log_dir: str | Path, name: str = "pipeline") -> logging.Lo
         datefmt="%Y-%m-%d %H:%M:%S",
     )
 
-    file_handler = logging.FileHandler(Path(log_dir) / f"{name}.log", encoding="utf-8")
+    file_handler = logging.FileHandler(Path(log_dir) / f"{name}.log", mode="w", encoding="utf-8")
     file_handler.setFormatter(formatter)
     stream_handler = logging.StreamHandler()
     stream_handler.setFormatter(formatter)

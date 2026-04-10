@@ -15,7 +15,7 @@ def main() -> dict:
     if not model_path.exists():
         raise FileNotFoundError(f"未找到模型文件: {model_path}")
 
-    model = load_model(model_path, context["config"])
+    model = load_model(model_path)
     evaluation = evaluate_policy(
         model=model,
         bundle=context["bundle"],
@@ -26,7 +26,7 @@ def main() -> dict:
     evaluation["monthly_results"].to_csv(context["output_paths"]["metrics"] / "validation_monthly_results.csv", index=False)
     metrics_frame = pd.DataFrame([evaluation["metrics"]])
     metrics_frame.to_csv(context["output_paths"]["metrics"] / "validation_summary.csv", index=False)
-    logger.info("Validation complete.")
+    logger.info("验证完成。")
     return evaluation
 
 

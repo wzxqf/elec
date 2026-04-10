@@ -71,9 +71,9 @@ def clean_total_data(
 
 def build_data_quality_markdown(report: dict[str, Any]) -> str:
     lines = [
-        "# Data Quality Report",
+        "# 数据质量报告",
         "",
-        "## Summary",
+        "## 概览",
         "",
         f"- 原始行数: {report['rows_before_cleaning']}",
         f"- 去重聚合后行数: {report['rows_after_duplicate_aggregation']}",
@@ -83,7 +83,7 @@ def build_data_quality_markdown(report: dict[str, Any]) -> str:
         f"- 重复时间戳个数: {report['duplicate_timestamp_count']}",
         f"- 去重后缺失 15 分钟时点数: {report['missing_timestamp_count_after_aggregation']}",
         "",
-        "## Duplicate Timestamps",
+        "## 重复时间戳",
         "",
     ]
 
@@ -92,7 +92,7 @@ def build_data_quality_markdown(report: dict[str, Any]) -> str:
     else:
         lines.append("- 无")
 
-    lines.extend(["", "## Missing Values", ""])
+    lines.extend(["", "## 缺失值统计", ""])
     for key, value in report["numeric_missing_counts"].items():
         lines.append(f"- {key}: {value}")
     return "\n".join(lines) + "\n"

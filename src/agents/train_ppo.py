@@ -16,33 +16,6 @@ from src.envs.elec_env import ElecEnv
 from src.utils.plotting import save_line_plot
 
 
-def resolve_torch_device(config: dict[str, Any] | None = None) -> tuple[str, dict[str, Any]]:
-    requested = str((config or {}).get("device", "auto")).lower()
-    mps_backend = getattr(torch.backends, "mps", None)
-    capability = {
-        "requested_device": requested,
-        "cuda_available": bool(torch.cuda.is_available()),
-        "cuda_device_count": int(torch.cuda.device_count()),
-        "mps_built": bool(mps_backend is not None),
-        "mps_available": bool(mps_backend is not None and mps_backend.is_available()),
-    }
-
-    if requested == "auto":
-        if capability["cuda_available"]:
-            return "cuda", capability
-        if capability["mps_available"]:
-            return "mps", capability
-        return "cpu", capability
-
-    if requested == "cuda":
-        return ("cuda" if capability["cuda_available"] else "cpu"), capability
-    if requested == "mps":
-        return ("mps" if capability["mps_available"] else "cpu"), capability
-    if requested == "cpu":
-        return "cpu", capability
-    raise ValueError(f"Unsupported torch device setting: {requested}")
-
-
 class TrainingMetricsCallback(BaseCallback):
     def __init__(self) -> None:
         super().__init__()
@@ -123,9 +96,9 @@ def _save_training_plots(train_metrics: pd.DataFrame, eval_metrics: pd.DataFrame
         reward_x,
         reward_y,
         figure_dir / "reward_curve.png",
-        title="Reward Curve",
-        xlabel="Timesteps",
-        ylabel="Reward",
+        title="奖励曲线",
+        xlabel="训练步数",
+        ylabel="奖励值",
     )
 
     loss_series = train_metrics["loss"].ffill().fillna(0.0) if "loss" in train_metrics else pd.Series(dtype=float)
@@ -133,9 +106,9 @@ def _save_training_plots(train_metrics: pd.DataFrame, eval_metrics: pd.DataFrame
         train_metrics["timesteps"] if "timesteps" in train_metrics else np.arange(len(train_metrics)),
         loss_series,
         figure_dir / "loss_curve.png",
-        title="Training Loss Curve",
-        xlabel="Timesteps",
-        ylabel="Loss",
+        title="训练损失曲线",
+        xlabel="训练步数",
+        ylabel="损失值",
     )
 
 
@@ -178,7 +151,7 @@ def train_model(
     train_env = _wrap_env(train_env, use_vec_normalize, training=True)
     eval_env = _wrap_env(eval_env, use_vec_normalize, training=False)
 
-    device, device_info = resolve_torch_device(config)
+    device = "cpu"
     model = PPO(
         policy=config["policy"],
         env=train_env,
@@ -210,6 +183,7 @@ def train_model(
         eval_freq=max(int(config["eval_freq"]), 1),
         deterministic=True,
         render=False,
+        verbose=0,
     )
     metrics_callback = TrainingMetricsCallback()
 
@@ -239,13 +213,11 @@ def train_model(
         "eval_metrics": eval_metrics,
         "best_model_path": output_paths["models"] / f"{run_name}_best" / "best_model.zip",
         "device": device,
-        "device_info": device_info,
     }
 
 
-def load_model(model_path: str | Path, config: dict[str, Any] | None = None) -> PPO:
-    device, _ = resolve_torch_device(config)
-    return PPO.load(str(model_path), device=device)
+def load_model(model_path: str | Path) -> PPO:
+    return PPO.load(str(model_path), device="cpu")
 
 
 def collect_policy_actions(

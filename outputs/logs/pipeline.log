@@ -1,16 +1,7 @@
-2026-04-10 10:29:24 | INFO | elec | Loaded data from /Users/dk/py/elec/total.csv
-2026-04-10 10:29:24 | INFO | elec | Training months: ['2025-12', '2026-01']
-2026-04-10 10:29:24 | INFO | elec | Validation months: ['2026-02']
-2026-04-10 10:29:24 | INFO | elec | Test months: ['2026-03']
-2026-04-10 10:29:24 | INFO | elec | Start full pipeline.
-2026-04-10 10:29:51 | INFO | elec | Start backtest module.
-2026-04-10 10:30:25 | INFO | elec | Backtest module complete.
-2026-04-10 10:30:25 | INFO | elec | Pipeline complete.
-2026-04-10 10:44:01 | INFO | elec | Loaded data from /Users/dk/py/elec/total.csv
-2026-04-10 10:44:01 | INFO | elec | Training months: ['2025-12', '2026-01']
-2026-04-10 10:44:01 | INFO | elec | Validation months: ['2026-02']
-2026-04-10 10:44:01 | INFO | elec | Test months: ['2026-03']
-2026-04-10 10:44:01 | INFO | elec | Start full pipeline.
-2026-04-10 10:44:39 | INFO | elec | Start backtest module.
-2026-04-10 10:45:31 | INFO | elec | Backtest module complete.
-2026-04-10 10:45:31 | INFO | elec | Pipeline complete.
+2026-04-10 11:24:00 | INFO | elec | 已加载数据文件: /Users/dk/py/elec/total.csv
+2026-04-10 11:24:00 | INFO | elec | 训练月份: ['2025-12', '2026-01']
+2026-04-10 11:24:00 | INFO | elec | 验证月份: ['2026-02']
+2026-04-10 11:24:00 | INFO | elec | 回测月份: ['2026-03']
+2026-04-10 11:24:01 | INFO | elec | 验证完成。
+��模块。
+2026-04-10 11:24:29 | INFO | elec | 回测模块执行完成。

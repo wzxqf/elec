@@ -16,12 +16,6 @@ mamba activate elec_env
 pip install -r requirements.txt
 ```
 
-训练设备默认使用 `auto` 模式：
-
-- 若存在 CUDA，则优先使用 CUDA GPU
-- 若为 Apple Silicon 且 MPS 可用，则使用 MPS GPU
-- 若以上均不可用，则回退到 CPU
-
 ## 入口
 
 ```bash

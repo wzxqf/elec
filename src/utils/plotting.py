@@ -3,11 +3,12 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Iterable
 
-import matplotlib
-
-matplotlib.use("Agg")
-import matplotlib.pyplot as plt
 import pandas as pd
+
+
+def _csv_path(path: str | Path) -> Path:
+    target = Path(path)
+    return target.with_suffix(".csv")
 
 
 def save_line_plot(
@@ -19,16 +20,13 @@ def save_line_plot(
     ylabel: str,
     label: str | None = None,
 ) -> None:
-    plt.figure(figsize=(10, 4.8))
-    plt.plot(list(x), list(y), label=label)
-    if label:
-        plt.legend()
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.tight_layout()
-    plt.savefig(path, dpi=160)
-    plt.close()
+    frame = pd.DataFrame(
+        {
+            xlabel: list(x),
+            label or ylabel: list(y),
+        }
+    )
+    frame.to_csv(_csv_path(path), index=False)
 
 
 def save_multi_line_plot(
@@ -38,17 +36,9 @@ def save_multi_line_plot(
     xlabel: str,
     ylabel: str,
 ) -> None:
-    plt.figure(figsize=(10, 4.8))
-    for column in frame.columns:
-        plt.plot(frame.index.astype(str), frame[column], label=str(column))
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.xticks(rotation=30)
-    plt.legend()
-    plt.tight_layout()
-    plt.savefig(path, dpi=160)
-    plt.close()
+    export_frame = frame.copy()
+    export_frame.index.name = xlabel
+    export_frame.reset_index().to_csv(_csv_path(path), index=False)
 
 
 def save_bar_plot(
@@ -58,12 +48,6 @@ def save_bar_plot(
     xlabel: str,
     ylabel: str,
 ) -> None:
-    plt.figure(figsize=(10, 4.8))
-    frame.plot(kind="bar", ax=plt.gca())
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.xticks(rotation=30)
-    plt.tight_layout()
-    plt.savefig(path, dpi=160)
-    plt.close()
+    export_frame = frame.copy()
+    export_frame.index.name = xlabel
+    export_frame.reset_index().to_csv(_csv_path(path), index=False)

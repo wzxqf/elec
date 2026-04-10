@@ -18,7 +18,7 @@ from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_pl
 def _ensure_main_model(context: dict[str, Any]):
     model_path = context["output_paths"]["models"] / "ppo_elec_env.zip"
     if model_path.exists():
-        return load_model(model_path, context["config"])
+        return load_model(model_path)
     training = train_model(
         bundle=context["bundle"],
         train_months=context["train_sequence"],
@@ -46,9 +46,9 @@ def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) 
     save_bar_plot(
         monthly_cost,
         output_paths["figures"] / "monthly_cost_compare.png",
-        title="Monthly Procurement Cost Comparison",
-        xlabel="Month",
-        ylabel="Cost",
+        title="月度采购成本对比",
+        xlabel="月份",
+        ylabel="成本",
     )
 
     equity_curve = (
@@ -59,18 +59,18 @@ def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) 
     save_multi_line_plot(
         equity_curve,
         output_paths["figures"] / "equity_curve.png",
-        title="Cumulative Cost Curve",
-        xlabel="Datetime",
-        ylabel="Cumulative Cost",
+        title="累计成本曲线",
+        xlabel="时间",
+        ylabel="累计成本",
     )
 
     hedge_error = monthly.pivot(index="month", columns="strategy", values="hedge_error_m").sort_index()
     save_multi_line_plot(
         hedge_error,
         output_paths["figures"] / "hedge_error_curve.png",
-        title="Monthly Hedge Error",
-        xlabel="Month",
-        ylabel="Hedge Error",
+        title="月度套保误差",
+        xlabel="月份",
+        ylabel="套保误差",
     )
 
 
@@ -119,9 +119,9 @@ def run_sensitivity_analysis(
             subset["value"],
             subset["cumulative_procurement_cost"],
             context["output_paths"]["figures"] / f"sensitivity_{factor}.png",
-            title=f"Sensitivity: {factor}",
+            title=f"敏感性分析: {factor}",
             xlabel=factor,
-            ylabel="Cumulative Procurement Cost",
+            ylabel="累计采购成本",
         )
     return frame
 
@@ -186,9 +186,9 @@ def run_robustness_analysis(
         contract["value"],
         contract["cumulative_procurement_cost"],
         context["output_paths"]["figures"] / "robustness_contract_ratio_shift.png",
-        title="Robustness: Contract Ratio Shift",
-        xlabel="Lock Ratio Shift",
-        ylabel="Cumulative Procurement Cost",
+        title="鲁棒性分析: 合约比例扰动",
+        xlabel="锁定比例扰动",
+        ylabel="累计采购成本",
     )
 
     forecast = frame.loc[frame["experiment"] == "forecast_error_scale"].sort_values("value")
@@ -196,9 +196,9 @@ def run_robustness_analysis(
         forecast["value"],
         forecast["cumulative_procurement_cost"],
         context["output_paths"]["figures"] / "robustness_forecast_error_scale.png",
-        title="Robustness: Forecast Error Scale",
-        xlabel="Forecast Error Scale",
-        ylabel="Cumulative Procurement Cost",
+        title="鲁棒性分析: 预测误差水平",
+        xlabel="预测误差系数",
+        ylabel="累计采购成本",
     )
 
     policy = frame.loc[frame["experiment"].str.contains("policy_split")].copy()
@@ -207,9 +207,9 @@ def run_robustness_analysis(
     save_bar_plot(
         policy,
         context["output_paths"]["figures"] / "robustness_policy_split.png",
-        title="Robustness: Policy Split",
-        xlabel="Segment",
-        ylabel="Cumulative Procurement Cost",
+        title="鲁棒性分析: 政策分段对比",
+        xlabel="样本分段",
+        ylabel="累计采购成本",
     )
     return frame
 
@@ -284,16 +284,16 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
 
     top = frame.head(5)
     summary_lines = [
-        "# Hyperparameter Search Summary",
+        "# 超参数搜索总结",
         "",
-        "## Top Trials",
+        "## 最优试验",
         "",
     ]
     for _, row in top.iterrows():
         summary_lines.append(
-            "- Trial {trial_id}: lr={learning_rate:.6f}, n_steps={n_steps}, batch_size={batch_size}, "
+            "- 试验 {trial_id}: lr={learning_rate:.6f}, n_steps={n_steps}, batch_size={batch_size}, "
             "ent_coef={ent_coef:.4f}, lambda_risk={lambda_risk:.4f}, lambda_he={lambda_he:.2f}, "
-            "hedge_intensity_scale={hedge_intensity_scale:.3f}, val_cost={val_cumulative_procurement_cost:.2f}".format(
+            "hedge_intensity_scale={hedge_intensity_scale:.3f}, 验证成本={val_cumulative_procurement_cost:.2f}".format(
                 **row.to_dict()
             )
         )
@@ -303,7 +303,7 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
 
 def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = context["logger"]
-    logger.info("Start backtest module.")
+    logger.info("开始执行回测模块。")
     model = model or _ensure_main_model(context)
 
     ppo_result = evaluate_policy(
@@ -347,7 +347,7 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     robustness = run_robustness_analysis(context, model, ppo_result["actions"])
     hparam_search = run_hparam_search(context)
 
-    logger.info("Backtest module complete.")
+    logger.info("回测模块执行完成。")
     return {
         "results": results,
         "metrics_frame": metrics_frame,

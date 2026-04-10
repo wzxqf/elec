@@ -1,6 +1,5 @@
 algorithm: PPO
 policy: MlpPolicy
-device: auto
 total_timesteps: 4096
 eval_freq: 256
 checkpoint_freq: 512
