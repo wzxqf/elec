@@ -15,7 +15,7 @@ def main() -> dict:
     if not model_path.exists():
         raise FileNotFoundError(f"未找到模型文件: {model_path}")
 
-    model = load_model(model_path)
+    model = load_model(model_path, context["config"])
     evaluation = evaluate_policy(
         model=model,
         bundle=context["bundle"],

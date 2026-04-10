@@ -30,19 +30,23 @@
 - 最优模型目录: /Users/dk/py/elec/outputs/models/ppo_elec_env_best/best_model.zip
 - 最终模型路径: /Users/dk/py/elec/outputs/models/ppo_elec_env.zip
 - 训练 timesteps: 4096
-- 训练设备: cpu
+- 设备偏好: auto
+- 训练设备: mps
+- CUDA 可用: False
+- CUDA 设备数: 0
+- MPS 可用: True
 
 ## Validation
 
-- 累计采购成本: 5795511288.79
-- CVaR(95%): 4131545.29
-- 平均奖励: -5795.759786
+- 累计采购成本: 5795501425.54
+- CVaR(95%): 4130038.68
+- 平均奖励: -5795.749814
 
 ## Backtest
 
-- 累计采购成本: 4031736315.64
+- 累计采购成本: 4031699504.62
 - 成本波动率: 0.00
-- CVaR(95%): 3852182.79
+- CVaR(95%): 3849615.18
 - 套保误差: 228.5880
 - 月均调整量: 0.0000
 

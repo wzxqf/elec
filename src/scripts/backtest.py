@@ -18,7 +18,7 @@ from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_pl
 def _ensure_main_model(context: dict[str, Any]):
     model_path = context["output_paths"]["models"] / "ppo_elec_env.zip"
     if model_path.exists():
-        return load_model(model_path)
+        return load_model(model_path, context["config"])
     training = train_model(
         bundle=context["bundle"],
         train_months=context["train_sequence"],

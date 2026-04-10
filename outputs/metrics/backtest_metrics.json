@@ -1,12 +1,12 @@
 {
   "main_strategy": {
-    "cumulative_procurement_cost": 4031736315.638957,
+    "cumulative_procurement_cost": 4031699504.622691,
     "cost_volatility": 0.0,
-    "cvar95": 3852182.794973835,
+    "cvar95": 3849615.17502536,
     "hedge_error": 228.5880078125,
     "avg_adjustment_mwh": 0.0,
     "max_drawdown": 0.0,
-    "mean_reward": -4031.960370988254,
+    "mean_reward": -4031.923392493626,
     "strategy": "ppo"
   },
   "benchmarks": [
@@ -33,15 +33,15 @@
       "cost_savings_vs_fixed_lock": -1385033.0861911774
     },
     {
-      "cumulative_procurement_cost": 4031736315.638957,
+      "cumulative_procurement_cost": 4031699504.622691,
       "cost_volatility": 0.0,
-      "cvar95": 3852182.794973835,
+      "cvar95": 3849615.17502536,
       "hedge_error": 228.5880078125,
       "avg_adjustment_mwh": 0.0,
       "max_drawdown": 0.0,
-      "mean_reward": -4031.960370988254,
+      "mean_reward": -4031.923392493626,
       "strategy": "ppo",
-      "cost_savings_vs_fixed_lock": -8856842.331166267
+      "cost_savings_vs_fixed_lock": -8820031.314900398
     },
     {
       "cumulative_procurement_cost": 4659092735.104519,
