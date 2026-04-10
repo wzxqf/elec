@@ -1,0 +1,56 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+from typing import Any, Iterable
+
+
+def ensure_directories(paths: Iterable[str | Path]) -> None:
+    for path in paths:
+        Path(path).mkdir(parents=True, exist_ok=True)
+
+
+def load_yaml(path: str | Path) -> dict[str, Any]:
+    import yaml
+
+    with Path(path).open("r", encoding="utf-8") as handle:
+        return yaml.safe_load(handle) or {}
+
+
+def dump_yaml(payload: dict[str, Any], path: str | Path) -> None:
+    import yaml
+
+    with Path(path).open("w", encoding="utf-8") as handle:
+        yaml.safe_dump(payload, handle, allow_unicode=True, sort_keys=False)
+
+
+def save_json(payload: dict[str, Any], path: str | Path) -> None:
+    def default(obj: Any) -> Any:
+        if hasattr(obj, "item"):
+            return obj.item()
+        raise TypeError(f"Unsupported type for JSON serialization: {type(obj)!r}")
+
+    with Path(path).open("w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2, default=default)
+
+
+def save_markdown(text: str, path: str | Path) -> None:
+    with Path(path).open("w", encoding="utf-8") as handle:
+        handle.write(text)
+
+
+def resolve_output_paths(config: dict[str, Any]) -> dict[str, Path]:
+    outputs = {key: Path(value) for key, value in config["outputs"].items()}
+    ensure_directories(outputs.values())
+    return outputs
+
+
+def merge_configs(*configs: dict[str, Any]) -> dict[str, Any]:
+    merged: dict[str, Any] = {}
+    for config in configs:
+        for key, value in config.items():
+            if isinstance(value, dict) and isinstance(merged.get(key), dict):
+                merged[key] = merge_configs(merged[key], value)
+            else:
+                merged[key] = value
+    return merged

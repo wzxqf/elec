@@ -1,0 +1,47 @@
+project_root: /Users/dk/py/elec
+sample_start: "2025-11-01 00:00:00"
+sample_end: "2026-03-20 23:45:00"
+warmup_month: "2025-11"
+train_months:
+  - "2025-12"
+  - "2026-01"
+val_months:
+  - "2026-02"
+test_months:
+  - "2026-03"
+data_candidates:
+  - /Users/dk/py/elec/total.csv
+  - /Users/dk/py/elec/data/total.csv
+policy_events:
+  policy_event_20260101: "2026-01-01 00:00:00"
+  policy_event_20260201: "2026-02-01 00:00:00"
+outputs:
+  logs: /Users/dk/py/elec/outputs/logs
+  models: /Users/dk/py/elec/outputs/models
+  metrics: /Users/dk/py/elec/outputs/metrics
+  figures: /Users/dk/py/elec/outputs/figures
+  reports: /Users/dk/py/elec/outputs/reports
+cost:
+  penalty_multiplier: 1.05
+  transaction_fee_rate: 2.0
+  lambda_risk: 0.08
+  lambda_tc: 1.0
+  lambda_he: 120.0
+  risk_vol_weight: 0.50
+  risk_cvar_weight: 0.50
+env:
+  reward_scale: 1000000.0
+rules:
+  price_spread_weight: 0.45
+  load_dev_weight: 0.35
+  renewable_dev_weight: 0.20
+  max_adjust_share: 0.85
+  price_gate_quantile: 0.95
+  price_gate_penalty: 0.50
+scenario:
+  train_sequence_length: 64
+  block_size: 2
+  bootstrap_seed: 42
+reporting:
+  use_intraday_proxy_settlement: true
+  use_estimated_lt_price: true

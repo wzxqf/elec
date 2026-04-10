@@ -1,0 +1,5 @@
+expected_frequency_minutes: 15
+datetime_column: datetime
+duplicate_strategy: mean
+settlement_interval_hours: 0.25
+hour_interval_hours: 1.0

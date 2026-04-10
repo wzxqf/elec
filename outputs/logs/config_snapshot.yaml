@@ -1,0 +1,135 @@
+project_root: /Users/dk/py/elec
+sample_start: '2025-11-01 00:00:00'
+sample_end: '2026-03-20 23:45:00'
+warmup_month: 2025-11
+train_months:
+- 2025-12
+- 2026-01
+val_months:
+- 2026-02
+test_months:
+- 2026-03
+data_candidates:
+- /Users/dk/py/elec/total.csv
+- /Users/dk/py/elec/data/total.csv
+policy_events:
+  policy_event_20260101: '2026-01-01 00:00:00'
+  policy_event_20260201: '2026-02-01 00:00:00'
+outputs:
+  logs: /Users/dk/py/elec/outputs/logs
+  models: /Users/dk/py/elec/outputs/models
+  metrics: /Users/dk/py/elec/outputs/metrics
+  figures: /Users/dk/py/elec/outputs/figures
+  reports: /Users/dk/py/elec/outputs/reports
+cost:
+  penalty_multiplier: 1.05
+  transaction_fee_rate: 2.0
+  lambda_risk: 0.08
+  lambda_tc: 1.0
+  lambda_he: 120.0
+  risk_vol_weight: 0.5
+  risk_cvar_weight: 0.5
+env:
+  reward_scale: 1000000.0
+rules:
+  price_spread_weight: 0.45
+  load_dev_weight: 0.35
+  renewable_dev_weight: 0.2
+  max_adjust_share: 0.85
+  price_gate_quantile: 0.95
+  price_gate_penalty: 0.5
+scenario:
+  train_sequence_length: 64
+  block_size: 2
+  bootstrap_seed: 42
+reporting:
+  use_intraday_proxy_settlement: true
+  use_estimated_lt_price: true
+algorithm: PPO
+policy: MlpPolicy
+total_timesteps: 4096
+eval_freq: 256
+checkpoint_freq: 512
+learning_rate: 0.0003
+n_steps: 256
+batch_size: 64
+n_epochs: 10
+gamma: 0.99
+gae_lambda: 0.95
+clip_range: 0.2
+ent_coef: 0.01
+vf_coef: 0.5
+max_grad_norm: 0.5
+seed: 42
+use_vec_normalize: false
+expected_frequency_minutes: 15
+datetime_column: datetime
+duplicate_strategy: mean
+settlement_interval_hours: 0.25
+hour_interval_hours: 1.0
+benchmarks:
+  fixed_lock_ratio: 0.6
+  dynamic_lock_base: 0.55
+  dynamic_lock_spread_penalty: 0.12
+  dynamic_lock_renewable_bonus: 0.15
+  dynamic_lock_policy_bonus: 0.05
+  rule_only_intensity: 0.75
+sensitivity:
+  lambda_risk:
+  - 0.04
+  - 0.08
+  - 0.12
+  market_vol_scale:
+  - 0.8
+  - 1.0
+  - 1.2
+  price_cap_multiplier:
+  - 0.9
+  - 1.0
+  - 1.1
+robustness:
+  contract_ratio_shift:
+  - -0.1
+  - 0.0
+  - 0.1
+  policy_cutoffs:
+  - '2026-01-01'
+  - '2026-02-01'
+  forecast_error_scale:
+  - 0.8
+  - 1.0
+  - 1.2
+hparam_search:
+  manual_grid:
+  - learning_rate: 0.0003
+    n_steps: 256
+    batch_size: 64
+    ent_coef: 0.01
+    lambda_risk: 0.08
+    lambda_he: 120.0
+    hedge_intensity_scale: 1.0
+  - learning_rate: 0.0001
+    n_steps: 128
+    batch_size: 32
+    ent_coef: 0.02
+    lambda_risk: 0.1
+    lambda_he: 150.0
+    hedge_intensity_scale: 0.9
+  random_search:
+    n_trials: 3
+    learning_rate_range:
+    - 0.0001
+    - 0.0005
+    ent_coef_range:
+    - 0.005
+    - 0.03
+    lambda_risk_range:
+    - 0.04
+    - 0.12
+    lambda_he_range:
+    - 80.0
+    - 180.0
+    hedge_intensity_scale_range:
+    - 0.8
+    - 1.2
+  total_timesteps: 1024
