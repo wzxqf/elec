@@ -1,51 +1,76 @@
 from __future__ import annotations
 
+from typing import Any
+
 import numpy as np
 import pandas as pd
 
 
-def zscore(series: pd.Series) -> pd.Series:
-    std = float(series.std(ddof=0))
-    if std == 0 or np.isnan(std):
-        return pd.Series(0.0, index=series.index)
-    return (series - float(series.mean())) / std
+def _signal(series: pd.Series, threshold: float) -> pd.Series:
+    scaled = series / max(threshold, 1e-6)
+    return scaled.clip(-1.0, 1.0)
 
 
-def compute_hourly_hedge_adjustment(
+def apply_hourly_hedge_rule(
     hourly_frame: pd.DataFrame,
-    residual_exposure_mwh: pd.Series,
+    q_lt_hourly: pd.Series,
     hedge_intensity: float,
-    rule_config: dict,
-    market_vol_scale: float = 1.0,
-    forecast_error_scale: float = 1.0,
-    price_cap_multiplier: float = 1.0,
-    hedge_intensity_scale: float = 1.0,
-) -> pd.Series:
-    spread_signal = zscore(hourly_frame["price_spread"] * market_vol_scale)
-    load_signal = zscore(hourly_frame["load_dev"] * forecast_error_scale)
-    renewable_signal = zscore(hourly_frame["renewable_dev"] * forecast_error_scale)
+    rules_config: dict[str, Any],
+) -> tuple[pd.DataFrame, dict[str, int]]:
+    frame = hourly_frame.copy().reset_index(drop=True)
+    q_lt = pd.Series(np.asarray(q_lt_hourly, dtype=float), index=frame.index, dtype=float).clip(lower=0.0)
+    frame["q_lt_hourly"] = q_lt
+    frame["spot_need"] = (frame["net_load_da"] - frame["q_lt_hourly"]).clip(lower=0.0)
+    frame["q_base"] = frame["spot_need"]
 
-    raw_signal = (
-        rule_config["price_spread_weight"] * spread_signal
-        + rule_config["load_dev_weight"] * load_signal
-        + rule_config["renewable_dev_weight"] * renewable_signal
-    )
-    clipped_signal = np.clip(raw_signal, -1.0, 1.0)
+    spread_signal = _signal(frame["price_spread"], float(rules_config["spread_threshold"]))
+    load_signal = _signal(frame["load_dev"], float(rules_config["load_dev_threshold"]))
+    renewable_signal = _signal(-frame["renewable_dev"], float(rules_config["renewable_dev_threshold"]))
 
-    price_threshold = hourly_frame["全网统一出清价格_日内"].quantile(rule_config["price_gate_quantile"])
-    price_gate = np.where(
-        hourly_frame["全网统一出清价格_日内"] > price_threshold * price_cap_multiplier,
-        rule_config["price_gate_penalty"],
-        1.0,
-    )
+    composite = (
+        float(rules_config["price_spread_weight"]) * spread_signal
+        + float(rules_config["load_dev_weight"]) * load_signal
+        + float(rules_config["renewable_dev_weight"]) * renewable_signal
+    ).clip(-float(rules_config["signal_clip"]), float(rules_config["signal_clip"]))
 
-    max_adjust_share = rule_config["max_adjust_share"]
-    adjustment = (
-        clipped_signal
-        * np.clip(hedge_intensity, 0.0, 1.0)
-        * hedge_intensity_scale
-        * max_adjust_share
-        * residual_exposure_mwh
-        * price_gate
-    )
-    return pd.Series(adjustment, index=hourly_frame.index)
+    frame["signal_spread"] = spread_signal
+    frame["signal_load_dev"] = load_signal
+    frame["signal_renewable_dev"] = renewable_signal
+
+    raw_a = hedge_intensity * composite
+    clipped_a = raw_a.clip(float(rules_config["a_min"]), float(rules_config["a_max"]))
+    frame["a_t_raw"] = raw_a
+    frame["a_t"] = clipped_a
+    frame["clipped_by_bound"] = (raw_a != clipped_a).astype(int)
+
+    raw_delta = frame["a_t"] * frame["q_base"]
+    smooth_limit = float(rules_config["gamma_max"])
+    delta_values: list[float] = []
+    smooth_hits = 0
+    previous_delta = 0.0
+    for value in raw_delta.tolist():
+        clipped_value = float(np.clip(value, previous_delta - smooth_limit, previous_delta + smooth_limit))
+        if not np.isclose(clipped_value, value):
+            smooth_hits += 1
+        delta_values.append(clipped_value)
+        previous_delta = clipped_value
+
+    frame["delta_q"] = delta_values
+    frame["smoothed"] = [
+        int(not np.isclose(raw, clipped))
+        for raw, clipped in zip(raw_delta.tolist(), frame["delta_q"].tolist(), strict=False)
+    ]
+    frame["q_spot_raw"] = frame["q_base"] + frame["delta_q"]
+    if bool(rules_config["non_negative_clip"]):
+        frame["q_spot"] = frame["q_spot_raw"].clip(lower=0.0)
+    else:
+        frame["q_spot"] = frame["q_spot_raw"]
+    frame["clipped_non_negative"] = (frame["q_spot_raw"] < 0.0).astype(int)
+    frame["hedge_error_abs"] = (frame["q_spot"] - frame["spot_need"]).abs()
+
+    stats = {
+        "bound_clip_count": int(frame["clipped_by_bound"].sum()),
+        "smooth_clip_count": int(smooth_hits),
+        "non_negative_clip_count": int(frame["clipped_non_negative"].sum()),
+    }
+    return frame, stats

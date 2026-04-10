@@ -1,0 +1,13 @@
+rules:
+  price_spread_weight: 0.45
+  load_dev_weight: 0.35
+  renewable_dev_weight: 0.20
+  spread_threshold: 8.0
+  load_dev_threshold: 120.0
+  renewable_dev_threshold: 100.0
+  a_min: -0.60
+  a_max: 0.60
+  gamma_max: 180.0
+  non_negative_clip: true
+  signal_clip: 1.0
+  smoothing_mode: hard_clip

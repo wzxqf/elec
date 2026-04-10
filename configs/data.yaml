@@ -3,3 +3,14 @@ datetime_column: datetime
 duplicate_strategy: mean
 settlement_interval_hours: 0.25
 hour_interval_hours: 1.0
+week_period: W-SUN
+feature_quantiles:
+  - 0.25
+  - 0.50
+  - 0.75
+weekly_target_column: net_load_da_mwh
+actual_target_column: net_load_id_mwh
+lt_price:
+  preferred_columns: []
+  fallback_method: previous_week_da_mean
+  warmup_label: warmup_unavailable

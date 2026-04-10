@@ -6,8 +6,9 @@ from pathlib import Path
 
 def configure_logging(log_dir: str | Path, name: str = "pipeline") -> logging.Logger:
     Path(log_dir).mkdir(parents=True, exist_ok=True)
-    logger = logging.getLogger("elec")
+    logger = logging.getLogger(f"elec.{name}")
     logger.setLevel(logging.INFO)
+    logger.propagate = False
 
     if logger.handlers:
         return logger

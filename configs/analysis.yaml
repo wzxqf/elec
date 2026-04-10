@@ -1,0 +1,6 @@
+analysis:
+  sensitivity_export_prefix: sensitivity
+  robustness_export_prefix: robustness
+  diagnostics_sample_weeks: 3
+  export_rule_trace: true
+  export_settlement_trace: true

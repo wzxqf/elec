@@ -1,0 +1,14 @@
+column,source,formula
+net_load_da,派生,省调负荷_日前 - 新能源负荷-总加_日前
+net_load_id,派生,省调负荷_日内 - 新能源负荷-总加_日内
+price_spread,派生,全网统一出清价格_日内 - 全网统一出清价格_日前
+load_dev,派生,net_load_id - net_load_da
+wind_dev,派生,新能源负荷-风电_日内 - 新能源负荷-风电_日前
+solar_dev,派生,新能源负荷-光伏_日内 - 新能源负荷-光伏_日前
+renewable_ratio_da,派生,新能源负荷-总加_日前 / 省调负荷_日前
+renewable_ratio_id,派生,新能源负荷-总加_日内 / 省调负荷_日内
+renewable_dev,派生,wind_dev + solar_dev
+net_load_da_mwh,派生,net_load_da * 0.25
+net_load_id_mwh,派生,net_load_id * 0.25
+policy_event_20260101,政策事件,datetime >= 2026-01-01 00:00:00
+policy_event_20260201,政策事件,datetime >= 2026-02-01 00:00:00

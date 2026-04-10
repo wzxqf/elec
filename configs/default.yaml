@@ -1,47 +1,62 @@
 project_root: /Users/dk/py/elec
 sample_start: "2025-11-01 00:00:00"
 sample_end: "2026-03-20 23:45:00"
-warmup_month: "2025-11"
-train_months:
-  - "2025-12"
-  - "2026-01"
-val_months:
-  - "2026-02"
-test_months:
-  - "2026-03"
+buffer_end: "2026-03-28 23:45:00"
+
+split:
+  train_start_week: "2025-11-03 00:00:00"
+  train_end_week: "2026-01-26 00:00:00"
+  val_start_week: "2026-02-02 00:00:00"
+  val_end_week: "2026-02-23 00:00:00"
+  test_start_week: "2026-03-02 00:00:00"
+  test_end_week: "2026-03-16 00:00:00"
+
 data_candidates:
   - /Users/dk/py/elec/total.csv
   - /Users/dk/py/elec/data/total.csv
+
 policy_events:
   policy_event_20260101: "2026-01-01 00:00:00"
   policy_event_20260201: "2026-02-01 00:00:00"
+
 outputs:
   logs: /Users/dk/py/elec/outputs/logs
   models: /Users/dk/py/elec/outputs/models
   metrics: /Users/dk/py/elec/outputs/metrics
   figures: /Users/dk/py/elec/outputs/figures
   reports: /Users/dk/py/elec/outputs/reports
+
 cost:
-  penalty_multiplier: 1.05
-  transaction_fee_rate: 2.0
-  lambda_risk: 0.08
-  lambda_tc: 1.0
-  lambda_he: 120.0
+  lambda_risk: 0.06
+  lambda_tc: 0.80
+  lambda_he: 100.0
   risk_vol_weight: 0.50
   risk_cvar_weight: 0.50
+  transaction_linear: 1.20
+  transaction_quadratic: 0.015
+  lt_adjust_cost: 0.60
+  imbalance_penalty_multiplier: 1.00
+  cvar_alpha: 0.95
+
+constraints:
+  lock_ratio_min: 0.10
+  lock_ratio_max: 0.90
+  delta_h_max: 0.25
+  cvar_budget: 220000.0
+  cvar_budget_penalty: 5.0
+
 env:
   reward_scale: 1000000.0
-rules:
-  price_spread_weight: 0.45
-  load_dev_weight: 0.35
-  renewable_dev_weight: 0.20
-  max_adjust_share: 0.85
-  price_gate_quantile: 0.95
-  price_gate_penalty: 0.50
+  include_prev_reward: true
+
 scenario:
-  train_sequence_length: 64
-  block_size: 2
+  train_sequence_length: 96
+  block_size: 3
   bootstrap_seed: 42
+  training_sequence_method: block_bootstrap
+
 reporting:
   use_intraday_proxy_settlement: true
+  settlement_note: "15分钟日内代理结算口径"
   use_estimated_lt_price: true
+  lt_price_note: "中长期价格默认采用上一自然周日前小时均价估算"

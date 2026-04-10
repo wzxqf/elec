@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import pandas as pd
-import torch
 from stable_baselines3 import PPO
 from stable_baselines3.common.callbacks import BaseCallback, CallbackList, CheckpointCallback, EvalCallback
 from stable_baselines3.common.monitor import Monitor
@@ -49,13 +49,13 @@ class SyncEvalCallback(EvalCallback):
 
 def _make_env(
     bundle: dict[str, Any],
-    months: list[pd.Timestamp],
+    weeks: list[pd.Timestamp],
     config: dict[str, Any],
     monitor_path: str | Path | None = None,
 ):
     def _init():
-        env = ElecEnv(bundle=bundle, month_sequence=months, config=config)
-        info_keywords = ("procurement_cost", "risk_term", "trading_cost", "hedge_error")
+        env = ElecEnv(bundle=bundle, week_sequence=weeks, config=config)
+        info_keywords = ("procurement_cost", "risk_term", "trading_cost", "hedge_error", "cvar")
         return Monitor(env, filename=str(monitor_path) if monitor_path else None, info_keywords=info_keywords)
 
     return _init
@@ -75,13 +75,11 @@ def _export_eval_metrics(eval_log_dir: Path, output_csv: Path) -> pd.DataFrame:
         return frame
 
     payload = np.load(evaluation_file)
-    results = payload["results"]
-    timesteps = payload["timesteps"]
     frame = pd.DataFrame(
         {
-            "timesteps": timesteps,
-            "mean_reward": results.mean(axis=1),
-            "std_reward": results.std(axis=1),
+            "timesteps": payload["timesteps"],
+            "mean_reward": payload["results"].mean(axis=1),
+            "std_reward": payload["results"].std(axis=1),
         }
     )
     frame.to_csv(output_csv, index=False)
@@ -95,16 +93,14 @@ def _save_training_plots(train_metrics: pd.DataFrame, eval_metrics: pd.DataFrame
     save_line_plot(
         reward_x,
         reward_y,
-        figure_dir / "reward_curve.png",
-        title="奖励曲线",
+        figure_dir / "weekly_reward_curve.png",
+        title="周度奖励曲线",
         xlabel="训练步数",
-        ylabel="奖励值",
+        ylabel="平均奖励",
     )
-
-    loss_series = train_metrics["loss"].ffill().fillna(0.0) if "loss" in train_metrics else pd.Series(dtype=float)
     save_line_plot(
         train_metrics["timesteps"] if "timesteps" in train_metrics else np.arange(len(train_metrics)),
-        loss_series,
+        train_metrics["loss"].ffill().fillna(0.0) if "loss" in train_metrics else [],
         figure_dir / "loss_curve.png",
         title="训练损失曲线",
         xlabel="训练步数",
@@ -114,11 +110,11 @@ def _save_training_plots(train_metrics: pd.DataFrame, eval_metrics: pd.DataFrame
 
 def train_model(
     bundle: dict[str, Any],
-    train_months: list[pd.Timestamp],
-    val_months: list[pd.Timestamp],
+    train_weeks: list[pd.Timestamp],
+    val_weeks: list[pd.Timestamp],
     config: dict[str, Any],
     output_paths: dict[str, Path],
-    run_name: str = "ppo_elec_env",
+    run_name: str = "ppo",
     total_timesteps_override: int | None = None,
     save_plots: bool = True,
 ) -> dict[str, Any]:
@@ -132,7 +128,7 @@ def train_model(
         [
             _make_env(
                 bundle=bundle,
-                months=train_months,
+                weeks=train_weeks,
                 config=config,
                 monitor_path=output_paths["logs"] / f"{run_name}_train_monitor.csv",
             )
@@ -142,7 +138,7 @@ def train_model(
         [
             _make_env(
                 bundle=bundle,
-                months=val_months,
+                weeks=val_weeks,
                 config=config,
                 monitor_path=output_paths["logs"] / f"{run_name}_eval_monitor.csv",
             )
@@ -151,7 +147,7 @@ def train_model(
     train_env = _wrap_env(train_env, use_vec_normalize, training=True)
     eval_env = _wrap_env(eval_env, use_vec_normalize, training=False)
 
-    device = "cpu"
+    device = str(config.get("device", "cpu"))
     model = PPO(
         policy=config["policy"],
         env=train_env,
@@ -178,7 +174,7 @@ def train_model(
     )
     eval_callback = SyncEvalCallback(
         eval_env=eval_env,
-        best_model_save_path=str(output_paths["models"] / f"{run_name}_best"),
+        best_model_save_path=str(output_paths["models"] / f"{run_name}_best_tmp"),
         log_path=str(eval_log_dir),
         eval_freq=max(int(config["eval_freq"]), 1),
         deterministic=True,
@@ -193,47 +189,53 @@ def train_model(
         progress_bar=False,
     )
 
-    model_path = output_paths["models"] / f"{run_name}.zip"
-    model.save(model_path)
+    latest_model_path = output_paths["models"] / f"{run_name}_latest.zip"
+    best_model_path = output_paths["models"] / f"{run_name}_best.zip"
+    model.save(latest_model_path)
+    tmp_best = output_paths["models"] / f"{run_name}_best_tmp" / "best_model.zip"
+    if tmp_best.exists():
+        shutil.copyfile(tmp_best, best_model_path)
+    else:
+        model.save(best_model_path)
     if use_vec_normalize:
-        train_env.save(str(output_paths["models"] / "vecnormalize.pkl"))
+        train_env.save(str(output_paths["models"] / f"{run_name}_vecnormalize.pkl"))
 
     train_metrics = pd.DataFrame(metrics_callback.records)
-    train_metrics_name = "train_metrics.csv" if run_name == "ppo_elec_env" else f"{run_name}_train_metrics.csv"
-    eval_metrics_name = "eval_metrics.csv" if run_name == "ppo_elec_env" else f"{run_name}_eval_metrics.csv"
-    train_metrics.to_csv(output_paths["metrics"] / train_metrics_name, index=False)
-    eval_metrics = _export_eval_metrics(eval_log_dir, output_paths["metrics"] / eval_metrics_name)
+    train_metrics.to_csv(output_paths["metrics"] / f"{run_name}_train_metrics.csv", index=False)
+    eval_metrics = _export_eval_metrics(eval_log_dir, output_paths["metrics"] / f"{run_name}_eval_metrics.csv")
     if save_plots:
         _save_training_plots(train_metrics, eval_metrics, output_paths["figures"])
 
     return {
         "model": model,
-        "model_path": model_path,
+        "model_path": latest_model_path,
+        "best_model_path": best_model_path,
         "train_metrics": train_metrics,
         "eval_metrics": eval_metrics,
-        "best_model_path": output_paths["models"] / f"{run_name}_best" / "best_model.zip",
         "device": device,
+        "gpu_used": device.startswith("cuda"),
+        "run_name": run_name,
     }
 
 
-def load_model(model_path: str | Path) -> PPO:
-    return PPO.load(str(model_path), device="cpu")
+def load_model(model_path: str | Path, device: str = "cpu") -> PPO:
+    return PPO.load(str(model_path), device=device)
 
 
 def collect_policy_actions(
     model: PPO,
     bundle: dict[str, Any],
-    months: list[pd.Timestamp],
+    weeks: list[pd.Timestamp],
     config: dict[str, Any],
 ) -> dict[pd.Timestamp, tuple[float, float]]:
-    env = ElecEnv(bundle=bundle, month_sequence=months, config=config)
+    env = ElecEnv(bundle=bundle, week_sequence=weeks, config=config)
     observation, _ = env.reset()
     actions: dict[pd.Timestamp, tuple[float, float]] = {}
     done = False
     while not done:
-        current_month = env.month_sequence[env._cursor]
+        current_week = env.week_sequence[env._cursor]
         action, _ = model.predict(observation, deterministic=True)
-        actions[current_month] = (float(action[0]), float(action[1]))
+        actions[current_week] = (float(action[0]), float(action[1]))
         observation, _, terminated, truncated, _ = env.step(action)
         done = terminated or truncated
     return actions
@@ -242,14 +244,14 @@ def collect_policy_actions(
 def evaluate_policy(
     model: PPO,
     bundle: dict[str, Any],
-    months: list[pd.Timestamp],
+    weeks: list[pd.Timestamp],
     config: dict[str, Any],
     strategy_name: str = "ppo_policy",
 ) -> dict[str, Any]:
-    actions = collect_policy_actions(model, bundle, months, config)
+    actions = collect_policy_actions(model, bundle, weeks, config)
     result = simulate_strategy(
         bundle=bundle,
-        months=months,
+        weeks=weeks,
         action_source=actions,
         config=config,
         strategy_name=strategy_name,

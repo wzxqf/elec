@@ -1,171 +1,192 @@
 from __future__ import annotations
 
-from typing import Callable
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
 
-from src.backtest.metrics import cvar_95, summarize_strategy_results
-from src.rules.hourly_hedge import compute_hourly_hedge_adjustment
+from src.backtest.metrics import summarize_strategy_results
+from src.backtest.settlement import settle_week
+from src.rules.hourly_hedge import apply_hourly_hedge_rule
 
 
-def _get_month_frames(bundle: dict, month: pd.Timestamp) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
-    quarter = bundle["quarter"].loc[bundle["quarter"]["month"] == month].copy()
-    hourly = bundle["hourly"].loc[bundle["hourly"]["month"] == month].copy()
-    metadata = bundle["monthly_metadata"].set_index("month").loc[month]
+def _get_week_frames(bundle: dict[str, Any], week_start: pd.Timestamp) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
+    week_start = pd.Timestamp(week_start)
+    quarter = bundle["quarter"].loc[bundle["quarter"]["week_start"] == week_start].copy()
+    hourly = bundle["hourly"].loc[bundle["hourly"]["week_start"] == week_start].copy()
+    metadata = bundle["weekly_metadata"].set_index("week_start").loc[week_start]
     return quarter, hourly, metadata
 
 
-def simulate_month(
-    bundle: dict,
-    month: pd.Timestamp,
-    action: tuple[float, float],
-    config: dict,
-    market_vol_scale: float = 1.0,
-    forecast_error_scale: float = 1.0,
-    price_cap_multiplier: float = 1.0,
-    hedge_intensity_scale: float = 1.0,
-) -> tuple[dict, pd.DataFrame]:
-    quarter, hourly, metadata = _get_month_frames(bundle, month)
-    lock_ratio = float(np.clip(action[0], 0.0, 1.0))
-    hedge_intensity = float(np.clip(action[1], 0.0, 1.0))
-    interval_hours = 0.25
+def _allocate_weekly_lt_to_hourly(hourly: pd.DataFrame, q_lt_target: float) -> pd.Series:
+    weights = hourly["net_load_da"].clip(lower=0.0)
+    if float(weights.sum()) <= 0.0:
+        weights = pd.Series(np.ones(len(hourly)), index=hourly.index, dtype=float)
+    allocation = q_lt_target * weights / float(weights.sum())
+    return allocation.astype(float)
 
-    quarter["forecast_energy_mwh"] = quarter["net_load_da"] * interval_hours
-    quarter["actual_energy_mwh"] = quarter["net_load_id"] * interval_hours
-    hourly["forecast_energy_mwh"] = hourly["net_load_da"]
 
-    forecast_monthly_net_demand = float(metadata["forecast_monthly_net_demand_mwh"])
-    lt_price = metadata["lt_price_m"]
-    if pd.isna(lt_price):
-        lt_price = float(metadata["da_price_mean"])
-
-    q_lt_target = lock_ratio * forecast_monthly_net_demand
-    positive_hourly_energy = hourly["forecast_energy_mwh"].clip(lower=0.0)
-    total_positive_hourly_energy = float(positive_hourly_energy.sum())
-    if total_positive_hourly_energy == 0.0:
-        lt_alloc_hour = pd.Series(0.0, index=hourly.index)
-    else:
-        lt_alloc_hour = q_lt_target * positive_hourly_energy / total_positive_hourly_energy
-
-    residual_exposure_hour = hourly["forecast_energy_mwh"] - lt_alloc_hour
-    hedge_adjust_hour = compute_hourly_hedge_adjustment(
-        hourly_frame=hourly,
-        residual_exposure_mwh=residual_exposure_hour,
-        hedge_intensity=hedge_intensity,
-        rule_config=config["rules"],
-        market_vol_scale=market_vol_scale,
-        forecast_error_scale=forecast_error_scale,
-        price_cap_multiplier=price_cap_multiplier,
-        hedge_intensity_scale=hedge_intensity_scale,
-    )
-    hourly["lt_alloc_mwh"] = lt_alloc_hour
-    hourly["hedge_adjust_mwh"] = hedge_adjust_hour
-
-    quarter = quarter.merge(hourly[["hour", "lt_alloc_mwh", "hedge_adjust_mwh"]], on="hour", how="left")
-    quarter["quarter_weight"] = quarter["forecast_energy_mwh"].clip(lower=0.0)
-    hourly_weights = quarter.groupby("hour")["quarter_weight"].transform("sum")
-    fallback_mask = hourly_weights == 0
-    quarter.loc[fallback_mask, "quarter_weight"] = interval_hours
-    hourly_weights = quarter.groupby("hour")["quarter_weight"].transform("sum")
-
-    quarter["lt_alloc_q_mwh"] = np.where(
-        hourly_weights > 0,
-        quarter["lt_alloc_mwh"] * quarter["quarter_weight"] / hourly_weights,
-        0.0,
-    )
-    quarter["hedge_adjust_q_mwh"] = quarter["hedge_adjust_mwh"] / 4.0
-    quarter["da_residual_q_mwh"] = quarter["forecast_energy_mwh"] - quarter["lt_alloc_q_mwh"]
-    quarter["imbalance_q_mwh"] = (
-        quarter["actual_energy_mwh"] - quarter["forecast_energy_mwh"] - quarter["hedge_adjust_q_mwh"]
-    )
-
-    penalty_multiplier = config["cost"]["penalty_multiplier"]
-    transaction_fee_rate = config["cost"]["transaction_fee_rate"]
-    quarter["lt_cost"] = quarter["lt_alloc_q_mwh"] * lt_price
-    quarter["dayahead_cost"] = quarter["da_residual_q_mwh"] * quarter["全网统一出清价格_日前"]
-    quarter["intraday_adjust_cost"] = quarter["hedge_adjust_q_mwh"] * quarter["全网统一出清价格_日内"]
-    quarter["imbalance_penalty_cost"] = (
-        quarter["imbalance_q_mwh"].abs() * quarter["全网统一出清价格_日内"] * penalty_multiplier
-    )
-    quarter["trading_cost"] = quarter["hedge_adjust_q_mwh"].abs() * transaction_fee_rate
-    quarter["procurement_cost"] = (
-        quarter["lt_cost"]
-        + quarter["dayahead_cost"]
-        + quarter["intraday_adjust_cost"]
-        + quarter["imbalance_penalty_cost"]
-    )
-    quarter["total_cost_with_penalties"] = quarter["procurement_cost"] + quarter["trading_cost"]
-
-    risk_vol = float(quarter["total_cost_with_penalties"].std(ddof=0))
-    risk_cvar = cvar_95(quarter["total_cost_with_penalties"])
+def _week_risk_term(settlement: pd.DataFrame, config: dict[str, Any]) -> tuple[float, float]:
+    per_interval = settlement["procurement_cost_15m"]
+    sigma = float(per_interval.std(ddof=0))
+    alpha = float(config["cost"]["cvar_alpha"])
+    threshold = float(per_interval.quantile(alpha))
+    tail = per_interval.loc[per_interval >= threshold]
+    cvar = float(tail.mean()) if not tail.empty else threshold
     risk_term = (
-        config["cost"]["risk_vol_weight"] * risk_vol
-        + config["cost"]["risk_cvar_weight"] * risk_cvar
+        float(config["cost"]["risk_vol_weight"]) * sigma
+        + float(config["cost"]["risk_cvar_weight"]) * cvar
     )
-    procurement_cost_m = float(quarter["procurement_cost"].sum())
-    trading_cost_m = float(quarter["trading_cost"].sum())
-    hedge_error_m = float(quarter["imbalance_q_mwh"].abs().mean())
-    reward = -(
-        procurement_cost_m
-        + config["cost"]["lambda_risk"] * risk_term
-        + config["cost"]["lambda_tc"] * trading_cost_m
-        + config["cost"]["lambda_he"] * hedge_error_m
-    ) / config["env"]["reward_scale"]
+    return risk_term, cvar
 
-    summary = {
-        "month": month,
+
+def simulate_week(
+    bundle: dict[str, Any],
+    week_start: pd.Timestamp,
+    action: tuple[float, float],
+    config: dict[str, Any],
+    previous_lock_ratio: float = 0.0,
+) -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame]:
+    quarter, hourly, metadata = _get_week_frames(bundle, week_start)
+    lock_ratio_raw = float(action[0])
+    hedge_intensity = float(np.clip(action[1], 0.0, 1.0))
+    constraints = config["constraints"]
+
+    lock_ratio = float(
+        np.clip(lock_ratio_raw, float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
+    )
+    max_step = float(constraints["delta_h_max"])
+    lock_ratio = float(np.clip(lock_ratio, previous_lock_ratio - max_step, previous_lock_ratio + max_step))
+    lock_ratio = float(
+        np.clip(lock_ratio, float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
+    )
+
+    forecast_weekly_net_demand = float(metadata["forecast_weekly_net_demand_mwh"])
+    q_lt_target = max(lock_ratio * forecast_weekly_net_demand, 0.0)
+    q_lt_hourly = _allocate_weekly_lt_to_hourly(hourly, q_lt_target)
+    hourly_trace, rule_stats = apply_hourly_hedge_rule(
+        hourly,
+        q_lt_hourly=q_lt_hourly,
+        hedge_intensity=hedge_intensity,
+        rules_config=config["rules"],
+    )
+
+    lt_price_w = float(metadata["lt_price_w"]) if pd.notna(metadata["lt_price_w"]) else float(metadata["da_price_mean"])
+    settlement = settle_week(quarter, hourly_trace, lt_price_w=lt_price_w, config=config)
+    procurement_cost = float(settlement["procurement_cost_15m"].sum())
+    risk_term, cvar_value = _week_risk_term(settlement, config)
+    trans_cost = float(
+        config["cost"]["transaction_linear"] * hourly_trace["delta_q"].abs().sum()
+        + config["cost"]["transaction_quadratic"] * (hourly_trace["delta_q"] ** 2).sum()
+        + config["cost"]["lt_adjust_cost"] * abs(q_lt_target - previous_lock_ratio * forecast_weekly_net_demand)
+    )
+    hedge_error = float(hourly_trace["hedge_error_abs"].mean())
+
+    budget_gap = max(cvar_value - float(constraints["cvar_budget"]), 0.0)
+    cvar_penalty = budget_gap * float(constraints["cvar_budget_penalty"])
+    reward_raw = -(
+        procurement_cost
+        + float(config["cost"]["lambda_risk"]) * risk_term
+        + float(config["cost"]["lambda_tc"]) * trans_cost
+        + float(config["cost"]["lambda_he"]) * hedge_error
+        + cvar_penalty
+    ) / float(config["env"]["reward_scale"])
+    reward = float(np.clip(reward_raw, -20.0, 20.0))
+
+    week_summary = {
+        "week_start": pd.Timestamp(week_start),
+        "is_partial_week": bool(metadata["is_partial_week"]),
         "lock_ratio": lock_ratio,
         "hedge_intensity": hedge_intensity,
-        "q_lt_target_mwh": q_lt_target,
-        "lt_price_m": float(lt_price),
-        "procurement_cost_m": procurement_cost_m,
-        "trading_cost_m": trading_cost_m,
-        "risk_term_m": risk_term,
-        "hedge_error_m": hedge_error_m,
-        "avg_adjustment_mwh": float(quarter["hedge_adjust_q_mwh"].abs().mean()),
+        "q_lt_target_w": q_lt_target,
+        "forecast_weekly_net_demand_mwh": forecast_weekly_net_demand,
+        "actual_weekly_net_demand_mwh": float(metadata["actual_weekly_net_demand_mwh"]),
+        "lt_price_w": lt_price_w,
+        "lt_price_source": metadata["lt_price_source"],
+        "procurement_cost_w": procurement_cost,
+        "risk_term_w": risk_term,
+        "trans_cost_w": trans_cost,
+        "hedge_error_w": hedge_error,
+        "cvar_w": cvar_value,
+        "reward_raw": reward_raw,
         "reward": reward,
+        "avg_adjustment_mwh": float(hourly_trace["delta_q"].mean()),
+        "bound_clip_count": int(rule_stats["bound_clip_count"]),
+        "smooth_clip_count": int(rule_stats["smooth_clip_count"]),
+        "non_negative_clip_count": int(rule_stats["non_negative_clip_count"]),
+        "cvar_budget_excess": budget_gap,
     }
-    quarter["month"] = month
-    return summary, quarter
+
+    hourly_trace["week_start"] = pd.Timestamp(week_start)
+    settlement["week_start"] = pd.Timestamp(week_start)
+    return week_summary, hourly_trace, settlement
 
 
 def simulate_strategy(
-    bundle: dict,
-    months: list[pd.Timestamp],
+    bundle: dict[str, Any],
+    weeks: list[pd.Timestamp],
     action_source: dict[pd.Timestamp, tuple[float, float]] | Callable[[pd.Timestamp], tuple[float, float]],
-    config: dict,
+    config: dict[str, Any],
     strategy_name: str,
     market_vol_scale: float = 1.0,
-    forecast_error_scale: float = 1.0,
     price_cap_multiplier: float = 1.0,
-    hedge_intensity_scale: float = 1.0,
-) -> dict:
-    monthly_records = []
-    interval_frames = []
-    for month in months:
-        action = action_source(month) if callable(action_source) else action_source[month]
-        summary, interval_frame = simulate_month(
-            bundle=bundle,
-            month=month,
+    forecast_error_scale: float = 1.0,
+) -> dict[str, Any]:
+    weekly_records = []
+    hourly_records = []
+    settlement_records = []
+    previous_lock_ratio = 0.0
+
+    bundle_variant = bundle.copy()
+    bundle_variant["hourly"] = bundle["hourly"].copy()
+    bundle_variant["quarter"] = bundle["quarter"].copy()
+    if market_vol_scale != 1.0:
+        for column in ["price_spread", "load_dev", "renewable_dev"]:
+            bundle_variant["hourly"][column] = bundle_variant["hourly"][column] * float(market_vol_scale)
+    if price_cap_multiplier != 1.0:
+        for column in ["全网统一出清价格_日前", "全网统一出清价格_日内"]:
+            bundle_variant["quarter"][column] = bundle_variant["quarter"][column] * float(price_cap_multiplier)
+    if forecast_error_scale != 1.0:
+        for column in ["net_load_da", "net_load_da_mwh"]:
+            bundle_variant["quarter"][column] = bundle_variant["quarter"][column] * float(forecast_error_scale)
+        bundle_variant["hourly"]["net_load_da"] = bundle_variant["hourly"]["net_load_da"] * float(forecast_error_scale)
+        bundle_variant["weekly_metadata"] = bundle["weekly_metadata"].copy()
+        bundle_variant["weekly_metadata"]["forecast_weekly_net_demand_mwh"] = (
+            bundle_variant["weekly_metadata"]["forecast_weekly_net_demand_mwh"] * float(forecast_error_scale)
+        )
+    else:
+        bundle_variant["weekly_metadata"] = bundle["weekly_metadata"]
+
+    for week in weeks:
+        action = action_source(week) if callable(action_source) else action_source[pd.Timestamp(week)]
+        summary, hourly_trace, settlement = simulate_week(
+            bundle=bundle_variant,
+            week_start=week,
             action=action,
             config=config,
-            market_vol_scale=market_vol_scale,
-            forecast_error_scale=forecast_error_scale,
-            price_cap_multiplier=price_cap_multiplier,
-            hedge_intensity_scale=hedge_intensity_scale,
+            previous_lock_ratio=previous_lock_ratio,
         )
         summary["strategy"] = strategy_name
-        monthly_records.append(summary)
-        interval_frame["strategy"] = strategy_name
-        interval_frames.append(interval_frame)
+        hourly_trace["strategy"] = strategy_name
+        settlement["strategy"] = strategy_name
+        previous_lock_ratio = float(summary["lock_ratio"])
 
-    monthly_results = pd.DataFrame(monthly_records)
-    interval_results = pd.concat(interval_frames, ignore_index=True) if interval_frames else pd.DataFrame()
-    metrics = summarize_strategy_results(monthly_results, interval_results)
-    metrics["strategy"] = strategy_name
+        weekly_records.append(summary)
+        hourly_records.append(hourly_trace)
+        settlement_records.append(settlement)
+
+    weekly_results = pd.DataFrame(weekly_records).sort_values("week_start").reset_index(drop=True)
+    hourly_results = pd.concat(hourly_records, ignore_index=True)
+    settlement_results = pd.concat(settlement_records, ignore_index=True)
+    metrics = summarize_strategy_results(
+        weekly_results=weekly_results,
+        settlement_results=settlement_results,
+        strategy_name=strategy_name,
+        cvar_alpha=float(config["cost"]["cvar_alpha"]),
+    )
     return {
-        "monthly_results": monthly_results,
-        "interval_results": interval_results,
+        "weekly_results": weekly_results,
+        "hourly_results": hourly_results,
+        "settlement_results": settlement_results,
         "metrics": metrics,
     }

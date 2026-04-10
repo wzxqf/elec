@@ -4,36 +4,41 @@ import numpy as np
 import pandas as pd
 
 
-def cvar_95(series: pd.Series) -> float:
-    threshold = float(series.quantile(0.95))
-    tail = series[series >= threshold]
+def cvar(series: pd.Series, alpha: float = 0.95) -> float:
+    if series.empty:
+        return 0.0
+    threshold = float(series.quantile(alpha))
+    tail = series.loc[series >= threshold]
     if tail.empty:
         return threshold
     return float(tail.mean())
 
 
-def max_drawdown(cost_series: pd.Series) -> float:
-    equity = -cost_series.cumsum()
-    running_max = equity.cummax()
-    drawdown = equity - running_max
-    return float(drawdown.min())
+def max_drawdown(series: pd.Series) -> float:
+    if series.empty:
+        return 0.0
+    cumulative = series.cumsum()
+    running_min = cumulative.cummin()
+    return float((cumulative - running_min).max())
 
 
 def summarize_strategy_results(
-    monthly_results: pd.DataFrame,
-    interval_results: pd.DataFrame,
-) -> dict[str, float]:
-    cumulative_cost = float(monthly_results["procurement_cost_m"].sum())
-    cost_volatility = float(monthly_results["procurement_cost_m"].std(ddof=0))
-    hedge_error = float(monthly_results["hedge_error_m"].mean())
-    avg_adjustment = float(monthly_results["avg_adjustment_mwh"].mean())
-    interval_total = interval_results["total_cost_with_penalties"]
+    weekly_results: pd.DataFrame,
+    settlement_results: pd.DataFrame,
+    strategy_name: str,
+    cvar_alpha: float = 0.95,
+) -> dict[str, float | str]:
+    weekly_cost = weekly_results["procurement_cost_w"]
     return {
-        "cumulative_procurement_cost": cumulative_cost,
-        "cost_volatility": cost_volatility,
-        "cvar95": cvar_95(interval_total),
-        "hedge_error": hedge_error,
-        "avg_adjustment_mwh": avg_adjustment,
-        "max_drawdown": max_drawdown(monthly_results["procurement_cost_m"]),
-        "mean_reward": float(monthly_results["reward"].mean()),
+        "strategy": strategy_name,
+        "total_procurement_cost": float(weekly_cost.sum()),
+        "avg_weekly_cost": float(weekly_cost.mean()),
+        "weekly_cost_volatility": float(weekly_cost.std(ddof=0)),
+        "cvar": cvar(weekly_cost, alpha=cvar_alpha),
+        "hedge_error": float(weekly_results["hedge_error_w"].mean()),
+        "mean_reward": float(weekly_results["reward"].mean()),
+        "avg_adjustment_mwh": float(weekly_results["avg_adjustment_mwh"].mean()),
+        "total_trans_cost": float(weekly_results["trans_cost_w"].sum()),
+        "max_drawdown": max_drawdown(weekly_cost),
+        "settlement_records": int(len(settlement_results)),
     }
