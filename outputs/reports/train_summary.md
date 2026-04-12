@@ -7,6 +7,8 @@
 - 重采样方式: block_bootstrap
 - 重采样序列长度: 96
 - 预热周: 2025-10-27
+- 政策来源文件数: 18
+- 政策解析失败文件数: 0
 
 ## 超参数
 
@@ -30,4 +32,6 @@
 - 最优模型路径: /Users/dk/py/elec/outputs/models/ppo_best.zip
 - 训练指标文件: /Users/dk/py/elec/outputs/metrics/ppo_train_metrics.csv
 - 评估指标文件: /Users/dk/py/elec/outputs/metrics/ppo_eval_metrics.csv
+- 奖励强基准: dynamic_lock_only
+- 中长期价格口径: 2026-02 前采用上一自然周日前均价代理，2026-02 起采用 40% 日前固定价 + 60% 日内联动价混合代理
 - 异常与警告记录: 详见 outputs/logs/train.log

@@ -9,3 +9,4 @@ tensorboard
 gymnasium
 stable-baselines3
 torch
+openpyxl

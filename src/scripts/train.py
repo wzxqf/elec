@@ -20,6 +20,8 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
         f"- 重采样方式: {config['scenario']['training_sequence_method']}",
         f"- 重采样序列长度: {len(context['train_sequence'])}",
         f"- 预热周: {', '.join(split_to_dict(context['split'])['warmup']) if context['split'].warmup else '无'}",
+        f"- 政策来源文件数: {len(context['bundle']['policy_inventory'])}",
+        f"- 政策解析失败文件数: {len(context['bundle']['policy_failures'])}",
         "",
         "## 超参数",
         "",
@@ -43,6 +45,8 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
         f"- 最优模型路径: {training['best_model_path']}",
         f"- 训练指标文件: {context['output_paths']['metrics'] / 'ppo_train_metrics.csv'}",
         f"- 评估指标文件: {context['output_paths']['metrics'] / 'ppo_eval_metrics.csv'}",
+        f"- 奖励强基准: {config['reward']['strong_baseline']}",
+        f"- 中长期价格口径: {config['reporting']['lt_price_note']}",
         f"- 异常与警告记录: 详见 outputs/logs/train.log",
         "",
     ]

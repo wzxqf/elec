@@ -48,6 +48,8 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 重复时间戳个数: {data_quality['duplicate_timestamp_count']}",
         f"- 去重后缺失 15 分钟时点数: {data_quality['missing_timestamp_count_after_aggregation']}",
         f"- 周度样本数: {len(context['bundle']['weekly_metadata'])}",
+        f"- 政策来源文件数: {len(context['bundle']['policy_inventory'])}",
+        f"- 政策解析失败文件数: {len(context['bundle']['policy_failures'])}",
         "",
         "## 样本划分",
         "",
@@ -64,6 +66,7 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 是否使用 GPU: {'是' if training['gpu_used'] else '否'}",
         f"- 最新模型路径: {training['model_path']}",
         f"- 最优模型路径: {training['best_model_path']}",
+        f"- 奖励强基准: {config['reward']['strong_baseline']}",
         "",
         "## 验证结果",
         "",
@@ -84,6 +87,7 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 中长期价格: {config['reporting']['lt_price_note']}",
         f"- 结算口径: {config['reporting']['settlement_note']}",
         f"- 训练样本构造: {config['scenario']['training_sequence_method']}",
+        f"- 政策规则汇总: {context['output_paths']['reports'] / 'policy_rule_summary.md'}",
         "",
     ]
     return "\n".join(lines)
@@ -97,6 +101,9 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     ppo_weekly = backtest["results"]["ppo"]["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
     ppo_hourly = backtest["results"]["ppo"]["hourly_results"].copy().sort_values(["week_start", "hour"]).reset_index(drop=True)
     benchmark_frame = backtest["metrics_frame"].copy()
+    policy_inventory = bundle["policy_inventory"].copy()
+    policy_rules = bundle["policy_rule_table"].copy()
+    policy_trace = bundle["policy_state_trace"].copy().sort_values("week_start").reset_index(drop=True)
 
     model_profile = pd.DataFrame(
         [
@@ -138,7 +145,21 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "",
         _frame_to_markdown(model_profile),
         "",
-        "## 三、周度基础样本统计",
+        "## 三、政策规则与制度状态",
+        "",
+        "### 3.1 政策文件清单",
+        "",
+        _frame_to_markdown(policy_inventory[["file_name", "suffix", "publish_time", "parse_status"]]),
+        "",
+        "### 3.2 结构化规则样本",
+        "",
+        _frame_to_markdown(policy_rules.head(20)),
+        "",
+        "### 3.3 周度制度状态",
+        "",
+        _frame_to_markdown(policy_trace),
+        "",
+        "## 四、周度基础样本统计",
         "",
         _frame_to_markdown(
             weekly_metadata[
@@ -155,11 +176,11 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
             ]
         ),
         "",
-        "## 四、训练过程数据",
+        "## 五、训练过程数据",
         "",
         _frame_to_markdown(training["train_metrics"].tail(10) if not training["train_metrics"].empty else pd.DataFrame()),
         "",
-        "## 五、算法应用效果",
+        "## 六、算法应用效果",
         "",
         "### 5.1 核心指标",
         "",
@@ -181,7 +202,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "",
         _frame_to_markdown(validation_weekly),
         "",
-        "## 六、论文写作可引用结论",
+        "## 七、论文写作可引用结论",
         "",
         f"- PPO 在回测集总采购成本为 {backtest['results']['ppo']['metrics']['total_procurement_cost']:.2f}。",
         f"- PPO 在回测集 CVaR 为 {backtest['results']['ppo']['metrics']['cvar']:.2f}，套保误差为 {backtest['results']['ppo']['metrics']['hedge_error']:.4f}。",

@@ -4,6 +4,7 @@ benchmarks:
   dynamic_lock_spread_penalty: 0.10
   dynamic_lock_renewable_bonus: 0.08
   dynamic_lock_policy_bonus: 0.05
+  dynamic_lock_linked_price_penalty: 0.08
   rule_only_intensity: 0.70
 
 sensitivity:

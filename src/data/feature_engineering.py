@@ -11,7 +11,7 @@ def safe_divide(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
     return result.replace([np.inf, -np.inf], np.nan).fillna(0.0)
 
 
-def add_derived_features(frame: pd.DataFrame, policy_events: dict[str, str]) -> tuple[pd.DataFrame, pd.DataFrame]:
+def add_derived_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     data = frame.copy()
     data["datetime"] = pd.to_datetime(data["datetime"])
     data["net_load_da"] = data["省调负荷_日前"] - data["新能源负荷-总加_日前"]
@@ -41,10 +41,6 @@ def add_derived_features(frame: pd.DataFrame, policy_events: dict[str, str]) -> 
         {"column": "net_load_da_mwh", "source": "派生", "formula": "net_load_da * 0.25"},
         {"column": "net_load_id_mwh", "source": "派生", "formula": "net_load_id * 0.25"},
     ]
-
-    for name, timestamp in policy_events.items():
-        data[name] = (data["datetime"] >= pd.Timestamp(timestamp)).astype(float)
-        manifest_rows.append({"column": name, "source": "政策事件", "formula": f"datetime >= {timestamp}"})
 
     return data, pd.DataFrame(manifest_rows)
 
@@ -79,7 +75,6 @@ def _series_stats(series: pd.Series, prefix: str, quantiles: list[float]) -> dic
 def build_weekly_features(hourly: pd.DataFrame, quantiles: list[float]) -> pd.DataFrame:
     weeks = sorted(hourly["week_start"].unique())
     previous_by_week = {week: hourly.loc[hourly["week_start"] == week].copy() for week in weeks}
-    policy_columns = [column for column in hourly.columns if column.startswith("policy_event_")]
     rows: list[dict[str, Any]] = []
 
     tracked_columns = {
@@ -110,8 +105,6 @@ def build_weekly_features(hourly: pd.DataFrame, quantiles: list[float]) -> pd.Da
         iso_week = int(week_ts.isocalendar().week)
         record["weekofyear_sin"] = float(np.sin(2 * np.pi * iso_week / 52))
         record["weekofyear_cos"] = float(np.cos(2 * np.pi * iso_week / 52))
-        for column in policy_columns:
-            record[column] = float(hourly.loc[hourly["week_start"] == week, column].max())
         rows.append(record)
 
     return pd.DataFrame(rows).sort_values("week_start").reset_index(drop=True)

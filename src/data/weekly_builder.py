@@ -19,7 +19,7 @@ def _is_partial_week(frame: pd.DataFrame, datetime_column: str) -> bool:
 
 
 def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str, Any]:
-    frame_15m, feature_manifest = add_derived_features(frame, config["policy_events"])
+    frame_15m, feature_manifest = add_derived_features(frame)
     hourly = aggregate_hourly(frame_15m)
 
     weekly_meta_rows: list[dict[str, Any]] = []

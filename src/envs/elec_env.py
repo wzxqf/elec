@@ -27,7 +27,11 @@ class ElecEnv(gym.Env):
         self.week_sequence = [pd.Timestamp(week) for week in week_sequence]
         self.config = config
         self.feature_frame = bundle["weekly_features"].set_index("week_start").sort_index()
-        self.feature_columns = [column for column in self.feature_frame.columns if column not in {"week_start", "lt_price_source"}]
+        self.feature_columns = [
+            column
+            for column in self.feature_frame.columns
+            if pd.api.types.is_numeric_dtype(self.feature_frame[column])
+        ]
         numeric_features = self.feature_frame[self.feature_columns].astype(float)
         self.feature_mean = numeric_features.mean()
         self.feature_std = numeric_features.std(ddof=0).replace(0.0, 1.0)

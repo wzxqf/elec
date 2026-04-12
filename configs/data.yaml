@@ -4,6 +4,7 @@ duplicate_strategy: mean
 settlement_interval_hours: 0.25
 hour_interval_hours: 1.0
 week_period: W-SUN
+scan_buffer_end: "2026-03-28 23:45:00"
 feature_quantiles:
   - 0.25
   - 0.50
@@ -14,3 +15,4 @@ lt_price:
   preferred_columns: []
   fallback_method: previous_week_da_mean
   warmup_label: warmup_unavailable
+  linked_effective_start: "2026-02-01 00:00:00"

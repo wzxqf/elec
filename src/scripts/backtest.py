@@ -201,6 +201,9 @@ def _build_backtest_summary(context: dict[str, Any], results: dict[str, dict], m
         f"- warm-up 周: {', '.join([week.strftime('%Y-%m-%d') for week in context['split'].warmup]) if context['split'].warmup else '无'}",
         f"- 结算口径: {context['config']['reporting']['settlement_note']}",
         f"- 中长期价格口径: {context['config']['reporting']['lt_price_note']}",
+        f"- 奖励强基准: {context['config']['reward']['strong_baseline']}",
+        f"- 政策来源文件数: {len(context['bundle']['policy_inventory'])}",
+        f"- 政策解析失败文件数: {len(context['bundle']['policy_failures'])}",
         f"- PPO 总采购成本: {ppo_metrics['total_procurement_cost']:.2f}",
         f"- PPO 周度成本波动率: {ppo_metrics['weekly_cost_volatility']:.2f}",
         f"- PPO CVaR: {ppo_metrics['cvar']:.2f}",
@@ -253,10 +256,12 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         context["output_paths"]["metrics"] / "backtest_weekly_results.csv",
         index=False,
     )
+    results["ppo"]["weekly_results"].to_csv(context["output_paths"]["metrics"] / "weekly_results.csv", index=False)
     pd.concat([payload["hourly_results"] for payload in results.values()], ignore_index=True).to_csv(
         context["output_paths"]["metrics"] / "backtest_hourly_rule_trace.csv",
         index=False,
     )
+    results["ppo"]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hourly_rule_trace.csv", index=False)
     pd.concat([payload["settlement_results"] for payload in results.values()], ignore_index=True).to_csv(
         context["output_paths"]["metrics"] / "backtest_settlement_trace.csv",
         index=False,

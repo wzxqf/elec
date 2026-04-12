@@ -27,10 +27,8 @@ def build_benchmark_actions(
                 benchmark_cfg["dynamic_lock_base"]
                 - benchmark_cfg["dynamic_lock_spread_penalty"] * max(row["prev_spread_mean"], 0.0) / 100.0
                 + benchmark_cfg["dynamic_lock_renewable_bonus"] * row["prev_renewable_ratio_da_mean"]
-                + benchmark_cfg["dynamic_lock_policy_bonus"] * max(
-                    row.get("policy_event_20260101", 0.0),
-                    row.get("policy_event_20260201", 0.0),
-                ),
+                + benchmark_cfg["dynamic_lock_policy_bonus"] * row.get("renewable_mechanism_active", 0.0)
+                - benchmark_cfg["dynamic_lock_linked_price_penalty"] * row.get("lt_price_linked_active", 0.0),
                 0.0,
                 1.0,
             )
