@@ -12,7 +12,7 @@ DEFAULT_POLICY_STATE = {
     "lt_spot_coupling_state": 0.0,
     "ancillary_peak_shaving_pause": 0.0,
     "ancillary_freq_reserve_tight": 0.0,
-    "ancillary_price_cap_tight": 0.0,
+    "ancillary_price_boundary_tight": 0.0,
     "renewable_mechanism_active": 0.0,
     "mechanism_price_floor": 0.0,
     "mechanism_price_ceiling": 0.0,
@@ -22,14 +22,92 @@ DEFAULT_POLICY_STATE = {
     "lt_price_linked_active": 0.0,
     "fixed_price_ratio_max": 0.0,
     "linked_price_ratio_min": 0.0,
+    "lt_linkage_pre_window": 0.0,
+    "info_disclosure_active": 0.0,
+    "metering_boundary_improved": 0.0,
+    "forecast_boundary_improved": 0.0,
     "policy_count": 0.0,
+    "policy_source_file_count": 0.0,
+    "policy_parse_failure_count": 0.0,
+    "forward_price_linkage_days": 60.0,
+    "forward_price_linkage_code": 0.0,
+    "forward_price_linkage_in_window": 0.0,
+    "forward_price_linkage_type": "none",
+    "forward_mechanism_execution_days": 60.0,
+    "forward_mechanism_execution_code": 0.0,
+    "forward_mechanism_execution_in_window": 0.0,
+    "forward_mechanism_execution_type": "none",
+    "forward_ancillary_coupling_days": 60.0,
+    "forward_ancillary_coupling_code": 0.0,
+    "forward_ancillary_coupling_in_window": 0.0,
+    "forward_ancillary_coupling_type": "none",
+    "forward_info_forecast_boundary_days": 60.0,
+    "forward_info_forecast_boundary_code": 0.0,
+    "forward_info_forecast_boundary_in_window": 0.0,
+    "forward_info_forecast_boundary_type": "none",
+}
+
+FORWARD_GROUPS = {
+    "price_linkage": {
+        "prefix": "forward_price_linkage",
+        "rule_types": {"lt_price_linkage"},
+    },
+    "mechanism_execution": {
+        "prefix": "forward_mechanism_execution",
+        "rule_types": {"renewable_mechanism_execution"},
+    },
+    "ancillary_coupling": {
+        "prefix": "forward_ancillary_coupling",
+        "rule_types": {"ancillary_coupling"},
+    },
+    "info_forecast_boundary": {
+        "prefix": "forward_info_forecast_boundary",
+        "rule_types": {"info_forecast_boundary"},
+    },
 }
 
 
 def _as_timestamp(value: Any) -> pd.Timestamp | None:
     if value is None or (isinstance(value, float) and np.isnan(value)):
         return None
+    if pd.isna(value):
+        return None
     return pd.Timestamp(value)
+
+
+def _build_forward_state(
+    week_start: pd.Timestamp,
+    rule_table: pd.DataFrame,
+    countdown_cap_days: int,
+    forward_window_days: int,
+    rule_types: set[str],
+    prefix: str,
+) -> dict[str, Any]:
+    subset = rule_table.loc[
+        rule_table["rule_type"].isin(rule_types) & rule_table["effective_start"].notna(),
+        ["effective_start", "rule_type", "state_name"],
+    ].copy()
+    subset["effective_start"] = subset["effective_start"].apply(pd.Timestamp)
+    subset = subset.loc[subset["effective_start"] > week_start].sort_values("effective_start").drop_duplicates()
+
+    if subset.empty:
+        return {
+            f"{prefix}_days": float(countdown_cap_days),
+            f"{prefix}_code": 0.0,
+            f"{prefix}_in_window": 0.0,
+            f"{prefix}_type": "none",
+        }
+
+    next_row = subset.iloc[0]
+    next_days = float(min((pd.Timestamp(next_row["effective_start"]) - week_start).days, countdown_cap_days))
+    type_name = str(next_row["rule_type"])
+    type_code = float(sorted(rule_types).index(type_name) + 1 if type_name in rule_types else 0)
+    return {
+        f"{prefix}_days": next_days,
+        f"{prefix}_code": type_code,
+        f"{prefix}_in_window": float(next_days <= forward_window_days and type_code > 0),
+        f"{prefix}_type": type_name,
+    }
 
 
 def build_policy_state_trace(
@@ -41,14 +119,19 @@ def build_policy_state_trace(
     rows: list[dict[str, Any]] = []
     forward_window_days = int(config["policy_regime"]["pre_switch_window_days"])
     countdown_cap_days = int(config["policy_regime"]["countdown_cap_days"])
+    parse_failures = inventory.loc[inventory["parse_status"] == "failed", "source_file"].astype(str).tolist()
 
-    switch_schedule = (
-        rule_table.loc[rule_table["effective_start"].notna(), ["effective_start", "rule_type"]]
-        .drop_duplicates()
-        .sort_values("effective_start")
-        .reset_index(drop=True)
-    )
-    switch_type_map = {value: index + 1 for index, value in enumerate(sorted(switch_schedule["rule_type"].unique()))}
+    if rule_table.empty:
+        empty_rows = []
+        for _, meta in weekly_metadata.sort_values("week_start").iterrows():
+            state = {"week_start": pd.Timestamp(meta["week_start"])}
+            state.update(DEFAULT_POLICY_STATE)
+            state["failed_policy_files"] = "|".join(parse_failures)
+            empty_rows.append(state)
+        return pd.DataFrame(empty_rows).sort_values("week_start").reset_index(drop=True)
+
+    ordered_rules = rule_table.copy().sort_values(["effective_start", "rule_id"], na_position="last").reset_index(drop=True)
+    end_series = ordered_rules["effective_end"].apply(_as_timestamp) if "effective_end" in ordered_rules.columns else None
 
     for _, meta in weekly_metadata.sort_values("week_start").iterrows():
         week_start = pd.Timestamp(meta["week_start"])
@@ -56,14 +139,14 @@ def build_policy_state_trace(
         state = {"week_start": week_start}
         state.update(DEFAULT_POLICY_STATE)
 
-        active_mask = rule_table["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min) <= week_end
-        if "effective_end" in rule_table.columns:
-            end_series = rule_table["effective_end"].apply(_as_timestamp)
+        active_mask = ordered_rules["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min) <= week_end
+        if end_series is not None:
             active_mask &= end_series.isna() | (end_series >= week_start)
-        active_rules = rule_table.loc[active_mask].copy()
+        active_rules = ordered_rules.loc[active_mask].copy()
 
-        source_files = []
-        policy_names = []
+        source_files: list[str] = []
+        policy_names: list[str] = []
+        state_groups: list[str] = []
         for _, rule in active_rules.iterrows():
             state_name = str(rule["state_name"])
             state_value = rule["state_value"]
@@ -76,27 +159,31 @@ def build_policy_state_trace(
                     state[state_name] = state_value
             source_files.append(str(rule["source_file"]))
             policy_names.append(str(rule["policy_name"]))
+            state_groups.append(str(rule.get("state_group", "")))
 
-        next_switch = switch_schedule.loc[switch_schedule["effective_start"] > week_start].head(1)
-        if next_switch.empty:
-            next_days = float(countdown_cap_days)
-            next_type = "none"
-            next_code = 0
-        else:
-            next_ts = pd.Timestamp(next_switch.iloc[0]["effective_start"])
-            next_days = float(min((next_ts - week_start).days, countdown_cap_days))
-            next_type = str(next_switch.iloc[0]["rule_type"])
-            next_code = int(switch_type_map[next_type])
-
-        parse_failures = inventory.loc[inventory["parse_status"] == "failed", "source_file"].tolist()
         state["policy_count"] = float(len(active_rules))
+        state["policy_source_file_count"] = float(len(set(source_files)))
+        state["policy_parse_failure_count"] = float(len(parse_failures))
         state["policy_sources"] = "|".join(sorted(set(source_files)))
         state["policy_names"] = "|".join(sorted(set(policy_names)))
-        state["pre_switch_window"] = float(next_days <= forward_window_days and next_code > 0)
-        state["days_to_next_policy_switch"] = next_days
-        state["next_policy_switch_type"] = next_type
-        state["next_policy_switch_code"] = float(next_code)
+        state["active_state_groups"] = "|".join(sorted(group for group in set(state_groups) if group))
         state["failed_policy_files"] = "|".join(parse_failures)
+
+        for group_config in FORWARD_GROUPS.values():
+            state.update(
+                _build_forward_state(
+                    week_start=week_start,
+                    rule_table=ordered_rules,
+                    countdown_cap_days=countdown_cap_days,
+                    forward_window_days=forward_window_days,
+                    rule_types=group_config["rule_types"],
+                    prefix=group_config["prefix"],
+                )
+            )
+
+        state["lt_linkage_pre_window"] = float(
+            state["forward_price_linkage_in_window"] > 0.5 and state["lt_price_linked_active"] < 0.5
+        )
         rows.append(state)
 
     return pd.DataFrame(rows).sort_values("week_start").reset_index(drop=True)

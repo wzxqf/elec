@@ -52,11 +52,11 @@ scenario:
 
 reward:
   strong_baseline: dynamic_lock_only
-  lambda_cost: 1.00
-  lambda_risk: 0.80
-  lambda_tc: 0.35
-  lambda_he: 0.35
-  lambda_penalty: 0.50
+  alpha_cost: 1.00
+  beta_tail_risk: 0.80
+  lambda_action_smooth: 0.20
+  lambda_hourly_smooth: 0.25
+  lambda_hedge_error: 0.55
   robust_eps: 1.0e-6
 
 policy_regime:

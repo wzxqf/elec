@@ -36,8 +36,10 @@ def build_policy_rule_summary_markdown(
                 [
                     "rule_id",
                     "policy_name",
+                    "publish_time",
                     "effective_start",
                     "rule_type",
+                    "state_group",
                     "state_name",
                     "state_value",
                     "source_file",

@@ -64,19 +64,36 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         output_paths["reports"] / "policy_rule_summary.md",
     )
     policy_result.inventory.to_csv(output_paths["metrics"] / "policy_file_inventory.csv", index=False)
+    policy_result.inventory.to_csv(output_paths["metrics"] / "policy_metadata_index.csv", index=False)
     policy_result.rule_table.to_csv(output_paths["metrics"] / "policy_rule_table.csv", index=False)
+    policy_result.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
     policy_trace.to_csv(output_paths["metrics"] / "policy_state_trace.csv", index=False)
 
     bundle["weekly_metadata"] = bundle["weekly_metadata"].merge(policy_trace, on="week_start", how="left")
     bundle["weekly_features"] = bundle["weekly_features"].merge(
-        policy_trace.drop(columns=["policy_sources", "policy_names", "failed_policy_files"], errors="ignore"),
+        policy_trace.drop(
+            columns=[
+                "policy_sources",
+                "policy_names",
+                "failed_policy_files",
+                "active_state_groups",
+                "mechanism_stage_label",
+                "forward_price_linkage_type",
+                "forward_mechanism_execution_type",
+                "forward_ancillary_coupling_type",
+                "forward_info_forecast_boundary_type",
+            ],
+            errors="ignore",
+        ),
         on="week_start",
         how="left",
     )
     bundle["policy_inventory"] = policy_result.inventory
+    bundle["policy_metadata_index"] = policy_result.inventory
     bundle["policy_rule_table"] = policy_result.rule_table
     bundle["policy_state_trace"] = policy_trace
     bundle["policy_failures"] = policy_result.failures
+    bundle["policy_parse_failures"] = policy_result.failures
 
     split = build_week_split(config, bundle["weekly_features"], bundle["weekly_metadata"])
     all_eval_weeks = sorted(set(split.train + split.val + split.test))
@@ -106,26 +123,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         ],
         ignore_index=True,
     )
-    delta_risk_series = pd.concat(
-        [
-            fixed_train["risk_term_w"].reset_index(drop=True) - dynamic_train["risk_term_w"].reset_index(drop=True),
-            rule_train["risk_term_w"].reset_index(drop=True) - dynamic_train["risk_term_w"].reset_index(drop=True),
-        ],
-        ignore_index=True,
-    )
-    trans_series = pd.concat(
-        [dynamic_train["trans_cost_w"], fixed_train["trans_cost_w"], rule_train["trans_cost_w"]],
-        ignore_index=True,
-    )
-    hedge_series = pd.concat(
-        [dynamic_train["hedge_error_w"], fixed_train["hedge_error_w"], rule_train["hedge_error_w"]],
-        ignore_index=True,
-    )
     reward_robust_stats = {
         "delta_cost": _robust_summary(delta_cost_series, float(config["reward"]["robust_eps"])),
-        "delta_risk": _robust_summary(delta_risk_series, float(config["reward"]["robust_eps"])),
-        "trans_cost": _robust_summary(trans_series, float(config["reward"]["robust_eps"])),
-        "hedge_error": _robust_summary(hedge_series, float(config["reward"]["robust_eps"])),
     }
     bundle["reward_reference"] = reward_reference
     bundle["reward_robust_stats"] = reward_robust_stats

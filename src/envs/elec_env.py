@@ -80,7 +80,7 @@ class ElecEnv(gym.Env):
             previous_lock_ratio=float(self._prev_action[0]),
         )
         reward = float(summary["reward"])
-        self._prev_action = np.asarray([summary["lock_ratio"], summary["hedge_intensity"]], dtype=np.float32)
+        self._prev_action = np.asarray([summary["lock_ratio"], summary["exposure_bandwidth"]], dtype=np.float32)
         self._prev_reward = reward
         self._cursor += 1
 
@@ -97,6 +97,7 @@ class ElecEnv(gym.Env):
             "trading_cost": float(summary["trans_cost_w"]),
             "hedge_error": float(summary["hedge_error_w"]),
             "cvar": float(summary["cvar_w"]),
+            "tail_penalty": float(summary["tail_penalty_w"]),
             "reward": reward,
         }
         return observation, reward, terminated, False, info

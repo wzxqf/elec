@@ -122,9 +122,9 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
                 "n_steps": 128,
                 "batch_size": 32,
                 "ent_coef": float(rng.uniform(*search_cfg["random_search"]["ent_coef_range"])),
-                "lambda_risk": float(rng.uniform(*search_cfg["random_search"]["lambda_risk_range"])),
-                "lambda_he": float(rng.uniform(*search_cfg["random_search"]["lambda_he_range"])),
-                "hedge_intensity_scale": float(rng.uniform(*search_cfg["random_search"]["hedge_intensity_scale_range"])),
+                "beta_tail_risk": float(rng.uniform(*search_cfg["random_search"]["beta_tail_risk_range"])),
+                "lambda_hedge_error": float(rng.uniform(*search_cfg["random_search"]["lambda_hedge_error_range"])),
+                "forecast_error_scale": float(rng.uniform(*search_cfg["random_search"]["forecast_error_scale_range"])),
             }
         )
 
@@ -135,8 +135,8 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
         trial_config["n_steps"] = int(candidate["n_steps"])
         trial_config["batch_size"] = int(candidate["batch_size"])
         trial_config["ent_coef"] = float(candidate["ent_coef"])
-        trial_config["cost"]["lambda_risk"] = float(candidate["lambda_risk"])
-        trial_config["cost"]["lambda_he"] = float(candidate["lambda_he"])
+        trial_config["reward"]["beta_tail_risk"] = float(candidate["beta_tail_risk"])
+        trial_config["reward"]["lambda_hedge_error"] = float(candidate["lambda_hedge_error"])
 
         training = train_model(
             bundle=context["bundle"],
@@ -162,7 +162,7 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
             config=trial_config,
             strategy_name=f"hparam_trial_{trial_id}_validation",
             market_vol_scale=1.0,
-            forecast_error_scale=float(candidate["hedge_intensity_scale"]),
+            forecast_error_scale=float(candidate["forecast_error_scale"]),
         )
         metrics = validation["metrics"]
         rows.append(
@@ -181,7 +181,7 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
     for _, row in frame.head(5).iterrows():
         summary_lines.append(
             "- 试验 {trial_id}: lr={learning_rate:.6f}, n_steps={n_steps}, batch_size={batch_size}, "
-            "ent_coef={ent_coef:.4f}, lambda_risk={lambda_risk:.4f}, lambda_he={lambda_he:.2f}, "
+            "ent_coef={ent_coef:.4f}, beta_tail_risk={beta_tail_risk:.4f}, lambda_hedge_error={lambda_hedge_error:.2f}, "
             "val_total_procurement_cost={val_total_procurement_cost:.2f}".format(**row.to_dict())
         )
     save_markdown("\n".join(summary_lines) + "\n", context["output_paths"]["reports"] / "hparam_search_summary.md")

@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 
 from src.backtest.metrics import summarize_strategy_results
-from src.backtest.settlement import settle_week
+from src.backtest.settlement import resolve_settlement_context, settle_week
 from src.rules.hourly_hedge import apply_hourly_hedge_rule
 
 
@@ -33,28 +33,8 @@ def _week_risk_term(settlement: pd.DataFrame, config: dict[str, Any]) -> tuple[f
     threshold = float(per_interval.quantile(alpha))
     tail = per_interval.loc[per_interval >= threshold]
     cvar = float(tail.mean()) if not tail.empty else threshold
-    risk_term = (
-        float(config["cost"]["risk_vol_weight"]) * sigma
-        + float(config["cost"]["risk_cvar_weight"]) * cvar
-    )
+    risk_term = float(config["cost"]["risk_vol_weight"]) * sigma + float(config["cost"]["risk_cvar_weight"]) * cvar
     return risk_term, cvar
-
-
-def _resolve_lt_price(metadata: pd.Series) -> tuple[float, str]:
-    if float(metadata.get("lt_price_linked_active", 0.0)) >= 0.5:
-        fixed_ratio = float(metadata.get("fixed_price_ratio_max", 0.4) or 0.4)
-        linked_ratio = float(metadata.get("linked_price_ratio_min", 0.6) or 0.6)
-        total_ratio = fixed_ratio + linked_ratio
-        if total_ratio <= 0.0:
-            fixed_ratio, linked_ratio = 0.4, 0.6
-            total_ratio = 1.0
-        fixed_ratio /= total_ratio
-        linked_ratio /= total_ratio
-        lt_price = fixed_ratio * float(metadata["da_price_mean"]) + linked_ratio * float(metadata["id_price_mean"])
-        return lt_price, "da_id_mixed_proxy"
-
-    lt_price = float(metadata["lt_price_w"]) if pd.notna(metadata["lt_price_w"]) else float(metadata["da_price_mean"])
-    return lt_price, str(metadata.get("lt_price_source", "estimated_prev_week_da_mean"))
 
 
 def _robust_zscore(value: float, stats: dict[str, float], eps: float) -> float:
@@ -72,7 +52,7 @@ def simulate_week(
 ) -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame]:
     quarter, hourly, metadata = _get_week_frames(bundle, week_start)
     lock_ratio_raw = float(action[0])
-    hedge_intensity = float(np.clip(action[1], 0.0, 1.0))
+    exposure_bandwidth = float(np.clip(action[1], 0.0, 1.0))
     constraints = config["constraints"]
 
     lock_ratio = float(
@@ -90,12 +70,13 @@ def simulate_week(
     hourly_trace, rule_stats = apply_hourly_hedge_rule(
         hourly,
         q_lt_hourly=q_lt_hourly,
-        hedge_intensity=hedge_intensity,
+        exposure_bandwidth=exposure_bandwidth,
+        policy_state=metadata,
         rules_config=config["rules"],
     )
 
-    lt_price_w, lt_price_source = _resolve_lt_price(metadata)
-    settlement = settle_week(quarter, hourly_trace, lt_price_w=lt_price_w, config=config)
+    settlement_context = resolve_settlement_context(quarter, metadata, config)
+    settlement = settle_week(quarter, hourly_trace, metadata=metadata, config=config)
     procurement_cost = float(settlement["procurement_cost_15m"].sum())
     risk_term, cvar_value = _week_risk_term(settlement, config)
     trans_cost = float(
@@ -111,7 +92,7 @@ def simulate_week(
         float(config["cost"]["cvar_budget_min"]),
     )
     excess = max((cvar_value - budget) / (budget + float(config["cost"]["cvar_budget_eps"])), 0.0)
-    penalty = float(np.log1p(excess))
+    tail_penalty = float(np.log1p(excess))
 
     baseline_frame = bundle.get("reward_reference")
     baseline_row = None
@@ -120,22 +101,24 @@ def simulate_week(
         if not matched.empty:
             baseline_row = matched.iloc[0]
 
-    delta_cost = procurement_cost - float(baseline_row["baseline_cost_w"]) if baseline_row is not None else procurement_cost
-    delta_risk = risk_term - float(baseline_row["baseline_risk_w"]) if baseline_row is not None else risk_term
-
+    baseline_cost = float(baseline_row["baseline_cost_w"]) if baseline_row is not None else procurement_cost
+    delta_cost = procurement_cost - baseline_cost
     robust_stats = bundle.get("reward_robust_stats", {})
     eps = float(config["reward"]["robust_eps"])
     z_delta_cost = _robust_zscore(delta_cost, robust_stats.get("delta_cost", {}), eps)
-    z_delta_risk = _robust_zscore(delta_risk, robust_stats.get("delta_risk", {}), eps)
-    z_trans_cost = _robust_zscore(trans_cost, robust_stats.get("trans_cost", {}), eps)
-    z_hedge_error = _robust_zscore(hedge_error, robust_stats.get("hedge_error", {}), eps)
 
+    action_smooth = abs(lock_ratio - previous_lock_ratio) / max(float(constraints["delta_h_max"]), eps)
+    hourly_smooth = float(hourly_trace["delta_q"].diff().abs().fillna(0.0).mean()) / max(float(config["rules"]["gamma_max"]), eps)
+    hedge_error_norm = hedge_error / max(float(hourly["net_load_id"].clip(lower=0.0).mean()), eps)
+    exec_quality = (
+        float(config["reward"]["lambda_action_smooth"]) * action_smooth
+        + float(config["reward"]["lambda_hourly_smooth"]) * hourly_smooth
+        + float(config["reward"]["lambda_hedge_error"]) * hedge_error_norm
+    )
     reward_raw = -(
-        float(config["reward"]["lambda_cost"]) * z_delta_cost
-        + float(config["reward"]["lambda_risk"]) * z_delta_risk
-        + float(config["reward"]["lambda_tc"]) * z_trans_cost
-        + float(config["reward"]["lambda_he"]) * z_hedge_error
-        + float(config["reward"]["lambda_penalty"]) * penalty
+        float(config["reward"]["alpha_cost"]) * z_delta_cost
+        + float(config["reward"]["beta_tail_risk"]) * tail_penalty
+        + exec_quality
     )
     reward = float(np.tanh(reward_raw / float(config["env"]["reward_temperature"])))
 
@@ -143,31 +126,31 @@ def simulate_week(
         "week_start": pd.Timestamp(week_start),
         "is_partial_week": bool(metadata["is_partial_week"]),
         "lock_ratio": lock_ratio,
-        "hedge_intensity": hedge_intensity,
+        "exposure_bandwidth": exposure_bandwidth,
         "q_lt_target_w": q_lt_target,
         "forecast_weekly_net_demand_mwh": forecast_weekly_net_demand,
         "actual_weekly_net_demand_mwh": float(metadata["actual_weekly_net_demand_mwh"]),
-        "lt_price_w": lt_price_w,
-        "lt_price_source": lt_price_source,
+        "lt_price_w": float(settlement_context["lt_price_w"]),
+        "lt_price_source": settlement_context["lt_price_regime"],
         "procurement_cost_w": procurement_cost,
         "risk_term_w": risk_term,
         "trans_cost_w": trans_cost,
         "hedge_error_w": hedge_error,
         "cvar_w": cvar_value,
-        "baseline_cost_w": float(baseline_row["baseline_cost_w"]) if baseline_row is not None else np.nan,
-        "baseline_risk_w": float(baseline_row["baseline_risk_w"]) if baseline_row is not None else np.nan,
+        "baseline_cost_w": baseline_cost,
         "delta_cost_w": delta_cost,
-        "delta_risk_w": delta_risk,
-        "reward_penalty_w": penalty,
+        "tail_penalty_w": tail_penalty,
         "reward_budget_w": budget,
         "reward_excess_w": excess,
         "z_delta_cost_w": z_delta_cost,
-        "z_delta_risk_w": z_delta_risk,
-        "z_trans_cost_w": z_trans_cost,
-        "z_hedge_error_w": z_hedge_error,
+        "action_smooth_w": action_smooth,
+        "hourly_smooth_w": hourly_smooth,
+        "hedge_error_norm_w": hedge_error_norm,
+        "exec_quality_w": exec_quality,
         "reward_raw": reward_raw,
         "reward": reward,
-        "avg_adjustment_mwh": float(hourly_trace["delta_q"].mean()),
+        "avg_adjustment_mwh": float(hourly_trace["delta_q"].abs().mean()),
+        "mean_bandwidth_mwh": float(hourly_trace["bandwidth_mwh"].mean()),
         "bound_clip_count": int(rule_stats["bound_clip_count"]),
         "smooth_clip_count": int(rule_stats["smooth_clip_count"]),
         "non_negative_clip_count": int(rule_stats["non_negative_clip_count"]),

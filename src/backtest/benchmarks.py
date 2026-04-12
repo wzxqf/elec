@@ -35,6 +35,6 @@ def build_benchmark_actions(
         )
         actions["fixed_lock"][pd.Timestamp(week)] = (fixed_lock, 0.0)
         actions["dynamic_lock_only"][pd.Timestamp(week)] = (dynamic_lock, 0.0)
-        actions["rule_only"][pd.Timestamp(week)] = (0.0, float(np.clip(benchmark_cfg["rule_only_intensity"], 0.0, 1.0)))
+        actions["rule_only"][pd.Timestamp(week)] = (0.0, float(np.clip(benchmark_cfg["rule_only_bandwidth"], 0.0, 1.0)))
 
     return actions

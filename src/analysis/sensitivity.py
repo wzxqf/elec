@@ -16,11 +16,11 @@ def run_sensitivity_analysis(
     weeks = context["split"].test
     rows = []
 
-    for value in config["sensitivity"]["lambda_risk"]:
+    for value in config["sensitivity"]["beta_tail_risk"]:
         config_variant = deepcopy(config)
-        config_variant["cost"]["lambda_risk"] = float(value)
-        result = simulate_strategy(context["bundle"], weeks, ppo_actions, config_variant, "ppo_sensitivity_lambda_risk")
-        rows.append({"factor": "风险厌恶系数", "value": float(value), **result["metrics"]})
+        config_variant["reward"]["beta_tail_risk"] = float(value)
+        result = simulate_strategy(context["bundle"], weeks, ppo_actions, config_variant, "ppo_sensitivity_beta_tail_risk")
+        rows.append({"factor": "尾部风险惩罚系数", "value": float(value), **result["metrics"]})
 
     for value in config["sensitivity"]["market_vol_scale"]:
         result = simulate_strategy(
