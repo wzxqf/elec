@@ -22,11 +22,15 @@ def _resolve_model_path(output_paths: dict[str, Path]) -> Path:
 
 def build_validation_summary(context: dict[str, Any], validation: dict[str, Any], model_path: Path) -> str:
     metrics = validation["metrics"]
+    agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
     lines = [
         "# 验证摘要",
         "",
         f"- 模型路径: {model_path}",
+        f"- 根参数文件: {context['config']['config_path']}",
         f"- 验证周范围: {context['split'].val[0]} 至 {context['split'].val[-1]}",
+        f"- PPO 实际特征数: {len(agent_feature_columns)}",
+        f"- 周度动作语义: 基准底仓残差 + 边际敞口带宽",
         f"- 单轮 episode 跑通: 是",
         f"- 奖励有限值检查: {'通过' if np.isfinite(metrics['mean_reward']) else '未通过'}",
         f"- NaN / inf 检查: 通过",
@@ -34,6 +38,7 @@ def build_validation_summary(context: dict[str, Any], validation: dict[str, Any]
         f"- 周度成本波动率: {metrics['weekly_cost_volatility']:.2f}",
         f"- CVaR: {metrics['cvar']:.2f}",
         f"- 套保误差: {metrics['hedge_error']:.4f}",
+        f"- 特征清单: {context['output_paths']['reports'] / 'feature_manifest.json'}",
         "",
     ]
     return "\n".join(lines)

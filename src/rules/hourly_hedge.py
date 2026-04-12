@@ -60,20 +60,26 @@ def apply_hourly_hedge_rule(
 
     target_delta = composite * frame["bandwidth_mwh"]
     smooth_limit = float(rules_config["gamma_max"])
+    smoothing_mode = str(rules_config.get("smoothing_mode", "hard_clip"))
     delta_values: list[float] = []
     smooth_hits = 0
     previous_delta = 0.0
     for value in target_delta.tolist():
-        clipped_value = float(np.clip(value, previous_delta - smooth_limit, previous_delta + smooth_limit))
-        if not np.isclose(clipped_value, value):
+        if smoothing_mode == "soft_clip":
+            clipped_value = float(previous_delta + smooth_limit * np.tanh((value - previous_delta) / max(smooth_limit, 1e-6)))
+        else:
+            clipped_value = float(np.clip(value, previous_delta - smooth_limit, previous_delta + smooth_limit))
+        if not np.isclose(clipped_value, value, atol=1e-9):
             smooth_hits += 1
         delta_values.append(clipped_value)
         previous_delta = clipped_value
 
-    frame["delta_q_candidate"] = delta_values
+    frame["delta_q_target"] = target_delta
+    frame["delta_q_after_smoothing"] = delta_values
+    frame["smoothing_mode"] = smoothing_mode
     frame["lower_band"] = (frame["q_base"] - frame["bandwidth_mwh"]).clip(lower=0.0)
     frame["upper_band"] = frame["q_base"] + frame["bandwidth_mwh"]
-    frame["q_spot_raw"] = frame["q_base"] + frame["delta_q_candidate"]
+    frame["q_spot_raw"] = frame["q_base"] + frame["delta_q_after_smoothing"]
     frame["q_spot_band_clipped"] = frame["q_spot_raw"].clip(lower=frame["lower_band"], upper=frame["upper_band"])
     frame["clipped_by_bound"] = (~np.isclose(frame["q_spot_raw"], frame["q_spot_band_clipped"])).astype(int)
     frame["q_spot"] = (
@@ -83,15 +89,16 @@ def apply_hourly_hedge_rule(
     frame["delta_q"] = frame["q_spot"] - frame["q_base"]
     frame["a_t_raw"] = composite
     frame["a_t"] = composite
-    frame["smoothed"] = [
+    frame["soft_clipped"] = [
         int(not np.isclose(raw, clipped))
-        for raw, clipped in zip(target_delta.tolist(), frame["delta_q_candidate"].tolist(), strict=False)
+        for raw, clipped in zip(target_delta.tolist(), frame["delta_q_after_smoothing"].tolist(), strict=False)
     ]
     frame["hedge_error_abs"] = (frame["q_spot"] - frame["spot_need"]).abs()
 
     stats = {
         "bound_clip_count": int(frame["clipped_by_bound"].sum()),
         "smooth_clip_count": int(smooth_hits),
+        "soft_clip_count": int(smooth_hits if smoothing_mode == "soft_clip" else 0),
         "non_negative_clip_count": int(frame["clipped_non_negative"].sum()),
     }
     return frame, stats

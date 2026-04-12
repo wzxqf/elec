@@ -7,14 +7,15 @@ import pandas as pd
 
 from src.backtest.benchmarks import build_benchmark_actions
 from src.backtest.simulator import simulate_strategy
+from src.config.load_config import load_runtime_config
 from src.data.loader import load_raw_total_csv, locate_total_csv
 from src.data.preprocess import build_data_quality_markdown, clean_total_data
-from src.data.scenario_generator import WeekSplit, build_bootstrap_sequence, build_week_split
+from src.data.scenario_generator import RollingValidationWindow, WeekSplit, build_bootstrap_sequence, build_rolling_validation_windows, build_week_split
 from src.data.weekly_builder import build_weekly_bundle
 from src.policy.policy_parser import parse_policy_environment
 from src.policy.policy_regime import build_policy_state_trace
 from src.policy.policy_tables import build_policy_rule_summary_markdown
-from src.utils.io import dump_yaml, load_yaml, merge_configs, resolve_output_paths, save_markdown
+from src.utils.io import dump_yaml, resolve_output_paths, save_json, save_markdown
 from src.utils.logger import configure_logging
 from src.utils.seeds import set_global_seed
 
@@ -30,14 +31,74 @@ def _robust_summary(series: pd.Series, eps: float) -> dict[str, float]:
 
 
 def load_project_config(project_root: str | Path) -> dict[str, Any]:
-    project_root = Path(project_root)
-    default = load_yaml(project_root / "configs" / "default.yaml")
-    data = load_yaml(project_root / "configs" / "data.yaml")
-    ppo = load_yaml(project_root / "configs" / "ppo.yaml")
-    rules = load_yaml(project_root / "configs" / "rules.yaml")
-    backtest = load_yaml(project_root / "configs" / "backtest.yaml")
-    analysis = load_yaml(project_root / "configs" / "analysis.yaml")
-    return merge_configs(default, data, ppo, rules, backtest, analysis)
+    return load_runtime_config(project_root)
+
+
+def _build_feature_manifest(
+    weekly_features: pd.DataFrame,
+    base_manifest: pd.DataFrame,
+    policy_trace: pd.DataFrame,
+    config: dict[str, Any],
+) -> tuple[pd.DataFrame, list[str]]:
+    feature_cfg = config["feature_selection"]
+    include_set = set(feature_cfg.get("feature_include_for_agent", []))
+    exclude_set = set(feature_cfg.get("feature_exclude_for_agent", []))
+    report_only_set = set(feature_cfg.get("feature_keep_for_report_only", []))
+    base_rows = base_manifest.set_index("column").to_dict(orient="index") if not base_manifest.empty else {}
+    policy_columns = set(policy_trace.columns) - {"week_start"}
+    rows: list[dict[str, Any]] = []
+    agent_columns: list[str] = []
+
+    for column in weekly_features.columns:
+        if column == "week_start":
+            continue
+        numeric = pd.api.types.is_numeric_dtype(weekly_features[column])
+        meta = base_rows.get(column, {})
+        source = meta.get("source")
+        formula = meta.get("formula")
+        if source is None:
+            if column in policy_columns:
+                source = "政策状态"
+                formula = "政策解析与制度状态回填"
+            else:
+                source = "周度聚合"
+                formula = ""
+
+        if column in policy_columns:
+            selected_for_agent = bool(numeric and column in include_set and column not in exclude_set)
+        else:
+            selected_for_agent = bool(numeric and column not in exclude_set)
+        if column in report_only_set:
+            selected_for_agent = False
+        if selected_for_agent:
+            agent_columns.append(column)
+
+        rows.append(
+            {
+                "column": column,
+                "source": source,
+                "formula": formula,
+                "is_numeric": bool(numeric),
+                "selected_for_agent": bool(selected_for_agent),
+                "report_only": bool(column in report_only_set),
+            }
+        )
+
+    manifest = pd.DataFrame(rows)
+    return manifest, agent_columns
+
+
+def _rolling_windows_to_dict(windows: list[RollingValidationWindow]) -> list[dict[str, Any]]:
+    payload = []
+    for window in windows:
+        payload.append(
+            {
+                "name": window.name,
+                "train": [pd.Timestamp(week).strftime("%Y-%m-%d") for week in window.train],
+                "val": [pd.Timestamp(week).strftime("%Y-%m-%d") for week in window.val],
+            }
+        )
+    return payload
 
 
 def prepare_project_context(project_root: str | Path, logger_name: str = "pipeline") -> dict[str, Any]:
@@ -95,7 +156,20 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     bundle["policy_failures"] = policy_result.failures
     bundle["policy_parse_failures"] = policy_result.failures
 
+    feature_manifest, agent_feature_columns = _build_feature_manifest(
+        weekly_features=bundle["weekly_features"],
+        base_manifest=bundle["feature_manifest"],
+        policy_trace=policy_trace,
+        config=config,
+    )
+    bundle["feature_manifest"] = feature_manifest
+    bundle["agent_feature_columns"] = agent_feature_columns
+
     split = build_week_split(config, bundle["weekly_features"], bundle["weekly_metadata"])
+    rolling_validation_windows = build_rolling_validation_windows(
+        config,
+        sorted(pd.to_datetime(bundle["weekly_features"]["week_start"]).tolist()),
+    )
     all_eval_weeks = sorted(set(split.train + split.val + split.test))
     benchmark_actions = build_benchmark_actions(all_eval_weeks, bundle["weekly_features"], config)
     dynamic_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["dynamic_lock_only"], config, "dynamic_lock_only")
@@ -140,10 +214,20 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     )
 
     bundle["feature_manifest"].to_csv(output_paths["metrics"] / "feature_manifest.csv", index=False)
+    save_json(
+        {
+            "version": config["version"],
+            "config_path": config["config_path"],
+            "agent_feature_columns": agent_feature_columns,
+            "report_only_columns": config["feature_selection"]["feature_keep_for_report_only"],
+            "manifest": bundle["feature_manifest"].to_dict(orient="records"),
+        },
+        output_paths["reports"] / "feature_manifest.json",
+    )
     bundle["weekly_metadata"].to_csv(output_paths["metrics"] / "weekly_metadata.csv", index=False)
     bundle["weekly_features"].to_csv(output_paths["metrics"] / "weekly_features.csv", index=False)
     reward_reference.to_csv(output_paths["metrics"] / "reward_reference_dynamic_baseline.csv", index=False)
-    dump_yaml(config, output_paths["reports"] / "train_config_snapshot.yaml")
+    dump_yaml(config["raw_experiment_config"], output_paths["reports"] / "train_config_snapshot.yaml")
 
     logger.info("已加载数据文件: %s", csv_path)
     logger.info("15分钟记录数: %s", len(bundle["quarter"]))
@@ -157,6 +241,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     logger.info("训练周: %s", [week.strftime("%Y-%m-%d") for week in split.train])
     logger.info("验证周: %s", [week.strftime("%Y-%m-%d") for week in split.val])
     logger.info("回测周: %s", [week.strftime("%Y-%m-%d") for week in split.test])
+    if rolling_validation_windows:
+        logger.info("滚动验证窗口: %s", _rolling_windows_to_dict(rolling_validation_windows))
 
     return {
         "config": config,
@@ -169,6 +255,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         "bundle": bundle,
         "split": split,
         "train_sequence": train_sequence,
+        "rolling_validation_windows": rolling_validation_windows,
     }
 
 

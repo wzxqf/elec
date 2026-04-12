@@ -5,6 +5,7 @@ from typing import Any, Callable
 import numpy as np
 import pandas as pd
 
+from src.backtest.benchmarks import get_dynamic_lock_base_for_week
 from src.backtest.metrics import summarize_strategy_results
 from src.backtest.settlement import resolve_settlement_context, settle_week
 from src.rules.hourly_hedge import apply_hourly_hedge_rule
@@ -43,29 +44,65 @@ def _robust_zscore(value: float, stats: dict[str, float], eps: float) -> float:
     return (float(value) - median) / max(iqr, eps)
 
 
+def _resolve_action_payload(
+    bundle: dict[str, Any],
+    week_start: pd.Timestamp,
+    action: tuple[float, float] | dict[str, Any],
+    config: dict[str, Any],
+) -> dict[str, float]:
+    delta_lock_cap = float(config["constraints"]["delta_lock_cap"])
+    dynamic_base = get_dynamic_lock_base_for_week(bundle["weekly_features"], week_start, config)
+    if isinstance(action, dict):
+        mode = str(action.get("mode", "residual"))
+        exposure_bandwidth = float(np.clip(action.get("exposure_bandwidth", 0.0), 0.0, 1.0))
+        if mode == "absolute":
+            target_lock_ratio = float(action.get("target_lock_ratio", dynamic_base))
+            delta_lock_ratio = target_lock_ratio - dynamic_base
+            delta_lock_ratio_raw = float(np.clip(delta_lock_ratio / max(delta_lock_cap, 1e-6), -1.0, 1.0))
+        else:
+            delta_lock_ratio_raw = float(np.clip(action.get("delta_lock_ratio_raw", 0.0), -1.0, 1.0))
+            delta_lock_ratio = float(delta_lock_ratio_raw * delta_lock_cap)
+            target_lock_ratio = dynamic_base + delta_lock_ratio
+    else:
+        delta_lock_ratio_raw = float(np.clip(action[0], -1.0, 1.0))
+        exposure_bandwidth = float(np.clip(action[1], 0.0, 1.0))
+        delta_lock_ratio = float(delta_lock_ratio_raw * delta_lock_cap)
+        target_lock_ratio = dynamic_base + delta_lock_ratio
+    return {
+        "lock_ratio_base": dynamic_base,
+        "delta_lock_ratio_raw": delta_lock_ratio_raw,
+        "delta_lock_ratio": float(target_lock_ratio - dynamic_base),
+        "target_lock_ratio": float(target_lock_ratio),
+        "exposure_bandwidth": exposure_bandwidth,
+    }
+
+
 def simulate_week(
     bundle: dict[str, Any],
     week_start: pd.Timestamp,
-    action: tuple[float, float],
+    action: tuple[float, float] | dict[str, Any],
     config: dict[str, Any],
     previous_lock_ratio: float = 0.0,
 ) -> tuple[dict[str, Any], pd.DataFrame, pd.DataFrame]:
     quarter, hourly, metadata = _get_week_frames(bundle, week_start)
-    lock_ratio_raw = float(action[0])
-    exposure_bandwidth = float(np.clip(action[1], 0.0, 1.0))
+    action_payload = _resolve_action_payload(bundle, pd.Timestamp(week_start), action, config)
+    lock_ratio_base = float(action_payload["lock_ratio_base"])
+    delta_lock_ratio_raw = float(action_payload["delta_lock_ratio_raw"])
+    delta_lock_ratio = float(action_payload["delta_lock_ratio"])
+    exposure_bandwidth = float(action_payload["exposure_bandwidth"])
     constraints = config["constraints"]
 
-    lock_ratio = float(
-        np.clip(lock_ratio_raw, float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
+    lock_ratio_preclip = float(
+        np.clip(action_payload["target_lock_ratio"], float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
     )
     max_step = float(constraints["delta_h_max"])
-    lock_ratio = float(np.clip(lock_ratio, previous_lock_ratio - max_step, previous_lock_ratio + max_step))
-    lock_ratio = float(
-        np.clip(lock_ratio, float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
+    lock_ratio_final = float(np.clip(lock_ratio_preclip, previous_lock_ratio - max_step, previous_lock_ratio + max_step))
+    lock_ratio_final = float(
+        np.clip(lock_ratio_final, float(constraints["lock_ratio_min"]), float(constraints["lock_ratio_max"]))
     )
 
     forecast_weekly_net_demand = float(metadata["forecast_weekly_net_demand_mwh"])
-    q_lt_target = max(lock_ratio * forecast_weekly_net_demand, 0.0)
+    q_lt_target = max(lock_ratio_final * forecast_weekly_net_demand, 0.0)
     q_lt_hourly = _allocate_weekly_lt_to_hourly(hourly, q_lt_target)
     hourly_trace, rule_stats = apply_hourly_hedge_rule(
         hourly,
@@ -107,7 +144,7 @@ def simulate_week(
     eps = float(config["reward"]["robust_eps"])
     z_delta_cost = _robust_zscore(delta_cost, robust_stats.get("delta_cost", {}), eps)
 
-    action_smooth = abs(lock_ratio - previous_lock_ratio) / max(float(constraints["delta_h_max"]), eps)
+    action_smooth = abs(lock_ratio_final - previous_lock_ratio) / max(float(constraints["delta_h_max"]), eps)
     hourly_smooth = float(hourly_trace["delta_q"].diff().abs().fillna(0.0).mean()) / max(float(config["rules"]["gamma_max"]), eps)
     hedge_error_norm = hedge_error / max(float(hourly["net_load_id"].clip(lower=0.0).mean()), eps)
     exec_quality = (
@@ -125,7 +162,11 @@ def simulate_week(
     week_summary = {
         "week_start": pd.Timestamp(week_start),
         "is_partial_week": bool(metadata["is_partial_week"]),
-        "lock_ratio": lock_ratio,
+        "lock_ratio_base": lock_ratio_base,
+        "delta_lock_ratio_raw": delta_lock_ratio_raw,
+        "delta_lock_ratio": delta_lock_ratio,
+        "lock_ratio_final": lock_ratio_final,
+        "lock_ratio": lock_ratio_final,
         "exposure_bandwidth": exposure_bandwidth,
         "q_lt_target_w": q_lt_target,
         "forecast_weekly_net_demand_mwh": forecast_weekly_net_demand,
@@ -153,6 +194,7 @@ def simulate_week(
         "mean_bandwidth_mwh": float(hourly_trace["bandwidth_mwh"].mean()),
         "bound_clip_count": int(rule_stats["bound_clip_count"]),
         "smooth_clip_count": int(rule_stats["smooth_clip_count"]),
+        "soft_clip_count": int(rule_stats.get("soft_clip_count", 0)),
         "non_negative_clip_count": int(rule_stats["non_negative_clip_count"]),
         "cvar_budget_excess": excess,
     }

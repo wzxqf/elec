@@ -14,6 +14,13 @@ class WeekSplit:
     test: list[pd.Timestamp]
 
 
+@dataclass
+class RollingValidationWindow:
+    name: str
+    train: list[pd.Timestamp]
+    val: list[pd.Timestamp]
+
+
 def _weeks_between(weeks: list[pd.Timestamp], start: str, end: str) -> list[pd.Timestamp]:
     start_ts = pd.Timestamp(start)
     end_ts = pd.Timestamp(end)
@@ -62,3 +69,24 @@ def build_bootstrap_sequence(
             if len(sequence) >= sequence_length:
                 break
     return sequence
+
+
+def build_rolling_validation_windows(config: dict, available_weeks: list[pd.Timestamp]) -> list[RollingValidationWindow]:
+    rolling_cfg = config.get("rolling_validation", {})
+    if not rolling_cfg.get("enabled", False):
+        return []
+
+    windows: list[RollingValidationWindow] = []
+    for index, window_cfg in enumerate(rolling_cfg.get("windows", []), start=1):
+        train = _weeks_between(available_weeks, config["split"]["train_start_week"], window_cfg["train_end_week"])
+        val = _weeks_between(available_weeks, window_cfg["val_start_week"], window_cfg["val_end_week"])
+        if not train or not val:
+            raise ValueError(f"滚动验证窗口 {window_cfg.get('name', index)} 的训练周或验证周为空。")
+        windows.append(
+            RollingValidationWindow(
+                name=str(window_cfg.get("name", f"窗口{index}")),
+                train=train,
+                val=val,
+            )
+        )
+    return windows

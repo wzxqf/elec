@@ -27,7 +27,7 @@ class ElecEnv(gym.Env):
         self.week_sequence = [pd.Timestamp(week) for week in week_sequence]
         self.config = config
         self.feature_frame = bundle["weekly_features"].set_index("week_start").sort_index()
-        self.feature_columns = [
+        self.feature_columns = list(bundle.get("agent_feature_columns", [])) or [
             column
             for column in self.feature_frame.columns
             if pd.api.types.is_numeric_dtype(self.feature_frame[column])
@@ -44,7 +44,7 @@ class ElecEnv(gym.Env):
             dtype=np.float32,
         )
         self.action_space = spaces.Box(
-            low=np.array([0.0, 0.0], dtype=np.float32),
+            low=np.array([-1.0, 0.0], dtype=np.float32),
             high=np.array([1.0, 1.0], dtype=np.float32),
             shape=(2,),
             dtype=np.float32,
@@ -80,7 +80,7 @@ class ElecEnv(gym.Env):
             previous_lock_ratio=float(self._prev_action[0]),
         )
         reward = float(summary["reward"])
-        self._prev_action = np.asarray([summary["lock_ratio"], summary["exposure_bandwidth"]], dtype=np.float32)
+        self._prev_action = np.asarray([summary["lock_ratio_final"], summary["exposure_bandwidth"]], dtype=np.float32)
         self._prev_reward = reward
         self._cursor += 1
 

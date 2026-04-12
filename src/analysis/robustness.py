@@ -16,10 +16,14 @@ def run_robustness_analysis(
 ) -> pd.DataFrame:
     config = context["config"]
     rows = []
+    delta_lock_cap = float(config["constraints"]["delta_lock_cap"])
 
     for shift in config["robustness"]["contract_ratio_shift"]:
         shifted_actions = {
-            week: (float(np.clip(action[0] + shift, 0.0, 1.0)), action[1])
+            week: (
+                float(np.clip(action[0] + float(shift) / max(delta_lock_cap, 1e-6), -1.0, 1.0)),
+                float(action[1]),
+            )
             for week, action in ppo_actions.items()
         }
         result = simulate_strategy(context["bundle"], context["split"].test, shifted_actions, config, "ppo_contract_shift")

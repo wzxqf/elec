@@ -117,6 +117,7 @@ def train_model(
     run_name: str = "ppo",
     total_timesteps_override: int | None = None,
     save_plots: bool = True,
+    persist_artifacts: bool = True,
 ) -> dict[str, Any]:
     use_vec_normalize = bool(config.get("use_vec_normalize", False))
     tensorboard_dir = output_paths["logs"] / "tensorboard"
@@ -167,49 +168,56 @@ def train_model(
         device=device,
     )
 
-    checkpoint_callback = CheckpointCallback(
-        save_freq=max(int(config["checkpoint_freq"]), 1),
-        save_path=str(output_paths["models"]),
-        name_prefix=f"{run_name}_checkpoint",
-    )
-    eval_callback = SyncEvalCallback(
-        eval_env=eval_env,
-        best_model_save_path=str(output_paths["models"] / f"{run_name}_best_tmp"),
-        log_path=str(eval_log_dir),
-        eval_freq=max(int(config["eval_freq"]), 1),
-        deterministic=True,
-        render=False,
-        verbose=0,
-    )
     metrics_callback = TrainingMetricsCallback()
+    callbacks: list[BaseCallback] = [metrics_callback]
+    if persist_artifacts:
+        checkpoint_callback = CheckpointCallback(
+            save_freq=max(int(config["checkpoint_freq"]), 1),
+            save_path=str(output_paths["models"]),
+            name_prefix=f"{run_name}_checkpoint",
+        )
+        eval_callback = SyncEvalCallback(
+            eval_env=eval_env,
+            best_model_save_path=str(output_paths["models"] / f"{run_name}_best_tmp"),
+            log_path=str(eval_log_dir),
+            eval_freq=max(int(config["eval_freq"]), 1),
+            deterministic=True,
+            render=False,
+            verbose=0,
+        )
+        callbacks = [checkpoint_callback, eval_callback, metrics_callback]
 
     model.learn(
         total_timesteps=int(total_timesteps_override or config["total_timesteps"]),
-        callback=CallbackList([checkpoint_callback, eval_callback, metrics_callback]),
+        callback=CallbackList(callbacks),
         progress_bar=False,
     )
 
     latest_model_path = output_paths["models"] / f"{run_name}_latest.zip"
     best_model_path = output_paths["models"] / f"{run_name}_best.zip"
-    model.save(latest_model_path)
-    tmp_best = output_paths["models"] / f"{run_name}_best_tmp" / "best_model.zip"
-    if tmp_best.exists():
-        shutil.copyfile(tmp_best, best_model_path)
-    else:
-        model.save(best_model_path)
-    if use_vec_normalize:
-        train_env.save(str(output_paths["models"] / f"{run_name}_vecnormalize.pkl"))
+    if persist_artifacts:
+        model.save(latest_model_path)
+        tmp_best = output_paths["models"] / f"{run_name}_best_tmp" / "best_model.zip"
+        if tmp_best.exists():
+            shutil.copyfile(tmp_best, best_model_path)
+        else:
+            model.save(best_model_path)
+        if use_vec_normalize:
+            train_env.save(str(output_paths["models"] / f"{run_name}_vecnormalize.pkl"))
 
     train_metrics = pd.DataFrame(metrics_callback.records)
-    train_metrics.to_csv(output_paths["metrics"] / f"{run_name}_train_metrics.csv", index=False)
-    eval_metrics = _export_eval_metrics(eval_log_dir, output_paths["metrics"] / f"{run_name}_eval_metrics.csv")
-    if save_plots:
+    if persist_artifacts:
+        train_metrics.to_csv(output_paths["metrics"] / f"{run_name}_train_metrics.csv", index=False)
+        eval_metrics = _export_eval_metrics(eval_log_dir, output_paths["metrics"] / f"{run_name}_eval_metrics.csv")
+    else:
+        eval_metrics = pd.DataFrame(columns=["timesteps", "mean_reward", "std_reward"])
+    if save_plots and persist_artifacts:
         _save_training_plots(train_metrics, eval_metrics, output_paths["figures"])
 
     return {
         "model": model,
-        "model_path": latest_model_path,
-        "best_model_path": best_model_path,
+        "model_path": latest_model_path if persist_artifacts else None,
+        "best_model_path": best_model_path if persist_artifacts else None,
         "train_metrics": train_metrics,
         "eval_metrics": eval_metrics,
         "device": device,

@@ -37,6 +37,7 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
     split_dict = split_to_dict(context["split"])
     validation_metrics = validation["metrics"]
     test_metrics = backtest["results"]["ppo"]["metrics"]
+    agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
     lines = [
         "# 运行总结",
         "",
@@ -50,6 +51,7 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 周度样本数: {len(context['bundle']['weekly_metadata'])}",
         f"- 政策来源文件数: {len(context['bundle']['policy_inventory'])}",
         f"- 政策解析失败文件数: {len(context['bundle']['policy_failures'])}",
+        f"- 根参数文件: {config['config_path']}",
         "",
         "## 样本划分",
         "",
@@ -64,6 +66,8 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 训练步数: {config['total_timesteps']}",
         f"- 训练设备: {training['device']}",
         f"- 是否使用 GPU: {'是' if training['gpu_used'] else '否'}",
+        f"- 周度动作语义: 基准底仓残差 + 边际敞口带宽",
+        f"- PPO 实际特征数: {len(agent_feature_columns)}",
         f"- 最新模型路径: {training['model_path']}",
         f"- 最优模型路径: {training['best_model_path']}",
         f"- 奖励强基准: {config['reward']['strong_baseline']}",
@@ -87,6 +91,9 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         f"- 中长期价格: {config['reporting']['lt_price_note']}",
         f"- 结算口径: {config['reporting']['settlement_note']}",
         f"- 训练样本构造: {config['scenario']['training_sequence_method']}",
+        f"- 滚动验证窗口数: {len(context['rolling_validation_windows'])}",
+        f"- 特征清单: {context['output_paths']['reports'] / 'feature_manifest.json'}",
+        f"- 滚动验证摘要: {context['output_paths']['reports'] / 'rolling_validation_summary.md'}",
         f"- 政策规则汇总: {context['output_paths']['reports'] / 'policy_rule_summary.md'}",
         "",
     ]
@@ -97,6 +104,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     bundle = context["bundle"]
     weekly_metadata = bundle["weekly_metadata"].copy().sort_values("week_start").reset_index(drop=True)
     weekly_features = bundle["weekly_features"].copy().sort_values("week_start").reset_index(drop=True)
+    feature_manifest = bundle["feature_manifest"].copy().sort_values(["selected_for_agent", "column"], ascending=[False, True]).reset_index(drop=True)
     validation_weekly = validation["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
     ppo_weekly = backtest["results"]["ppo"]["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
     ppo_hourly = backtest["results"]["ppo"]["hourly_results"].copy().sort_values(["week_start", "hour"]).reset_index(drop=True)
@@ -104,6 +112,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     policy_inventory = bundle["policy_inventory"].copy()
     policy_rules = bundle["policy_rule_table"].copy()
     policy_trace = bundle["policy_state_trace"].copy().sort_values("week_start").reset_index(drop=True)
+    rolling_validation = backtest.get("hparam_search", pd.DataFrame()).copy()
 
     model_profile = pd.DataFrame(
         [
@@ -112,8 +121,10 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
                 "策略网络": context["config"]["policy"],
                 "训练设备": training["device"],
                 "总训练步数": int(context["config"]["total_timesteps"]),
-                "状态维度": int(len([column for column in weekly_features.columns if column not in {'week_start', 'lt_price_source'}])),
+                "状态维度": int(len(bundle.get("agent_feature_columns", []))),
                 "动作维度": 2,
+                "动作一语义": "dynamic_lock_only 基准底仓残差",
+                "动作二语义": "边际敞口带宽",
                 "训练周数": len(context["split"].train),
                 "验证周数": len(context["split"].val),
                 "回测周数": len(context["split"].test),
@@ -144,6 +155,10 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "## 二、模型数据",
         "",
         _frame_to_markdown(model_profile),
+        "",
+        "### 2.1 状态空间清单",
+        "",
+        _frame_to_markdown(feature_manifest[["column", "source", "selected_for_agent", "report_only"]]),
         "",
         "## 三、政策规则与制度状态",
         "",
@@ -182,25 +197,29 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "",
         "## 六、算法应用效果",
         "",
-        "### 5.1 核心指标",
+        "### 6.1 核心指标",
         "",
         _frame_to_markdown(practice_effect),
         "",
-        "### 5.2 基准策略比较",
+        "### 6.2 基准策略比较",
         "",
         _frame_to_markdown(benchmark_frame),
         "",
-        "### 5.3 PPO 周度执行结果",
+        "### 6.3 PPO 周度执行结果",
         "",
         _frame_to_markdown(ppo_weekly),
         "",
-        "### 5.4 PPO 小时级规则执行轨迹样本",
+        "### 6.4 PPO 小时级规则执行轨迹样本",
         "",
         _frame_to_markdown(ppo_hourly.head(48)),
         "",
-        "### 5.5 验证集周度结果",
+        "### 6.5 验证集周度结果",
         "",
         _frame_to_markdown(validation_weekly),
+        "",
+        "### 6.6 滚动验证汇总",
+        "",
+        _frame_to_markdown(rolling_validation),
         "",
         "## 七、论文写作可引用结论",
         "",
@@ -215,7 +234,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
 
 def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, Any], validation: dict[str, Any], backtest: dict[str, Any]) -> None:
     metrics_dir: Path = context["output_paths"]["metrics"]
-    weekly_features = context["bundle"]["weekly_features"]
+    agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
 
     model_profile = pd.DataFrame(
         [
@@ -233,7 +252,9 @@ def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, 
                 "ent_coef": float(context["config"]["ent_coef"]),
                 "vf_coef": float(context["config"]["vf_coef"]),
                 "随机种子": int(context["config"]["seed"]),
-                "周度特征维度": int(len([column for column in weekly_features.columns if column not in {'week_start', 'lt_price_source'}])),
+                "周度特征维度": int(len(agent_feature_columns)),
+                "动作一语义": "dynamic_lock_only 基准底仓残差",
+                "动作二语义": "边际敞口带宽",
             }
         ]
     )

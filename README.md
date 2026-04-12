@@ -1,11 +1,15 @@
 # elec
 
-基于 Gymnasium 自定义环境与 Stable-Baselines3 PPO 的售电采购策略实验工程。当前版本已按 2026-04-10 交付说明重构为：
+基于 Gymnasium 自定义环境与 Stable-Baselines3 PPO 的售电采购策略实验工程。当前版本已按 `v0.23` 说明重构为：
 
-- 周度中长期持仓 PPO 决策
-- 小时级显式规则现货修正
+- 周度中长期底仓残差 PPO 决策
+- 小时级 `soft_clip` 显式规则现货修正
 - 15 分钟日内代理结算回测
-- 基准策略、敏感性、鲁棒性、参数搜索与论文写作用详细报告
+- `dynamic_lock_only` 强基准对比、滚动验证、参数搜索与论文写作用详细报告
+
+## 配置入口
+
+项目根目录的 `experiment_config.yaml` 是当前唯一人工修改入口。训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程都从该文件读取参数；`configs/*.yaml` 仅保留为历史模板或参考，不再作为正式实验主入口。
 
 ## 运行前提
 
@@ -41,3 +45,4 @@ python -m src.scripts.diagnostics
 - 图表不再直接输出图片，统一导出为与原图表同名的 CSV 文件。
 - 日志、摘要、回测报告和详细运行报告均为中文输出。
 - 中长期价格估算与 15 分钟代理结算口径会在日志和报告中明确标注。
+- 运行后会额外输出 `outputs/reports/train_config_snapshot.yaml`、`outputs/reports/feature_manifest.json`、`outputs/reports/rolling_validation_summary.md` 和 `outputs/metrics/rolling_validation_metrics.csv`。

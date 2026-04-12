@@ -10,6 +10,7 @@ from src.utils.logger import configure_logging
 
 def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> str:
     config = context["config"]
+    agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
     lines = [
         "# 训练摘要",
         "",
@@ -22,6 +23,8 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
         f"- 预热周: {', '.join(split_to_dict(context['split'])['warmup']) if context['split'].warmup else '无'}",
         f"- 政策来源文件数: {len(context['bundle']['policy_inventory'])}",
         f"- 政策解析失败文件数: {len(context['bundle']['policy_failures'])}",
+        f"- 根参数文件: {config['config_path']}",
+        f"- PPO 实际特征数: {len(agent_feature_columns)}",
         "",
         "## 超参数",
         "",
@@ -41,12 +44,15 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
         f"- 最终训练轮次: {config['total_timesteps']}",
         f"- 训练设备: {training['device']}",
         f"- 是否使用 GPU: {'是' if training['gpu_used'] else '否'}",
+        f"- 周度动作语义: 基准底仓残差 + 边际敞口带宽",
         f"- 最新模型路径: {training['model_path']}",
         f"- 最优模型路径: {training['best_model_path']}",
         f"- 训练指标文件: {context['output_paths']['metrics'] / 'ppo_train_metrics.csv'}",
         f"- 评估指标文件: {context['output_paths']['metrics'] / 'ppo_eval_metrics.csv'}",
         f"- 奖励强基准: {config['reward']['strong_baseline']}",
         f"- 中长期价格口径: {config['reporting']['lt_price_note']}",
+        f"- 滚动验证窗口数: {len(context['rolling_validation_windows'])}",
+        f"- 特征清单: {context['output_paths']['reports'] / 'feature_manifest.json'}",
         f"- 异常与警告记录: 详见 outputs/logs/train.log",
         "",
     ]
