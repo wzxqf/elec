@@ -1,5 +1,13 @@
 # 更新日志
 
+## v0.21
+
+- 接入 `政策环境` 目录解析链路，新增 `src/policy/` 模块，自动扫描政策文本与竞价结果表，生成结构化规则表、政策文件清单、失败清单和周度制度状态轨迹。
+- 政策状态不再仅使用简单事件哑变量，改为同时进入周度状态空间与结算说明，补充市场衔接、辅助服务耦合、新能源机制电价和中长期价格联动等制度状态。
+- 2026 年 2 月起的中长期价格口径更新为“40% 日前固定价 + 60% 日内联动价”混合代理；2026 年 2 月前仍采用上一自然周日前均价代理。
+- 奖励函数改为以 `dynamic_lock_only` 为强基准的相对奖励，采用训练集 robust 标准化、CVaR 相对超额软惩罚和 `tanh` 软压缩，不再使用旧的绝对成本硬裁剪写法。
+- 新增并更新政策相关输出，包括 `policy_rule_summary.md`、`policy_state_trace.csv`、`policy_rule_table.csv`、`policy_file_inventory.csv`、`reward_reference_dynamic_baseline.csv`、`weekly_results.csv` 与 `hourly_rule_trace.csv`。
+
 ## v0.2
 
 - 按 2026-04-10 交付说明完成全面重构，主链切换为“周度 PPO + 小时级显式规则 + 15 分钟代理结算”。
