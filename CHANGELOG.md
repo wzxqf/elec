@@ -1,5 +1,13 @@
 # 更新日志
 
+## v0.24
+
+- 新增根目录一键全流程脚本 `run_all.sh`，固定通过 `mamba run -n elec_env python -m src.scripts.run_pipeline` 启动训练、验证、回测与报告导出。
+- 脚本增加最小运行保护：校验 `experiment_config.yaml` 与 `mamba` 是否存在，并在启动前打印项目根目录、实验版本和输出目录。
+- 新增 `--dry-run` 模式，便于只检查本次版本号、结果目录和真实执行命令而不实际启动流水线。
+- 补充 `tests/test_run_all_script.py`，回归校验根目录脚本存在且固定绑定 `elec_env` 主入口。
+- README 同步补充根目录一键入口说明，明确 `run_all.sh` 为当前推荐的正式启动方式。
+
 ## v0.23
 
 - 新增根目录独立参数文件 `experiment_config.yaml`，训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程统一改为从该文件加载；`configs/*.yaml` 保留为模板，不再作为正式实验主入口。
