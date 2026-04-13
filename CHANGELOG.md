@@ -3,6 +3,7 @@
 ## v0.23
 
 - 新增根目录独立参数文件 `experiment_config.yaml`，训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程统一改为从该文件加载；`configs/*.yaml` 保留为模板，不再作为正式实验主入口。
+- 输出目录统一升级为 `outputs/<version>/<真实输出>` 结构，版本号由 `project.version` 自动决定，避免不同版本结果混放。
 - 上层 PPO 第一维动作从“绝对底仓比例”改为相对 `dynamic_lock_only` 强基准的残差动作，输出补充 `lock_ratio_base`、`delta_lock_ratio_raw`、`delta_lock_ratio` 与 `lock_ratio_final`。
 - 小时级规则层真正支持 `soft_clip` 连续压缩，规则轨迹新增 `delta_q_target`、`delta_q_after_smoothing`、`smoothing_mode`、`soft_clipped`，并汇总 `soft_clip_count`。
 - 奖励参数按 `v0.23` 新口径调整为“成本改进优先、执行惩罚适度放松”，保持三层结构与 `tanh` 软压缩不变。

@@ -40,7 +40,22 @@ def save_markdown(text: str, path: str | Path) -> None:
 
 
 def resolve_output_paths(config: dict[str, Any]) -> dict[str, Path]:
-    outputs = {key: Path(value) for key, value in config["outputs"].items()}
+    outputs_config = config["outputs"]
+    version = str(config.get("version") or config.get("project", {}).get("version") or "unversioned")
+
+    if "root" in outputs_config:
+        version_root = Path(outputs_config["root"]) / version
+        outputs = {
+            "root": version_root,
+            "logs": version_root / "logs",
+            "models": version_root / "models",
+            "metrics": version_root / "metrics",
+            "figures": version_root / "figures",
+            "reports": version_root / "reports",
+        }
+    else:
+        outputs = {key: Path(value) for key, value in outputs_config.items()}
+
     ensure_directories(outputs.values())
     return outputs
 

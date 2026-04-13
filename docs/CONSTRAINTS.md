@@ -178,13 +178,13 @@
 
 ### 3. 输出口径保持稳定
 结果继续统一输出到：
-- `outputs/logs/`
-- `outputs/models/`
-- `outputs/metrics/`
-- `outputs/figures/`
-- `outputs/reports/`
+- `outputs/<version>/logs/`
+- `outputs/<version>/models/`
+- `outputs/<version>/metrics/`
+- `outputs/<version>/figures/`
+- `outputs/<version>/reports/`
 
-不得将关键结果改为只打印终端、不落盘、不留痕。
+其中 `<version>` 必须取自 `project.version`。不得将关键结果改为只打印终端、不落盘、不留痕，也不得把不同版本结果混写到同一层目录。
 
 ---
 

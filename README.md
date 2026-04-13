@@ -34,15 +34,16 @@ python -m src.scripts.diagnostics
 
 运行后结果会写入：
 
-- `outputs/logs/`
-- `outputs/models/`
-- `outputs/metrics/`
-- `outputs/figures/`
-- `outputs/reports/`
+- `outputs/<version>/logs/`
+- `outputs/<version>/models/`
+- `outputs/<version>/metrics/`
+- `outputs/<version>/figures/`
+- `outputs/<version>/reports/`
 
 说明：
 
+- `<version>` 由 `experiment_config.yaml` 中的 `project.version` 自动决定，例如当前版本输出到 `outputs/v0.23/`。
 - 图表不再直接输出图片，统一导出为与原图表同名的 CSV 文件。
 - 日志、摘要、回测报告和详细运行报告均为中文输出。
 - 中长期价格估算与 15 分钟代理结算口径会在日志和报告中明确标注。
-- 运行后会额外输出 `outputs/reports/train_config_snapshot.yaml`、`outputs/reports/feature_manifest.json`、`outputs/reports/rolling_validation_summary.md` 和 `outputs/metrics/rolling_validation_metrics.csv`。
+- 运行后会额外输出 `outputs/<version>/reports/train_config_snapshot.yaml`、`outputs/<version>/reports/feature_manifest.json`、`outputs/<version>/reports/rolling_validation_summary.md` 和 `outputs/<version>/metrics/rolling_validation_metrics.csv`。

@@ -15,7 +15,7 @@
 5. **规则执行与回测层**：`src/rules/`、`src/backtest/`
 6. **分析与输出层**：`src/analysis/`、`src/scripts/`、`outputs/`
 
-其中，`src/scripts/` 负责把各层串成完整流水线，`outputs/` 负责落地模型、指标、图表 CSV 和中文报告。
+其中，`src/scripts/` 负责把各层串成完整流水线，`outputs/` 负责按 `outputs/<version>/...` 结构落地模型、指标、图表 CSV 和中文报告。
 
 ---
 
@@ -117,11 +117,13 @@
 ### 3.10 outputs/
 统一输出目录，禁止结果散落到源码目录。
 
-- `outputs/models/`：模型文件
-- `outputs/logs/`：日志
-- `outputs/metrics/`：指标表、轨迹表、政策表
-- `outputs/figures/`：图表对应 CSV
-- `outputs/reports/`：中文摘要与详细报告
+- `outputs/<version>/models/`：模型文件
+- `outputs/<version>/logs/`：日志
+- `outputs/<version>/metrics/`：指标表、轨迹表、政策表
+- `outputs/<version>/figures/`：图表对应 CSV
+- `outputs/<version>/reports/`：中文摘要与详细报告
+
+其中 `<version>` 由根参数文件中的 `project.version` 自动决定。
 
 ---
 
@@ -253,7 +255,7 @@ PPO 结果 + 基准策略结果
 4. 不在脚本中重新拼装数据口径，统一走 `prepare_project_context`。
 5. 不把图表默认导出为图片，继续保持 CSV 导出。
 6. 所有摘要、报告和日志继续保持中文输出。
-7. 输出文件统一写入 `outputs/`，不污染源码目录。
+7. 输出文件统一写入 `outputs/<version>/`，不污染源码目录，也不混放不同版本结果。
 
 ---
 
