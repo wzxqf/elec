@@ -1,0 +1,2 @@
+strategy,total_procurement_cost,avg_weekly_cost,weekly_cost_volatility,cvar,hedge_error,mean_reward,avg_adjustment_mwh,total_trans_cost,max_drawdown,settlement_records
+ppo_validation,3442653650.1711073,860663412.5427768,434273409.43510073,1436830524.4249496,3986.0571003873933,-0.1942948876701427,3986.0571003873933,115600957.0820814,2906518711.085458,2688

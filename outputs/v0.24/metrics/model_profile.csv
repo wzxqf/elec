@@ -1,0 +1,2 @@
+算法,策略网络,训练设备,总训练步数,n_steps,batch_size,n_epochs,gamma,gae_lambda,clip_range,ent_coef,vf_coef,随机种子,周度特征维度,动作一语义,动作二语义
+PPO,MlpPolicy,cpu,50000,256,64,10,0.995,0.97,0.15,0.005,0.5,42,110,dynamic_lock_only 基准底仓残差,边际敞口带宽
