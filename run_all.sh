@@ -29,8 +29,11 @@ if [[ -z "${VERSION}" ]]; then
   exit 1
 fi
 
+export MPLCONFIGDIR="${PROJECT_ROOT}/.cache/matplotlib"
+mkdir -p "${MPLCONFIGDIR}"
+
 RUN_CMD=(
-  mamba run -n elec_env
+  mamba run -n torch311
   python -m src.scripts.run_pipeline
 )
 

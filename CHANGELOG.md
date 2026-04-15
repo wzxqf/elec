@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.3
+
+- 主算法从“周度 PPO + 小时级显式规则修正”切换为“双层 HPSO + 15 分钟代理结算回测”。
+- 新增 `src/agents/hpso.py`，实现标准 PSO 更新、退火扰动、停滞扰动、BP 局部精修、固定随机种子复现、CUDA 优先与受控 CPU 降级。
+- 上层 HPSO 搜索不设硬限的中长期合约调整量与诊断性 `exposure_bandwidth`，输出保留 `lock_ratio_base`、`delta_lock_ratio_raw`、`delta_lock_ratio` 与 `lock_ratio_final` 诊断字段。
+- 下层 HPSO 搜索不设硬限的小时级现货合约修正量 `delta_q`，生成可映射到 15 分钟结算的完整小时轨迹；非负、带宽、平滑和辅助服务字段仅保留为诊断，不再硬裁剪模型输出。
+- `v0.3.md` 新增本版数学公式，后续每个版本说明必须同步写入当版实际使用公式。
+- 训练、验证、回测入口按 `training.algorithm` 分支，`HPSO` 路径不再加载 PPO 模型文件，PPO 依赖改为延迟导入。
+- 根配置升级为 `project.version: v0.3`，新增 `hpso` 配置节，输出写入 `outputs/v0.3/<真实输出>`。
+- 回测输出新增 `hpso_upper_weekly_actions.csv`、`hpso_hourly_delta_q.csv`、`hpso_convergence_curve.csv`，并继续导出政策清单、规则表、解析失败清单、滚动验证摘要和基准比较表。
+- README 同步更新为 v0.3 HPSO 主线说明。
+
 ## v0.25
 
 - 版本定位调整为纯工程性能优化，不改变周度底仓决策、小时级现货修正、15 分钟代理结算和 `dynamic_lock_only` 强基准口径。

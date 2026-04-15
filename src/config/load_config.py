@@ -27,6 +27,7 @@ REQUIRED_SECTIONS = [
     "sensitivity",
     "robustness",
     "search",
+    "hpso",
 ]
 
 
@@ -73,12 +74,14 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     sensitivity = _require_section(root_config, "sensitivity")
     robustness = _require_section(root_config, "robustness")
     search = _require_section(root_config, "search")
+    hpso = _require_section(root_config, "hpso")
 
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
     _require_keys("training", training, ["policy", "total_timesteps", "eval_freq", "checkpoint_freq", "learning_rate", "n_steps", "batch_size", "n_epochs", "gamma", "gae_lambda", "clip_range", "ent_coef", "vf_coef", "max_grad_norm", "seed", "device", "use_vec_normalize"])
     _require_keys("constraints", constraints, ["lock_ratio_min", "lock_ratio_max", "delta_h_max", "delta_lock_cap"])
     _require_keys("feature_selection", feature_selection, ["enabled", "feature_include_for_agent", "feature_exclude_for_agent", "feature_keep_for_report_only"])
+    _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "upper", "lower", "objective_weights"])
 
     runtime = {
         "config_path": str(config_path),
@@ -110,6 +113,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "sensitivity": sensitivity,
         "robustness": robustness,
         "search": search,
+        "hpso": hpso,
     }
 
     runtime.update(data)

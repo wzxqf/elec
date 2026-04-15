@@ -6,7 +6,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.agents.train_ppo import evaluate_policy, load_model
+from src.agents.hpso import HPSOModel, evaluate_hpso_policy
 from src.scripts.common import prepare_project_context
 from src.scripts.train import run_train
 from src.utils.io import save_markdown
@@ -23,14 +23,16 @@ def _resolve_model_path(output_paths: dict[str, Path]) -> Path:
 def build_validation_summary(context: dict[str, Any], validation: dict[str, Any], model_path: Path) -> str:
     metrics = validation["metrics"]
     agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
+    algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
     lines = [
         "# 验证摘要",
         "",
-        f"- 模型路径: {model_path}",
+        f"- 模型路径: {model_path if algorithm != 'HPSO' else 'HPSO 无模型文件'}",
         f"- 根参数文件: {context['config']['config_path']}",
         f"- 验证周范围: {context['split'].val[0]} 至 {context['split'].val[-1]}",
-        f"- PPO 实际特征数: {len(agent_feature_columns)}",
-        f"- 周度动作语义: 基准底仓残差 + 边际敞口带宽",
+        f"- 主算法: {algorithm}",
+        f"- 实际特征数: {len(agent_feature_columns)}",
+        f"- 周度动作语义: {'HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽' if algorithm == 'HPSO' else '基准底仓残差 + 边际敞口带宽'}",
         f"- 单轮 episode 跑通: 是",
         f"- 奖励有限值检查: {'通过' if np.isfinite(metrics['mean_reward']) else '未通过'}",
         f"- NaN / inf 检查: 通过",
@@ -47,23 +49,44 @@ def build_validation_summary(context: dict[str, Any], validation: dict[str, Any]
 def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="evaluate")
     logger.info("开始执行验证模块。")
-    if model is None:
+    algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
+    if algorithm == "HPSO":
+        model = model or HPSOModel(device=str(context["config"]["hpso"].get("device", context["config"].get("device", "cpu"))), config=context["config"])
+        model_path = Path("HPSO")
+        validation = evaluate_hpso_policy(
+            model=model,
+            bundle=context["bundle"],
+            weeks=context["split"].val,
+            config=context["config"],
+            strategy_name="hpso_validation",
+        )
+    elif model is None:
+        from src.agents.train_ppo import evaluate_policy, load_model
+
         try:
             model_path = _resolve_model_path(context["output_paths"])
             model = load_model(model_path)
         except FileNotFoundError:
             model = run_train(context)["model"]
             model_path = _resolve_model_path(context["output_paths"])
+        validation = evaluate_policy(
+            model=model,
+            bundle=context["bundle"],
+            weeks=context["split"].val,
+            config=context["config"],
+            strategy_name="ppo_validation",
+        )
     else:
-        model_path = _resolve_model_path(context["output_paths"])
+        from src.agents.train_ppo import evaluate_policy
 
-    validation = evaluate_policy(
-        model=model,
-        bundle=context["bundle"],
-        weeks=context["split"].val,
-        config=context["config"],
-        strategy_name="ppo_validation",
-    )
+        model_path = _resolve_model_path(context["output_paths"])
+        validation = evaluate_policy(
+            model=model,
+            bundle=context["bundle"],
+            weeks=context["split"].val,
+            config=context["config"],
+            strategy_name="ppo_validation",
+        )
 
     metrics = validation["metrics"]
     numeric_values = pd.Series([value for value in metrics.values() if isinstance(value, (int, float))], dtype=float)
@@ -81,7 +104,7 @@ def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
 
 
 def main() -> dict[str, Any]:
-    context = prepare_project_context("/Users/dk/py/elec", logger_name="evaluate")
+    context = prepare_project_context(Path.cwd(), logger_name="evaluate")
     return run_evaluate(context)
 
 

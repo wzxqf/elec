@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -56,7 +57,7 @@ def run_diagnostics(context: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> dict[str, Any]:
-    context = prepare_project_context("/Users/dk/py/elec", logger_name="pipeline")
+    context = prepare_project_context(Path.cwd(), logger_name="pipeline")
     return run_diagnostics(context)
 
 

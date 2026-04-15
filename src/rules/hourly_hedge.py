@@ -52,13 +52,17 @@ def apply_hourly_hedge_rule(
         0.1,
         1.0,
     )
-    base_band = q_base * float(rules_config["band_base_multiplier"]) * float(np.clip(exposure_bandwidth, 0.0, 1.0))
-    bandwidth_mwh = np.clip(
-        base_band * ancillary_multiplier * volatility_multiplier,
-        float(rules_config["band_floor_mwh"]),
-        q_base * float(rules_config["band_cap_ratio"]),
-    )
-    bandwidth_mwh = np.clip(np.minimum(bandwidth_mwh, q_base), 0.0, None)
+    exposure = float(np.clip(exposure_bandwidth, 0.0, 1.0))
+    if exposure <= 0.0:
+        bandwidth_mwh = np.zeros_like(q_base, dtype=float)
+    else:
+        base_band = q_base * float(rules_config["band_base_multiplier"]) * exposure
+        bandwidth_mwh = np.clip(
+            base_band * ancillary_multiplier * volatility_multiplier,
+            float(rules_config["band_floor_mwh"]),
+            q_base * float(rules_config["band_cap_ratio"]),
+        )
+        bandwidth_mwh = np.clip(np.minimum(bandwidth_mwh, q_base), 0.0, None)
 
     target_delta = composite * bandwidth_mwh
     smooth_limit = float(rules_config["gamma_max"])

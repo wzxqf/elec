@@ -36,7 +36,8 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
     data_quality = context["data_quality_report"]
     split_dict = split_to_dict(context["split"])
     validation_metrics = validation["metrics"]
-    test_metrics = backtest["results"]["ppo"]["metrics"]
+    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
+    test_metrics = backtest["results"][main_key]["metrics"]
     agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
     lines = [
         "# 运行总结",
@@ -62,14 +63,15 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         "",
         "## 模型与训练",
         "",
-        f"- 策略网络: {config['policy']}",
-        f"- 训练步数: {config['total_timesteps']}",
+        f"- 主算法: {main_key.upper()}",
+        f"- 策略网络: {config.get('policy', 'N/A')}",
+        f"- 训练步数: {config['hpso']['upper']['iterations'] if main_key == 'hpso' else config['total_timesteps']}",
         f"- 训练设备: {training['device']}",
         f"- 是否使用 GPU: {'是' if training['gpu_used'] else '否'}",
-        f"- 周度动作语义: 基准底仓残差 + 边际敞口带宽",
-        f"- PPO 实际特征数: {len(agent_feature_columns)}",
-        f"- 最新模型路径: {training['model_path']}",
-        f"- 最优模型路径: {training['best_model_path']}",
+        f"- 周度动作语义: {'HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽' if main_key == 'hpso' else '基准底仓残差 + 边际敞口带宽'}",
+        f"- 实际特征数: {len(agent_feature_columns)}",
+        f"- 最新模型路径: {training['model_path'] or 'HPSO 无模型文件'}",
+        f"- 最优模型路径: {training['best_model_path'] or 'HPSO 无模型文件'}",
         f"- 奖励强基准: {config['reward']['strong_baseline']}",
         "",
         "## 验证结果",
@@ -106,8 +108,9 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     weekly_features = bundle["weekly_features"].copy().sort_values("week_start").reset_index(drop=True)
     feature_manifest = bundle["feature_manifest"].copy().sort_values(["selected_for_agent", "column"], ascending=[False, True]).reset_index(drop=True)
     validation_weekly = validation["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
-    ppo_weekly = backtest["results"]["ppo"]["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
-    ppo_hourly = backtest["results"]["ppo"]["hourly_results"].copy().sort_values(["week_start", "hour"]).reset_index(drop=True)
+    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
+    ppo_weekly = backtest["results"][main_key]["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
+    ppo_hourly = backtest["results"][main_key]["hourly_results"].copy().sort_values(["week_start", "hour"]).reset_index(drop=True)
     benchmark_frame = backtest["metrics_frame"].copy()
     policy_inventory = bundle["policy_inventory"].copy()
     policy_rules = bundle["policy_rule_table"].copy()
@@ -117,14 +120,14 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     model_profile = pd.DataFrame(
         [
             {
-                "算法": "PPO",
-                "策略网络": context["config"]["policy"],
+                "算法": main_key.upper(),
+                "策略网络": context["config"].get("policy", "N/A"),
                 "训练设备": training["device"],
-                "总训练步数": int(context["config"]["total_timesteps"]),
+                "总训练步数": int(context["config"]["hpso"]["upper"]["iterations"] if main_key == "hpso" else context["config"]["total_timesteps"]),
                 "状态维度": int(len(bundle.get("agent_feature_columns", []))),
                 "动作维度": 2,
-                "动作一语义": "dynamic_lock_only 基准底仓残差",
-                "动作二语义": "边际敞口带宽",
+                "动作一语义": "不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差",
+                "动作二语义": "诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽",
                 "训练周数": len(context["split"].train),
                 "验证周数": len(context["split"].val),
                 "回测周数": len(context["split"].test),
@@ -135,7 +138,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     practice_effect = pd.DataFrame(
         [
             {"阶段": "验证集", **validation["metrics"]},
-            {"阶段": "回测集_PPO", **backtest["results"]["ppo"]["metrics"]},
+            {"阶段": f"回测集_{main_key.upper()}", **backtest["results"][main_key]["metrics"]},
         ]
     )
 
@@ -205,11 +208,11 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "",
         _frame_to_markdown(benchmark_frame),
         "",
-        "### 6.3 PPO 周度执行结果",
+        f"### 6.3 {main_key.upper()} 周度执行结果",
         "",
         _frame_to_markdown(ppo_weekly),
         "",
-        "### 6.4 PPO 小时级规则执行轨迹样本",
+        f"### 6.4 {main_key.upper()} 小时级修正轨迹样本",
         "",
         _frame_to_markdown(ppo_hourly.head(48)),
         "",
@@ -223,9 +226,9 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         "",
         "## 七、论文写作可引用结论",
         "",
-        f"- PPO 在回测集总采购成本为 {backtest['results']['ppo']['metrics']['total_procurement_cost']:.2f}。",
-        f"- PPO 在回测集 CVaR 为 {backtest['results']['ppo']['metrics']['cvar']:.2f}，套保误差为 {backtest['results']['ppo']['metrics']['hedge_error']:.4f}。",
-        f"- 相对固定锁定比例策略，成本节约为 {benchmark_frame.loc[benchmark_frame['strategy'] == 'ppo', 'cost_savings_vs_fixed_lock'].iloc[0]:.2f}。",
+        f"- {main_key.upper()} 在回测集总采购成本为 {backtest['results'][main_key]['metrics']['total_procurement_cost']:.2f}。",
+        f"- {main_key.upper()} 在回测集 CVaR 为 {backtest['results'][main_key]['metrics']['cvar']:.2f}，套保误差为 {backtest['results'][main_key]['metrics']['hedge_error']:.4f}。",
+        f"- 相对固定锁定比例策略，成本节约为 {benchmark_frame.loc[benchmark_frame['strategy'] == main_key, 'cost_savings_vs_fixed_lock'].iloc[0]:.2f}。",
         "- 模型参数、周度结果、小时时间轨迹和基准比较表均已导出为 CSV，可直接用于论文正文或附录。",
         "",
     ]
@@ -235,26 +238,27 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
 def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, Any], validation: dict[str, Any], backtest: dict[str, Any]) -> None:
     metrics_dir: Path = context["output_paths"]["metrics"]
     agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
+    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
 
     model_profile = pd.DataFrame(
         [
             {
-                "算法": "PPO",
-                "策略网络": context["config"]["policy"],
+                "算法": main_key.upper(),
+                "策略网络": context["config"].get("policy", "N/A"),
                 "训练设备": training["device"],
-                "总训练步数": int(context["config"]["total_timesteps"]),
-                "n_steps": int(context["config"]["n_steps"]),
-                "batch_size": int(context["config"]["batch_size"]),
-                "n_epochs": int(context["config"]["n_epochs"]),
-                "gamma": float(context["config"]["gamma"]),
-                "gae_lambda": float(context["config"]["gae_lambda"]),
-                "clip_range": float(context["config"]["clip_range"]),
-                "ent_coef": float(context["config"]["ent_coef"]),
-                "vf_coef": float(context["config"]["vf_coef"]),
+                "总训练步数": int(context["config"]["hpso"]["upper"]["iterations"] if main_key == "hpso" else context["config"]["total_timesteps"]),
+                "n_steps": int(context["config"].get("n_steps", 0)),
+                "batch_size": int(context["config"].get("batch_size", 0)),
+                "n_epochs": int(context["config"].get("n_epochs", 0)),
+                "gamma": float(context["config"].get("gamma", 0.0)),
+                "gae_lambda": float(context["config"].get("gae_lambda", 0.0)),
+                "clip_range": float(context["config"].get("clip_range", 0.0)),
+                "ent_coef": float(context["config"].get("ent_coef", 0.0)),
+                "vf_coef": float(context["config"].get("vf_coef", 0.0)),
                 "随机种子": int(context["config"]["seed"]),
                 "周度特征维度": int(len(agent_feature_columns)),
-                "动作一语义": "dynamic_lock_only 基准底仓残差",
-                "动作二语义": "边际敞口带宽",
+                "动作一语义": "不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差",
+                "动作二语义": "诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽",
             }
         ]
     )
@@ -263,19 +267,19 @@ def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, 
     algorithm_effect = pd.concat(
         [
             pd.DataFrame([{"阶段": "验证集", **validation["metrics"]}]),
-            pd.DataFrame([{"阶段": "回测集_PPO", **backtest["results"]["ppo"]["metrics"]}]),
+            pd.DataFrame([{"阶段": f"回测集_{main_key.upper()}", **backtest["results"][main_key]["metrics"]}]),
             backtest["metrics_frame"].assign(阶段="回测基准比较"),
         ],
         ignore_index=True,
         sort=False,
     )
     algorithm_effect.to_csv(metrics_dir / "algorithm_practice_effect.csv", index=False)
-    backtest["results"]["ppo"]["weekly_results"].to_csv(metrics_dir / "ppo_weekly_practice_data.csv", index=False)
-    backtest["results"]["ppo"]["hourly_results"].to_csv(metrics_dir / "ppo_hourly_rule_practice_data.csv", index=False)
+    backtest["results"][main_key]["weekly_results"].to_csv(metrics_dir / f"{main_key}_weekly_practice_data.csv", index=False)
+    backtest["results"][main_key]["hourly_results"].to_csv(metrics_dir / f"{main_key}_hourly_rule_practice_data.csv", index=False)
 
 
 def main() -> dict[str, Any]:
-    context = prepare_project_context("/Users/dk/py/elec", logger_name="pipeline")
+    context = prepare_project_context(Path.cwd(), logger_name="pipeline")
     logger = context["logger"]
     logger.info("开始执行全量流水线。")
 

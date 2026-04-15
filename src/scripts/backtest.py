@@ -8,9 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.agents.train_ppo import evaluate_policy, load_model, train_model
-from src.analysis.robustness import run_robustness_analysis
-from src.analysis.sensitivity import run_sensitivity_analysis
+from src.agents.hpso import HPSOModel, evaluate_hpso_policy, simulate_hpso_strategy
 from src.backtest.benchmarks import build_benchmark_actions
 from src.backtest.simulator import simulate_strategy
 from src.data.scenario_generator import build_bootstrap_sequence
@@ -27,6 +25,11 @@ def _resolve_main_model(output_paths: dict[str, Path]) -> Path | None:
 
 
 def _ensure_main_model(context: dict[str, Any]):
+    algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
+    if algorithm == "HPSO":
+        return HPSOModel(device=str(context["config"]["hpso"].get("device", context["config"].get("device", "cpu"))), config=context["config"])
+    from src.agents.train_ppo import load_model, train_model
+
     model_path = _resolve_main_model(context["output_paths"])
     if model_path is not None:
         return load_model(model_path)
@@ -56,6 +59,7 @@ def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) 
     from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_plot
 
     weekly = pd.concat([payload["weekly_results"] for payload in results.values()], ignore_index=True)
+    main_key = "hpso" if "hpso" in results else "ppo"
 
     weekly_cost = weekly.pivot(index="week_start", columns="strategy", values="procurement_cost_w").sort_index()
     save_multi_line_plot(
@@ -66,7 +70,7 @@ def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) 
         ylabel="procurement_cost_w",
     )
 
-    ppo_reward = results["ppo"]["weekly_results"].sort_values("week_start")
+    ppo_reward = results[main_key]["weekly_results"].sort_values("week_start")
     save_line_plot(
         ppo_reward["week_start"].astype(str),
         ppo_reward["reward"],
@@ -157,6 +161,8 @@ def _evaluate_candidate_over_windows(
     stage_name: str,
     timesteps: int,
 ) -> pd.DataFrame:
+    from src.agents.train_ppo import evaluate_policy, train_model
+
     if not context["rolling_validation_windows"]:
         return pd.DataFrame()
 
@@ -357,6 +363,59 @@ def _build_rolling_validation_summary(detail_frame: pd.DataFrame, summary_frame:
 
 def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
     config = context["config"]
+    if str(config["training"].get("algorithm", "PPO")).upper() == "HPSO":
+        rows: list[dict[str, Any]] = []
+        for window in context["rolling_validation_windows"]:
+            validation = simulate_hpso_strategy(
+                bundle=context["bundle"],
+                weeks=window.val,
+                config=config,
+                strategy_name=f"hpso_{window.name}",
+            )
+            benchmark_actions = build_benchmark_actions(
+                window.val,
+                context["bundle"]["weekly_features"],
+                config,
+                weekly_feature_by_week=context["bundle"].get("weekly_feature_by_week"),
+            )
+            dynamic_baseline = simulate_strategy(
+                bundle=context["bundle"],
+                weeks=window.val,
+                action_source=benchmark_actions["dynamic_lock_only"],
+                config=config,
+                strategy_name="dynamic_lock_only_rolling",
+            )
+            rows.append(
+                {
+                    "stage": "HPSO滚动验证",
+                    "candidate_id": "hpso_default",
+                    "window_name": window.name,
+                    "train_end_week": window.train[-1],
+                    "val_start_week": window.val[0],
+                    "val_end_week": window.val[-1],
+                    "val_total_procurement_cost": validation["metrics"]["total_procurement_cost"],
+                    "val_cvar": validation["metrics"]["cvar"],
+                    "val_mean_reward": validation["metrics"]["mean_reward"],
+                    "baseline_total_procurement_cost": dynamic_baseline["metrics"]["total_procurement_cost"],
+                    "baseline_cvar": dynamic_baseline["metrics"]["cvar"],
+                    "cost_gap_vs_dynamic_lock_only": validation["metrics"]["total_procurement_cost"]
+                    - dynamic_baseline["metrics"]["total_procurement_cost"],
+                    "cvar_gap_vs_dynamic_lock_only": validation["metrics"]["cvar"] - dynamic_baseline["metrics"]["cvar"],
+                }
+            )
+        detail_frame = pd.DataFrame(rows)
+        summary_frame = _summarize_rolling_validation(detail_frame)
+        detail_frame.to_csv(context["output_paths"]["metrics"] / "rolling_validation_metrics.csv", index=False)
+        summary_frame.to_csv(context["output_paths"]["metrics"] / "hparam_search_results.csv", index=False)
+        save_markdown(
+            _build_rolling_validation_summary(detail_frame, summary_frame),
+            context["output_paths"]["reports"] / "rolling_validation_summary.md",
+        )
+        save_markdown(
+            _build_rolling_validation_summary(detail_frame, summary_frame).replace("滚动验证摘要", "HPSO 搜索参数总结"),
+            context["output_paths"]["reports"] / "hparam_search_summary.md",
+        )
+        return summary_frame
     search_cfg = config["search"]
     if not search_cfg.get("enabled", False):
         empty = pd.DataFrame()
@@ -402,23 +461,26 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
 
 
 def _build_backtest_summary(context: dict[str, Any], results: dict[str, dict], metrics_frame: pd.DataFrame) -> str:
-    ppo_metrics = results["ppo"]["metrics"]
-    clip_stats = results["ppo"]["weekly_results"][
+    main_key = "hpso" if "hpso" in results else "ppo"
+    main_metrics = results[main_key]["metrics"]
+    clip_stats = results[main_key]["weekly_results"][
         ["bound_clip_count", "smooth_clip_count", "soft_clip_count", "non_negative_clip_count"]
     ].sum()
+    model_label = "HPSO 无模型文件" if main_key == "hpso" else str(_resolve_main_model(context["output_paths"]))
     lines = [
         "# 回测摘要",
         "",
-        f"- 使用模型版本: {_resolve_main_model(context['output_paths'])}",
+        f"- 使用模型版本: {model_label}",
+        f"- 主算法: {main_key.upper()}",
         f"- 回测时间范围: {context['split'].test[0]} 至 {context['split'].test[-1]}",
         f"- 结算口径: {context['config']['reporting']['settlement_note']}",
         f"- 中长期价格口径: {context['config']['reporting']['lt_price_note']}",
         f"- 奖励强基准: {context['config']['reward']['strong_baseline']}",
         f"- 根参数文件: {context['config']['config_path']}",
-        f"- PPO 总采购成本: {ppo_metrics['total_procurement_cost']:.2f}",
-        f"- PPO 周度成本波动率: {ppo_metrics['weekly_cost_volatility']:.2f}",
-        f"- PPO CVaR: {ppo_metrics['cvar']:.2f}",
-        f"- PPO 套保误差: {ppo_metrics['hedge_error']:.4f}",
+        f"- {main_key.upper()} 总采购成本: {main_metrics['total_procurement_cost']:.2f}",
+        f"- {main_key.upper()} 周度成本波动率: {main_metrics['weekly_cost_volatility']:.2f}",
+        f"- {main_key.upper()} CVaR: {main_metrics['cvar']:.2f}",
+        f"- {main_key.upper()} 套保误差: {main_metrics['hedge_error']:.4f}",
         f"- 强边界裁剪次数: {int(clip_stats['bound_clip_count'])}",
         f"- 平滑压缩次数: {int(clip_stats['smooth_clip_count'])}",
         f"- soft_clip 触发次数: {int(clip_stats['soft_clip_count'])}",
@@ -436,25 +498,104 @@ def _build_backtest_summary(context: dict[str, Any], results: dict[str, dict], m
     return "\n".join(lines)
 
 
+def _run_hpso_sensitivity_analysis(context: dict[str, Any]) -> pd.DataFrame:
+    rows = []
+    config = context["config"]
+    weeks = context["split"].test
+    for value in config["sensitivity"]["beta_tail_risk"]:
+        config_variant = deepcopy(config)
+        config_variant["hpso"]["objective_weights"]["risk"] = float(value)
+        result = simulate_hpso_strategy(context["bundle"], weeks, config_variant, "hpso_sensitivity_risk")
+        rows.append({"factor": "综合风险权重", "value": float(value), **result["metrics"]})
+    for value in config["sensitivity"]["market_vol_scale"]:
+        result = simulate_hpso_strategy(
+            context["bundle"],
+            weeks,
+            config,
+            "hpso_sensitivity_market_vol",
+            market_vol_scale=float(value),
+        )
+        rows.append({"factor": "市场波动率强度", "value": float(value), **result["metrics"]})
+    for value in config["sensitivity"]["price_cap_multiplier"]:
+        result = simulate_hpso_strategy(
+            context["bundle"],
+            weeks,
+            config,
+            "hpso_sensitivity_price_cap",
+            price_cap_multiplier=float(value),
+        )
+        rows.append({"factor": "价格限值倍数", "value": float(value), **result["metrics"]})
+    return pd.DataFrame(rows)
+
+
+def _run_hpso_robustness_analysis(context: dict[str, Any], model: Any) -> pd.DataFrame:
+    config = context["config"]
+    rows = []
+    for shift in config["robustness"]["contract_ratio_shift"]:
+        config_variant = deepcopy(config)
+        config_variant["benchmarks"]["dynamic_lock_base"] = float(
+            np.clip(float(config_variant["benchmarks"]["dynamic_lock_base"]) + float(shift), 0.0, 1.0)
+        )
+        result = simulate_hpso_strategy(context["bundle"], context["split"].test, config_variant, "hpso_contract_shift")
+        rows.append({"experiment": "合约比例扰动", "value": float(shift), **result["metrics"]})
+
+    all_weeks = sorted(set(context["split"].train + context["split"].val + context["split"].test))
+    for cutoff in config["robustness"]["policy_cutoffs"]:
+        cutoff_ts = pd.Timestamp(cutoff)
+        before = [week for week in all_weeks if week < cutoff_ts]
+        after = [week for week in all_weeks if week >= cutoff_ts]
+        if before:
+            result = evaluate_hpso_policy(model, context["bundle"], before, config, "hpso_policy_before")
+            rows.append({"experiment": "政策边界前样本", "value": cutoff, **result["metrics"]})
+        if after:
+            result = evaluate_hpso_policy(model, context["bundle"], after, config, "hpso_policy_after")
+            rows.append({"experiment": "政策边界后样本", "value": cutoff, **result["metrics"]})
+
+    for scale in config["robustness"]["forecast_error_scale"]:
+        result = simulate_hpso_strategy(
+            context["bundle"],
+            context["split"].test,
+            config,
+            "hpso_forecast_error",
+            forecast_error_scale=float(scale),
+        )
+        rows.append({"experiment": "预测误差水平", "value": float(scale), **result["metrics"]})
+    return pd.DataFrame(rows)
+
+
 def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="backtest")
     logger.info("开始执行回测模块。")
     model = model or _ensure_main_model(context)
+    algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
 
-    ppo_result = evaluate_policy(
-        model=model,
-        bundle=context["bundle"],
-        weeks=context["split"].test,
-        config=context["config"],
-        strategy_name="ppo",
-    )
+    if algorithm == "HPSO":
+        main_key = "hpso"
+        main_result = evaluate_hpso_policy(
+            model=model,
+            bundle=context["bundle"],
+            weeks=context["split"].test,
+            config=context["config"],
+            strategy_name="hpso",
+        )
+    else:
+        from src.agents.train_ppo import evaluate_policy
+
+        main_key = "ppo"
+        main_result = evaluate_policy(
+            model=model,
+            bundle=context["bundle"],
+            weeks=context["split"].test,
+            config=context["config"],
+            strategy_name="ppo",
+        )
     benchmark_actions = build_benchmark_actions(
         weeks=context["split"].test,
         weekly_features=context["bundle"]["weekly_features"],
         config=context["config"],
         weekly_feature_by_week=context["bundle"].get("weekly_feature_by_week"),
     )
-    results = {"ppo": ppo_result}
+    results = {main_key: main_result}
     for strategy, actions in benchmark_actions.items():
         results[strategy] = simulate_strategy(
             bundle=context["bundle"],
@@ -470,12 +611,19 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         context["output_paths"]["metrics"] / "backtest_weekly_results.csv",
         index=False,
     )
-    results["ppo"]["weekly_results"].to_csv(context["output_paths"]["metrics"] / "weekly_results.csv", index=False)
+    results[main_key]["weekly_results"].to_csv(context["output_paths"]["metrics"] / "weekly_results.csv", index=False)
+    if main_key == "hpso":
+        results[main_key]["upper_actions"].to_csv(context["output_paths"]["metrics"] / "hpso_upper_weekly_actions.csv", index=False)
+        results[main_key]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hpso_hourly_delta_q.csv", index=False)
+        pd.concat(
+            [results[main_key]["upper_convergence"], results[main_key]["lower_convergence"]],
+            ignore_index=True,
+        ).to_csv(context["output_paths"]["metrics"] / "hpso_convergence_curve.csv", index=False)
     pd.concat([payload["hourly_results"] for payload in results.values()], ignore_index=True).to_csv(
         context["output_paths"]["metrics"] / "backtest_hourly_rule_trace.csv",
         index=False,
     )
-    results["ppo"]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hourly_rule_trace.csv", index=False)
+    results[main_key]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hourly_rule_trace.csv", index=False)
     pd.concat([payload["settlement_results"] for payload in results.values()], ignore_index=True).to_csv(
         context["output_paths"]["metrics"] / "backtest_settlement_trace.csv",
         index=False,
@@ -483,11 +631,21 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
 
     _save_core_figures(results, context["output_paths"])
 
-    sensitivity = run_sensitivity_analysis(context, ppo_result["actions"])
+    if main_key == "hpso":
+        sensitivity = _run_hpso_sensitivity_analysis(context)
+    else:
+        from src.analysis.sensitivity import run_sensitivity_analysis
+
+        sensitivity = run_sensitivity_analysis(context, main_result["actions"])
     sensitivity.to_csv(context["output_paths"]["metrics"] / "sensitivity_metrics.csv", index=False)
     save_markdown(_build_sensitivity_report(sensitivity), context["output_paths"]["reports"] / "sensitivity_report.md")
 
-    robustness = run_robustness_analysis(context, model, ppo_result["actions"])
+    if main_key == "hpso":
+        robustness = _run_hpso_robustness_analysis(context, model)
+    else:
+        from src.analysis.robustness import run_robustness_analysis
+
+        robustness = run_robustness_analysis(context, model, main_result["actions"])
     robustness.to_csv(context["output_paths"]["metrics"] / "robustness_metrics.csv", index=False)
     save_markdown(_build_robustness_report(robustness), context["output_paths"]["reports"] / "robustness_report.md")
 
@@ -507,7 +665,7 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
 
 
 def main() -> dict[str, Any]:
-    context = prepare_project_context("/Users/dk/py/elec", logger_name="backtest")
+    context = prepare_project_context(Path.cwd(), logger_name="backtest")
     return run_backtest(context)
 
 
