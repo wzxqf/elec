@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
@@ -16,7 +17,6 @@ from src.data.scenario_generator import build_bootstrap_sequence
 from src.scripts.common import prepare_project_context
 from src.utils.io import save_markdown
 from src.utils.logger import configure_logging
-from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_plot
 
 
 def _resolve_main_model(output_paths: dict[str, Path]) -> Path | None:
@@ -53,6 +53,8 @@ def _benchmark_comparison_frame(results: dict[str, dict]) -> pd.DataFrame:
 
 
 def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) -> None:
+    from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_plot
+
     weekly = pd.concat([payload["weekly_results"] for payload in results.values()], ignore_index=True)
 
     weekly_cost = weekly.pivot(index="week_start", columns="strategy", values="procurement_cost_w").sort_index()
@@ -185,7 +187,12 @@ def _evaluate_candidate_over_windows(
             config=config_variant,
             strategy_name=f"{candidate['candidate_id']}_{window.name}",
         )
-        benchmark_actions = build_benchmark_actions(window.val, context["bundle"]["weekly_features"], config_variant)
+        benchmark_actions = build_benchmark_actions(
+            window.val,
+            context["bundle"]["weekly_features"],
+            config_variant,
+            weekly_feature_by_week=context["bundle"].get("weekly_feature_by_week"),
+        )
         dynamic_baseline = simulate_strategy(
             bundle=context["bundle"],
             weeks=window.val,
@@ -214,6 +221,92 @@ def _evaluate_candidate_over_windows(
             }
         )
     return pd.DataFrame(rows)
+
+
+def _search_worker_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
+    keys = [
+        "quarter",
+        "hourly",
+        "weekly_features",
+        "weekly_metadata",
+        "reward_reference",
+        "reward_robust_stats",
+        "agent_feature_columns",
+        "quarter_by_week",
+        "hourly_by_week",
+        "weekly_metadata_by_week",
+        "weekly_feature_by_week",
+        "reward_reference_by_week",
+    ]
+    return {key: bundle[key] for key in keys if key in bundle}
+
+
+def _evaluate_candidate_over_windows_worker(
+    bundle: dict[str, Any],
+    rolling_validation_windows: list[Any],
+    config: dict[str, Any],
+    output_paths: dict[str, Path],
+    candidate: dict[str, Any],
+    stage_name: str,
+    timesteps: int,
+) -> pd.DataFrame:
+    context = {
+        "bundle": bundle,
+        "rolling_validation_windows": rolling_validation_windows,
+        "config": config,
+        "output_paths": output_paths,
+    }
+    return _evaluate_candidate_over_windows(
+        context=context,
+        candidate=candidate,
+        stage_name=stage_name,
+        timesteps=timesteps,
+    )
+
+
+def _evaluate_candidate_batch(
+    context: dict[str, Any],
+    candidates: list[dict[str, Any]],
+    stage_name: str,
+    timesteps: int,
+) -> pd.DataFrame:
+    if not candidates:
+        return pd.DataFrame()
+
+    worker_count = int(context["config"]["search"].get("worker_count", 1))
+    if worker_count <= 1 or len(candidates) == 1:
+        frames = [
+            _evaluate_candidate_over_windows(
+                context=context,
+                candidate=candidate,
+                stage_name=stage_name,
+                timesteps=timesteps,
+            )
+            for candidate in candidates
+        ]
+    else:
+        max_workers = min(worker_count, len(candidates))
+        worker_bundle = _search_worker_bundle(context["bundle"])
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            futures = [
+                executor.submit(
+                    _evaluate_candidate_over_windows_worker,
+                    worker_bundle,
+                    context["rolling_validation_windows"],
+                    context["config"],
+                    context["output_paths"],
+                    candidate,
+                    stage_name,
+                    timesteps,
+                )
+                for candidate in candidates
+            ]
+            frames = [future.result() for future in futures]
+
+    valid_frames = [frame for frame in frames if not frame.empty]
+    if not valid_frames:
+        return pd.DataFrame()
+    return pd.concat(valid_frames, ignore_index=True)
 
 
 def _summarize_rolling_validation(frame: pd.DataFrame) -> pd.DataFrame:
@@ -274,32 +367,23 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
 
     rng = np.random.default_rng(int(search_cfg.get("random_seed", config["seed"])))
     stage1_candidates = _sample_stage1_candidates(search_cfg, rng)
-    stage1_detail = pd.concat(
-        [
-            _evaluate_candidate_over_windows(
-                context=context,
-                candidate=candidate,
-                stage_name="粗搜索",
-                timesteps=int(search_cfg["stage1_timesteps"]),
-            )
-            for candidate in stage1_candidates
-        ],
-        ignore_index=True,
+    stage1_detail = _evaluate_candidate_batch(
+        context=context,
+        candidates=stage1_candidates,
+        stage_name="粗搜索",
+        timesteps=int(search_cfg["stage1_timesteps"]),
     )
     stage1_summary = _summarize_rolling_validation(stage1_detail)
     top_candidates = stage1_summary.head(int(search_cfg["stage2_topk"]))["candidate_id"].tolist()
     stage2_candidates = [candidate for candidate in stage1_candidates if candidate["candidate_id"] in top_candidates]
-    stage2_detail = pd.concat(
-        [
-            _evaluate_candidate_over_windows(
-                context=context,
-                candidate={**candidate, "candidate_id": candidate["candidate_id"].replace("stage1", "stage2")},
-                stage_name="精搜索",
-                timesteps=int(search_cfg["stage2_timesteps"]),
-            )
+    stage2_detail = _evaluate_candidate_batch(
+        context=context,
+        candidates=[
+            {**candidate, "candidate_id": candidate["candidate_id"].replace("stage1", "stage2")}
             for candidate in stage2_candidates
         ],
-        ignore_index=True,
+        stage_name="精搜索",
+        timesteps=int(search_cfg["stage2_timesteps"]),
     )
     detail_frame = pd.concat([stage1_detail, stage2_detail], ignore_index=True)
     summary_frame = _summarize_rolling_validation(detail_frame)
@@ -368,6 +452,7 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         weeks=context["split"].test,
         weekly_features=context["bundle"]["weekly_features"],
         config=context["config"],
+        weekly_feature_by_week=context["bundle"].get("weekly_feature_by_week"),
     )
     results = {"ppo": ppo_result}
     for strategy, actions in benchmark_actions.items():

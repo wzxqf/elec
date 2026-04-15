@@ -1,5 +1,15 @@
 # 更新日志
 
+## v0.25
+
+- 版本定位调整为纯工程性能优化，不改变周度底仓决策、小时级现货修正、15 分钟代理结算和 `dynamic_lock_only` 强基准口径。
+- 新增回测运行时周级缓存，覆盖 `quarter`、`hourly`、`weekly_metadata`、`weekly_features` 与 `reward_reference` 的按周查找，并在缩放场景中自动重建缓存，避免读到旧切片。
+- `apply_hourly_hedge_rule` 与 `settle_week` 收敛为基于 `numpy` 的批量计算路径，减少规则层和结算层的重复 `DataFrame` 列赋值开销。
+- 搜索态训练在 `persist_artifacts=False` 时不再创建评估环境、monitor CSV 和 tensorboard 路径，降低滚动搜索的无效 I/O 与初始化耗时。
+- 文档统一补充周度切片缓存、lookup/index 优化、重复 DataFrame 访问收敛、回测尾部瓶颈修复等提速方向，明确默认训练设备保持 `cpu`。
+- 补充 `analysis.worker_count` 与 `search.worker_count` 的可选并行设置，默认仍保持单 worker，不改变策略语义。
+- 补充 `mps` 为可选加速路径的说明，并同步记录子代理/模块归属信息，便于并行实施和后续追踪。
+
 ## v0.24
 
 - 新增根目录一键全流程脚本 `run_all.sh`，固定通过 `mamba run -n elec_env python -m src.scripts.run_pipeline` 启动训练、验证、回测与报告导出。

@@ -13,7 +13,6 @@ from stable_baselines3.common.vec_env import DummyVecEnv, VecNormalize
 
 from src.backtest.simulator import simulate_strategy
 from src.envs.elec_env import ElecEnv
-from src.utils.plotting import save_line_plot
 
 
 class TrainingMetricsCallback(BaseCallback):
@@ -87,6 +86,8 @@ def _export_eval_metrics(eval_log_dir: Path, output_csv: Path) -> pd.DataFrame:
 
 
 def _save_training_plots(train_metrics: pd.DataFrame, eval_metrics: pd.DataFrame, figure_dir: Path) -> None:
+    from src.utils.plotting import save_line_plot
+
     reward_source = eval_metrics if not eval_metrics.empty else train_metrics
     reward_x = reward_source["timesteps"] if "timesteps" in reward_source else np.arange(len(reward_source))
     reward_y = reward_source["mean_reward"] if "mean_reward" in reward_source else train_metrics["ep_rew_mean"].fillna(0.0)
@@ -120,10 +121,12 @@ def train_model(
     persist_artifacts: bool = True,
 ) -> dict[str, Any]:
     use_vec_normalize = bool(config.get("use_vec_normalize", False))
-    tensorboard_dir = output_paths["logs"] / "tensorboard"
-    tensorboard_dir.mkdir(parents=True, exist_ok=True)
-    eval_log_dir = output_paths["logs"] / "eval" / run_name
-    eval_log_dir.mkdir(parents=True, exist_ok=True)
+    tensorboard_dir = output_paths["logs"] / "tensorboard" if persist_artifacts else None
+    eval_log_dir = output_paths["logs"] / "eval" / run_name if persist_artifacts else None
+    if tensorboard_dir is not None:
+        tensorboard_dir.mkdir(parents=True, exist_ok=True)
+    if eval_log_dir is not None:
+        eval_log_dir.mkdir(parents=True, exist_ok=True)
 
     train_env = DummyVecEnv(
         [
@@ -131,22 +134,25 @@ def train_model(
                 bundle=bundle,
                 weeks=train_weeks,
                 config=config,
-                monitor_path=output_paths["logs"] / f"{run_name}_train_monitor.csv",
+                monitor_path=output_paths["logs"] / f"{run_name}_train_monitor.csv" if persist_artifacts else None,
             )
         ]
     )
-    eval_env = DummyVecEnv(
-        [
-            _make_env(
-                bundle=bundle,
-                weeks=val_weeks,
-                config=config,
-                monitor_path=output_paths["logs"] / f"{run_name}_eval_monitor.csv",
-            )
-        ]
-    )
+    eval_env = None
+    if persist_artifacts:
+        eval_env = DummyVecEnv(
+            [
+                _make_env(
+                    bundle=bundle,
+                    weeks=val_weeks,
+                    config=config,
+                    monitor_path=output_paths["logs"] / f"{run_name}_eval_monitor.csv",
+                )
+            ]
+        )
     train_env = _wrap_env(train_env, use_vec_normalize, training=True)
-    eval_env = _wrap_env(eval_env, use_vec_normalize, training=False)
+    if eval_env is not None:
+        eval_env = _wrap_env(eval_env, use_vec_normalize, training=False)
 
     device = str(config.get("device", "cpu"))
     model = PPO(
@@ -163,7 +169,7 @@ def train_model(
         vf_coef=float(config["vf_coef"]),
         max_grad_norm=float(config["max_grad_norm"]),
         seed=int(config["seed"]),
-        tensorboard_log=str(tensorboard_dir),
+        tensorboard_log=str(tensorboard_dir) if tensorboard_dir is not None else None,
         verbose=0,
         device=device,
     )

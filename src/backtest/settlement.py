@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 
@@ -78,31 +79,48 @@ def settle_week(
     settlement["hour"] = settlement["datetime"].dt.floor("h")
     settlement = settlement.merge(hourly_to_join, on="hour", how="left")
 
-    settlement["actual_need_15m"] = settlement["net_load_id_mwh"].clip(lower=0.0)
-    settlement["lt_energy_15m"] = settlement["q_lt_hourly"] * 0.25
-    settlement["spot_energy_15m"] = settlement["q_spot"] * 0.25
-    settlement["scheduled_energy_15m"] = settlement["lt_energy_15m"] + settlement["spot_energy_15m"]
-    settlement["imbalance_energy_15m"] = (settlement["actual_need_15m"] - settlement["scheduled_energy_15m"]).abs()
+    actual_need_15m = settlement["net_load_id_mwh"].to_numpy(dtype=float, copy=False)
+    q_lt_hourly = settlement["q_lt_hourly"].to_numpy(dtype=float, copy=False)
+    q_spot = settlement["q_spot"].to_numpy(dtype=float, copy=False)
+    da_price = settlement["全网统一出清价格_日前"].to_numpy(dtype=float, copy=False)
+    id_price = settlement["全网统一出清价格_日内"].to_numpy(dtype=float, copy=False)
 
+    actual_need_15m = actual_need_15m.clip(min=0.0)
+    lt_energy_15m = q_lt_hourly * 0.25
+    spot_energy_15m = q_spot * 0.25
+    scheduled_energy_15m = lt_energy_15m + spot_energy_15m
+    imbalance_energy_15m = np.abs(actual_need_15m - scheduled_energy_15m)
     penalty_multiplier = float(config["cost"]["imbalance_penalty_multiplier"])
-    settlement["lt_cost_15m"] = settlement["lt_energy_15m"] * settlement_context["lt_price_w"]
-    settlement["spot_cost_15m"] = settlement["spot_energy_15m"] * settlement["全网统一出清价格_日前"]
-    settlement["imbalance_cost_15m"] = (
-        settlement["imbalance_energy_15m"] * settlement["全网统一出清价格_日内"] * penalty_multiplier
+    lt_cost_15m = lt_energy_15m * settlement_context["lt_price_w"]
+    spot_cost_15m = spot_energy_15m * da_price
+    imbalance_cost_15m = imbalance_energy_15m * id_price * penalty_multiplier
+    procurement_cost_15m = lt_cost_15m + spot_cost_15m + imbalance_cost_15m
+
+    derived = pd.DataFrame(
+        {
+            "actual_need_15m": actual_need_15m,
+            "lt_energy_15m": lt_energy_15m,
+            "spot_energy_15m": spot_energy_15m,
+            "scheduled_energy_15m": scheduled_energy_15m,
+            "imbalance_energy_15m": imbalance_energy_15m,
+            "lt_cost_15m": lt_cost_15m,
+            "spot_cost_15m": spot_cost_15m,
+            "imbalance_cost_15m": imbalance_cost_15m,
+            "procurement_cost_15m": procurement_cost_15m,
+            "lt_price_w": settlement_context["lt_price_w"],
+            "lt_price_fixed_ratio": settlement_context["lt_price_fixed_ratio"],
+            "lt_price_linked_ratio": settlement_context["lt_price_linked_ratio"],
+            "lt_price_regime": settlement_context["lt_price_regime"],
+            "renewable_mechanism_active": settlement_context["renewable_mechanism_active"],
+            "mechanism_price_floor": settlement_context["mechanism_price_floor"],
+            "mechanism_price_ceiling": settlement_context["mechanism_price_ceiling"],
+            "mechanism_volume_ratio_max": settlement_context["mechanism_volume_ratio_max"],
+            "mechanism_stage_label": settlement_context["mechanism_stage_label"],
+            "ancillary_freq_reserve_tight": settlement_context["ancillary_freq_reserve_tight"],
+            "ancillary_peak_shaving_pause": settlement_context["ancillary_peak_shaving_pause"],
+            "settlement_note": config["reporting"]["settlement_note"],
+        },
+        index=settlement.index,
     )
-    settlement["procurement_cost_15m"] = (
-        settlement["lt_cost_15m"] + settlement["spot_cost_15m"] + settlement["imbalance_cost_15m"]
-    )
-    settlement["lt_price_w"] = settlement_context["lt_price_w"]
-    settlement["lt_price_fixed_ratio"] = settlement_context["lt_price_fixed_ratio"]
-    settlement["lt_price_linked_ratio"] = settlement_context["lt_price_linked_ratio"]
-    settlement["lt_price_regime"] = settlement_context["lt_price_regime"]
-    settlement["renewable_mechanism_active"] = settlement_context["renewable_mechanism_active"]
-    settlement["mechanism_price_floor"] = settlement_context["mechanism_price_floor"]
-    settlement["mechanism_price_ceiling"] = settlement_context["mechanism_price_ceiling"]
-    settlement["mechanism_volume_ratio_max"] = settlement_context["mechanism_volume_ratio_max"]
-    settlement["mechanism_stage_label"] = settlement_context["mechanism_stage_label"]
-    settlement["ancillary_freq_reserve_tight"] = settlement_context["ancillary_freq_reserve_tight"]
-    settlement["ancillary_peak_shaving_pause"] = settlement_context["ancillary_peak_shaving_pause"]
-    settlement["settlement_note"] = config["reporting"]["settlement_note"]
+    settlement = pd.concat([settlement, derived], axis=1)
     return settlement

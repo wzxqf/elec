@@ -6,6 +6,7 @@ from typing import Any
 import pandas as pd
 
 from src.backtest.benchmarks import build_benchmark_actions
+from src.backtest.runtime_cache import prepare_runtime_bundle
 from src.backtest.simulator import simulate_strategy
 from src.config.load_config import load_runtime_config
 from src.data.loader import load_raw_total_csv, locate_total_csv
@@ -164,6 +165,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     )
     bundle["feature_manifest"] = feature_manifest
     bundle["agent_feature_columns"] = agent_feature_columns
+    prepare_runtime_bundle(bundle)
 
     split = build_week_split(config, bundle["weekly_features"], bundle["weekly_metadata"])
     rolling_validation_windows = build_rolling_validation_windows(
@@ -171,7 +173,12 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         sorted(pd.to_datetime(bundle["weekly_features"]["week_start"]).tolist()),
     )
     all_eval_weeks = sorted(set(split.train + split.val + split.test))
-    benchmark_actions = build_benchmark_actions(all_eval_weeks, bundle["weekly_features"], config)
+    benchmark_actions = build_benchmark_actions(
+        all_eval_weeks,
+        bundle["weekly_features"],
+        config,
+        weekly_feature_by_week=bundle.get("weekly_feature_by_week"),
+    )
     dynamic_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["dynamic_lock_only"], config, "dynamic_lock_only")
     fixed_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["fixed_lock"], config, "fixed_lock")
     rule_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["rule_only"], config, "rule_only")
@@ -205,6 +212,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     bundle["baseline_dynamic_results"] = dynamic_baseline["weekly_results"]
     bundle["baseline_fixed_results"] = fixed_baseline["weekly_results"]
     bundle["baseline_rule_results"] = rule_baseline["weekly_results"]
+    prepare_runtime_bundle(bundle)
 
     train_sequence = build_bootstrap_sequence(
         train_weeks=split.train,

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from src.backtest.benchmarks import get_dynamic_lock_base_for_week
+from src.backtest.runtime_cache import prepare_runtime_bundle
 from src.backtest.metrics import summarize_strategy_results
 from src.backtest.settlement import resolve_settlement_context, settle_week
 from src.rules.hourly_hedge import apply_hourly_hedge_rule
@@ -13,9 +14,22 @@ from src.rules.hourly_hedge import apply_hourly_hedge_rule
 
 def _get_week_frames(bundle: dict[str, Any], week_start: pd.Timestamp) -> tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
     week_start = pd.Timestamp(week_start)
+    quarter_lookup = bundle.get("quarter_by_week")
+    hourly_lookup = bundle.get("hourly_by_week")
+    metadata_lookup = bundle.get("weekly_metadata_by_week")
+
+    if isinstance(quarter_lookup, dict) and isinstance(hourly_lookup, dict) and isinstance(metadata_lookup, dict):
+        if week_start not in quarter_lookup or week_start not in hourly_lookup or week_start not in metadata_lookup:
+            raise KeyError(f"未找到周度缓存切片: {week_start}")
+        return (
+            quarter_lookup[week_start].copy(),
+            hourly_lookup[week_start].copy(),
+            metadata_lookup[week_start].copy(),
+        )
+
     quarter = bundle["quarter"].loc[bundle["quarter"]["week_start"] == week_start].copy()
     hourly = bundle["hourly"].loc[bundle["hourly"]["week_start"] == week_start].copy()
-    metadata = bundle["weekly_metadata"].set_index("week_start").loc[week_start]
+    metadata = bundle["weekly_metadata"].set_index("week_start").loc[week_start].copy()
     return quarter, hourly, metadata
 
 
@@ -51,7 +65,12 @@ def _resolve_action_payload(
     config: dict[str, Any],
 ) -> dict[str, float]:
     delta_lock_cap = float(config["constraints"]["delta_lock_cap"])
-    dynamic_base = get_dynamic_lock_base_for_week(bundle["weekly_features"], week_start, config)
+    dynamic_base = get_dynamic_lock_base_for_week(
+        bundle["weekly_features"],
+        week_start,
+        config,
+        weekly_feature_by_week=bundle.get("weekly_feature_by_week"),
+    )
     if isinstance(action, dict):
         mode = str(action.get("mode", "residual"))
         exposure_bandwidth = float(np.clip(action.get("exposure_bandwidth", 0.0), 0.0, 1.0))
@@ -131,12 +150,16 @@ def simulate_week(
     excess = max((cvar_value - budget) / (budget + float(config["cost"]["cvar_budget_eps"])), 0.0)
     tail_penalty = float(np.log1p(excess))
 
-    baseline_frame = bundle.get("reward_reference")
+    baseline_lookup = bundle.get("reward_reference_by_week")
     baseline_row = None
-    if isinstance(baseline_frame, pd.DataFrame) and not baseline_frame.empty:
-        matched = baseline_frame.loc[baseline_frame["week_start"] == pd.Timestamp(week_start)]
-        if not matched.empty:
-            baseline_row = matched.iloc[0]
+    if isinstance(baseline_lookup, dict):
+        baseline_row = baseline_lookup.get(pd.Timestamp(week_start))
+    if baseline_row is None:
+        baseline_frame = bundle.get("reward_reference")
+        if isinstance(baseline_frame, pd.DataFrame) and not baseline_frame.empty:
+            matched = baseline_frame.loc[baseline_frame["week_start"] == pd.Timestamp(week_start)]
+            if not matched.empty:
+                baseline_row = matched.iloc[0]
 
     baseline_cost = float(baseline_row["baseline_cost_w"]) if baseline_row is not None else procurement_cost
     delta_cost = procurement_cost - baseline_cost
@@ -238,6 +261,9 @@ def simulate_strategy(
         )
     else:
         bundle_variant["weekly_metadata"] = bundle["weekly_metadata"]
+
+    if any(scale != 1.0 for scale in (market_vol_scale, price_cap_multiplier, forecast_error_scale)):
+        prepare_runtime_bundle(bundle_variant)
 
     for week in weeks:
         action = action_source(week) if callable(action_source) else action_source[pd.Timestamp(week)]
