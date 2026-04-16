@@ -1,14 +1,14 @@
 D:\miniforge\envs\torch311\Lib\site-packages\torch\cuda\__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
   import pynvml  # type: ignore[import]
-2026-04-16 22:19:16 | INFO | elec.pipeline | 已加载数据文件: d:\elec\total.csv
-2026-04-16 22:19:16 | INFO | elec.pipeline | 训练算法: HYBRID_PSO_V036
-2026-04-16 22:19:16 | INFO | elec.pipeline | 政策来源文件数: 18
-2026-04-16 22:19:16 | INFO | elec.pipeline | 政策候选规则数: 34
-2026-04-16 22:19:16 | INFO | elec.pipeline | 政策正式规则数: 34
-2026-04-16 22:19:16 | INFO | elec.pipeline | 滚动重训窗口数: 10
-2026-04-16 22:19:16 | INFO | elec.train | 开始执行 v0.36 训练模块。
-2026-04-16 22:19:28 | INFO | elec.train | 训练模块执行完成。
-2026-04-16 22:19:28 | INFO | elec.evaluate | 开始执行验证模块。
-2026-04-16 22:19:28 | INFO | elec.evaluate | 验证模块执行完成。
-2026-04-16 22:19:28 | INFO | elec.backtest | 开始执行 v0.36 回测模块。
-2026-04-16 22:21:33 | INFO | elec.backtest | 回测模块执行完成。
+2026-04-16 23:25:39 | INFO | elec.pipeline | 已加载数据文件: d:\elec\total.csv
+2026-04-16 23:25:39 | INFO | elec.pipeline | 训练算法: HYBRID_PSO_V036
+2026-04-16 23:25:39 | INFO | elec.pipeline | 政策来源文件数: 18
+2026-04-16 23:25:39 | INFO | elec.pipeline | 政策候选规则数: 34
+2026-04-16 23:25:39 | INFO | elec.pipeline | 政策正式规则数: 34
+2026-04-16 23:25:39 | INFO | elec.pipeline | 滚动重训窗口数: 10
+2026-04-16 23:25:39 | INFO | elec.train | 开始执行 v0.36 训练模块。
+2026-04-16 23:25:51 | INFO | elec.train | 训练模块执行完成。
+2026-04-16 23:25:51 | INFO | elec.evaluate | 开始执行验证模块。
+2026-04-16 23:25:51 | INFO | elec.evaluate | 验证模块执行完成。
+2026-04-16 23:25:51 | INFO | elec.backtest | 开始执行 v0.36 回测模块。
+2026-04-16 23:27:53 | INFO | elec.backtest | 回测模块执行完成。
