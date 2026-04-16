@@ -5,6 +5,8 @@ import os
 from pathlib import Path
 from uuid import uuid4
 
+import pandas as pd
+
 import run_all
 from src.scripts import run_pipeline
 
@@ -77,6 +79,11 @@ def test_format_progress_line_includes_stage_progress_and_resources() -> None:
 def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
     status_path = Path(".cache") / "tests" / f"pipeline-status-{uuid4().hex}.json"
     monkeypatch.setenv("ELEC_RUNTIME_STATUS_PATH", str(status_path))
+    output_root = Path(".cache") / "tests" / f"pipeline-{uuid4().hex}"
+    metrics_dir = output_root / "metrics"
+    reports_dir = output_root / "reports"
+    metrics_dir.mkdir(parents=True, exist_ok=True)
+    reports_dir.mkdir(parents=True, exist_ok=True)
 
     original_prepare = run_pipeline.prepare_project_context
     original_train = run_pipeline.run_train
@@ -85,8 +92,12 @@ def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
 
     def fake_prepare_project_context(*args, **kwargs):
         return {
-            "config": {"version": "v0.33", "training": {"algorithm": "HYBRID_PSO_V033"}},
-            "output_paths": {"reports": Path(".cache") / "tests"},
+            "config": {"version": "v0.35", "training": {"algorithm": "HYBRID_PSO_V033"}},
+            "output_paths": {"reports": reports_dir, "metrics": metrics_dir},
+            "bundle": {
+                "policy_rule_table": pd.DataFrame({"rule_id": ["r1"], "state_name": ["renewable_mechanism_active"]}),
+                "market_rule_constraints": pd.DataFrame({"constraint_id": ["c1"], "model_mapping": ["renewable_mechanism_active"]}),
+            },
         }
 
     def fake_run_train(context):
@@ -95,13 +106,33 @@ def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
         return {"model": object(), "device": "cpu"}
 
     def fake_run_evaluate(context, model=None):
-        return {"metrics": {"total_procurement_cost": 1.0, "total_profit": 2.0, "cvar99": 3.0}}
+        return {
+            "metrics": {"total_procurement_cost": 1.0, "total_profit": 2.0, "cvar99": 3.0},
+            "contract_value_weekly": pd.DataFrame({"contract_value_w": [325.0], "stability_score_w": [0.8]}),
+            "risk_factor_manifest": pd.DataFrame({"factor_category": ["spot_price_volatility"]}),
+            "policy_risk_metrics": pd.DataFrame(
+                {
+                    "policy_risk_penalty_w": [1.0],
+                    "policy_risk_adjusted_excess_return_w": [2.0],
+                    "excess_profit_w": [3.0],
+                }
+            ),
+        }
 
     def fake_run_backtest(context, model=None):
         class _Summary:
             aggregate = {"window_count": 1.0, "mean_total_procurement_cost": 3.0, "mean_total_profit": 4.0, "mean_cvar99": 5.0}
 
-        return {"rolling_summary": _Summary()}
+        return {
+            "rolling_summary": _Summary(),
+            "rolling_excess_return_metrics": pd.DataFrame(
+                {
+                    "window_name": ["window_01"],
+                    "window_policy_risk_adjusted_sharpe": [1.2],
+                    "active_excess_return_persistent": [True],
+                }
+            ),
+        }
 
     monkeypatch.setattr(run_pipeline, "prepare_project_context", fake_prepare_project_context)
     monkeypatch.setattr(run_pipeline, "run_train", fake_run_train)
@@ -118,3 +149,6 @@ def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
 
     final_payload = json.loads(status_path.read_text(encoding="utf-8"))
     assert final_payload["stage"] == "完成"
+    assert (reports_dir / "module1_summary.md").exists()
+    assert (reports_dir / "market_mechanism_analysis.md").exists()
+    assert (reports_dir / "excess_return_validation_summary.md").exists()

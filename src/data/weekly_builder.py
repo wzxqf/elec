@@ -21,11 +21,32 @@ def _is_partial_week(frame: pd.DataFrame, datetime_column: str) -> bool:
 def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str, Any]:
     frame_15m, feature_manifest = add_derived_features(frame)
     hourly = aggregate_hourly(frame_15m)
+    analysis_cfg = config.get("analysis_v035", {})
+    price_spike_threshold = float(analysis_cfg.get("price_spike_zscore_threshold", 2.5))
+    extreme_event_threshold = float(analysis_cfg.get("extreme_event_std_threshold", 2.0))
+    global_id_price_std = float(hourly["全网统一出清价格_日内"].std(ddof=0)) if not hourly.empty else 0.0
+    global_load_dev_std = float(hourly["load_dev"].std(ddof=0)) if not hourly.empty else 0.0
+    global_renewable_dev_std = float(hourly["renewable_dev"].std(ddof=0)) if not hourly.empty else 0.0
 
     weekly_meta_rows: list[dict[str, Any]] = []
     for week_start, week_quarter in frame_15m.groupby("week_start"):
         week_hourly = hourly.loc[hourly["week_start"] == week_start].copy()
         da_cost_proxy = week_quarter["net_load_da_mwh"] * week_quarter["全网统一出清价格_日前"]
+        da_prices = week_hourly["全网统一出清价格_日前"]
+        id_prices = week_hourly["全网统一出清价格_日内"]
+        da_id_cross_corr = 0.0
+        if len(da_prices) > 1 and float(da_prices.std(ddof=0)) > 0.0 and float(id_prices.std(ddof=0)) > 0.0:
+            da_id_cross_corr = float(da_prices.corr(id_prices))
+        week_id_price_std = float(id_prices.std(ddof=0))
+        week_load_dev_std = float(week_hourly["load_dev"].std(ddof=0))
+        week_renewable_dev_std = float(week_hourly["renewable_dev"].std(ddof=0))
+        id_price_z = week_id_price_std / max(global_id_price_std, 1.0e-6)
+        load_dev_z = week_load_dev_std / max(global_load_dev_std, 1.0e-6)
+        renewable_dev_z = week_renewable_dev_std / max(global_renewable_dev_std, 1.0e-6)
+        price_spike_flag = float(id_price_z >= price_spike_threshold)
+        extreme_event_flag = float(
+            price_spike_flag > 0.0 or load_dev_z >= extreme_event_threshold or renewable_dev_z >= extreme_event_threshold
+        )
         weekly_meta_rows.append(
             {
                 "week_start": pd.Timestamp(week_start),
@@ -43,6 +64,9 @@ def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str
                 "spread_std": float(week_hourly["price_spread"].std(ddof=0)),
                 "load_dev_std": float(week_hourly["load_dev"].std(ddof=0)),
                 "renewable_dev_std": float(week_hourly["renewable_dev"].std(ddof=0)),
+                "da_id_cross_corr_w": da_id_cross_corr,
+                "extreme_price_spike_flag_w": price_spike_flag,
+                "extreme_event_flag_w": extreme_event_flag,
                 "proxy_da_cost_mean": float(da_cost_proxy.mean()),
                 "proxy_da_cost_cvar95": float(da_cost_proxy[da_cost_proxy >= da_cost_proxy.quantile(0.95)].mean()),
             }

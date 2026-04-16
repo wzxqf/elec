@@ -126,6 +126,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "search",
         "hpso",
         "policy",
+        "analysis_v035",
     ]:
         value = root_config.get(optional_section)
         if isinstance(value, dict):

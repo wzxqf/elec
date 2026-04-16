@@ -3,6 +3,13 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+import pandas as pd
+
+from src.analysis.reporting import (
+    build_excess_return_validation_summary,
+    build_market_mechanism_analysis,
+    build_module1_summary,
+)
 from src.scripts.backtest import run_backtest
 from src.scripts.common import prepare_project_context
 from src.scripts.evaluate import run_evaluate
@@ -12,6 +19,8 @@ from src.utils.runtime_status import RuntimeStatusTracker
 
 
 def _build_run_summary(context: dict, training: dict, validation: dict, backtest: dict) -> str:
+    rolling_excess = backtest.get("rolling_excess_return_metrics", pd.DataFrame())
+    persistent_windows = int(rolling_excess.get("active_excess_return_persistent", pd.Series(dtype="bool")).astype(bool).sum())
     return "\n".join(
         [
             "# 运行总结",
@@ -26,6 +35,10 @@ def _build_run_summary(context: dict, training: dict, validation: dict, backtest
             f"- 平均回测成本: {backtest['rolling_summary'].aggregate['mean_total_procurement_cost']:.2f}",
             f"- 平均回测收益: {backtest['rolling_summary'].aggregate.get('mean_total_profit', 0.0):.2f}",
             f"- 平均回测 CVaR99: {backtest['rolling_summary'].aggregate['mean_cvar99']:.2f}",
+            f"- 持续跑赢窗口数: {persistent_windows}",
+            f"- 模块1摘要: {context['output_paths']['reports'] / 'module1_summary.md'}",
+            f"- 市场机制分析: {context['output_paths']['reports'] / 'market_mechanism_analysis.md'}",
+            f"- 超额收益验证摘要: {context['output_paths']['reports'] / 'excess_return_validation_summary.md'}",
             "",
         ]
     )
@@ -44,6 +57,29 @@ def main() -> dict:
     validation = run_evaluate(context, model=training["model"])
     status_tracker.update(stage="回测", phase_name="滚动回测", phase_progress=0.0, total_progress=0.66, message="开始回测")
     backtest = run_backtest(context, model=training["model"])
+    save_markdown(
+        build_module1_summary(
+            contract_value_path=context["output_paths"]["metrics"] / "contract_value_weekly.csv",
+            risk_factor_path=context["output_paths"]["metrics"] / "risk_factor_manifest.csv",
+            contract_value_weekly=validation.get("contract_value_weekly", pd.DataFrame()),
+            risk_factor_manifest=validation.get("risk_factor_manifest", pd.DataFrame()),
+        ),
+        context["output_paths"]["reports"] / "module1_summary.md",
+    )
+    save_markdown(
+        build_market_mechanism_analysis(
+            rule_table=context["bundle"].get("policy_rule_table", pd.DataFrame()),
+            constraints=context["bundle"].get("market_rule_constraints", pd.DataFrame()),
+        ),
+        context["output_paths"]["reports"] / "market_mechanism_analysis.md",
+    )
+    save_markdown(
+        build_excess_return_validation_summary(
+            policy_metrics=validation.get("policy_risk_metrics", pd.DataFrame()),
+            rolling_metrics=backtest.get("rolling_excess_return_metrics", pd.DataFrame()),
+        ),
+        context["output_paths"]["reports"] / "excess_return_validation_summary.md",
+    )
     save_markdown(_build_run_summary(context, training, validation, backtest), context["output_paths"]["reports"] / "run_summary.md")
     status_tracker.update(stage="完成", phase_name="全量流水线", phase_progress=1.0, total_progress=1.0, message="流水线执行完成")
     return {

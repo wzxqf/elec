@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
 import pandas as pd
 import torch
 
@@ -16,6 +17,19 @@ class MaterializedStrategyResult:
     hourly_results: pd.DataFrame
     settlement_results: pd.DataFrame
     metrics: dict[str, Any]
+
+
+def _aggregate_hourly_profile_to_24(hourly_load: np.ndarray) -> np.ndarray:
+    if hourly_load.size == 0:
+        return np.zeros(24, dtype=np.float64)
+    aggregated = np.zeros(24, dtype=np.float64)
+    counts = np.zeros(24, dtype=np.float64)
+    for hour_index, load_value in enumerate(hourly_load):
+        slot = hour_index % 24
+        aggregated[slot] += float(load_value)
+        counts[slot] += 1.0
+    counts[counts == 0.0] = 1.0
+    return aggregated / counts
 
 
 def _compute_metrics(
@@ -78,6 +92,8 @@ def materialize_particle_pair(
     friction_cost = scored.weekly_friction_cost[0, 0].detach().cpu().numpy()
     violation_penalty = scored.weekly_policy_violation_penalty[0, 0].detach().cpu().numpy()
     actual_load = tensor_bundle.actual_weekly_load.detach().cpu().numpy()
+    forecast_load = tensor_bundle.forecast_weekly_load.detach().cpu().numpy()
+    hourly_tensor = tensor_bundle.hourly_tensor.detach().cpu().numpy()
     price_tensor = tensor_bundle.quarter_price_tensor.detach().cpu().numpy()
     hour_mask = tensor_bundle.hourly_valid_mask.detach().cpu().numpy()
     quarter_mask = tensor_bundle.quarter_valid_mask.detach().cpu().numpy()
@@ -108,6 +124,31 @@ def materialize_particle_pair(
             "reward_w": float(reward[week_pos]),
             "strategy": strategy_name,
         }
+        forecast_weekly_load = max(float(forecast_load[week_pos]), 1.0)
+        lock_ratio_proxy = float(contract_position[week_pos]) / forecast_weekly_load
+        valid_hour_mask = hour_mask[week_pos].astype(bool)
+        if valid_hour_mask.any():
+            load_shape = _aggregate_hourly_profile_to_24(hourly_tensor[week_pos, valid_hour_mask, 0])
+            load_shape = load_shape / max(float(load_shape.sum()), 1.0e-6)
+            curve_slice = contract_curve[week_pos, :24]
+            curve_slice = curve_slice / max(float(curve_slice.sum()), 1.0e-6)
+            curve_match_score = float(np.clip(1.0 - 0.5 * np.abs(load_shape - curve_slice).sum(), 0.0, 1.0))
+        else:
+            curve_match_score = 0.0
+        cvar_scale = float(cvar99[week_pos]) / max(float(np.mean(cvar99)), 1.0e-6)
+        stability_score = float(
+            np.clip(
+                0.35 * np.clip(lock_ratio_proxy, 0.0, 1.0)
+                + 0.35 * curve_match_score
+                + 0.15 * np.clip(1.0 - float(hedge_error[week_pos]), 0.0, 1.0)
+                + 0.15 * (1.0 / (1.0 + cvar_scale)),
+                0.0,
+                1.0,
+            )
+        )
+        weekly_row["lock_ratio_proxy_w"] = lock_ratio_proxy
+        weekly_row["curve_match_score_w"] = curve_match_score
+        weekly_row["stability_score_w"] = stability_score
         for curve_idx in range(contract_curve.shape[-1]):
             weekly_row[f"contract_curve_h{curve_idx + 1}"] = float(contract_curve[week_pos, curve_idx])
         weekly_rows.append(weekly_row)
