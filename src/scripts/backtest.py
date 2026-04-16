@@ -40,7 +40,7 @@ def _build_backtest_summary(summary: dict[str, Any], rolling_excess_return_metri
 
 def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="backtest")
-    logger.info("开始执行 v0.36 回测模块。")
+    logger.info("开始执行 %s 回测模块。", context["config"]["version"])
     window_records: list[dict[str, Any]] = []
     parameter_rows: list[dict[str, Any]] = []
     validation_frames: list[pd.DataFrame] = []

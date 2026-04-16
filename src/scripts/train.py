@@ -39,7 +39,7 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
     status_path = context.get("runtime_status_path", Path.cwd() / ".cache" / "train_runtime_status.json")
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_tracker = RuntimeStatusTracker(status_path)
-    logger.info("开始执行 v0.36 训练模块。")
+    logger.info("开始执行 %s 训练模块。", context["config"]["version"])
     train_bundle = subset_bundle_for_weeks(context["bundle"], context["split"].train)
     status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=0.0, total_progress=0.1, message="编译张量包")
     training_result = train_hybrid_pso_model(

@@ -14,6 +14,14 @@ POWERSHELL_SCRIPT_PATH = PROJECT_ROOT / "run_all.ps1"
 BAT_SCRIPT_PATH = PROJECT_ROOT / "run_all.bat"
 
 
+def _expected_version() -> str:
+    for line in (PROJECT_ROOT / "experiment_config.yaml").read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if stripped.startswith("version:"):
+            return stripped.split(":", maxsplit=1)[1].strip()
+    raise AssertionError("experiment_config.yaml is missing project.version")
+
+
 class RunAllScriptTest(unittest.TestCase):
     def test_python_entrypoint_exists_and_windows_wrappers_are_removed(self) -> None:
         self.assertTrue(PYTHON_SCRIPT_PATH.exists(), "run_all.py should exist at project root")
@@ -30,7 +38,7 @@ class RunAllScriptTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("Experiment version: v0.36", result.stdout)
+        self.assertIn(f"Experiment version: {_expected_version()}", result.stdout)
         self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
 
     def test_shell_wrapper_delegates_to_python_entrypoint(self) -> None:
@@ -47,7 +55,7 @@ class RunAllScriptTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("Experiment version: v0.36", result.stdout)
+        self.assertIn(f"Experiment version: {_expected_version()}", result.stdout)
         self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
 
 

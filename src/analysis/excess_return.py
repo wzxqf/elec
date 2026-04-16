@@ -60,9 +60,10 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
         adjusted_std = float(adjusted.std(ddof=0))
         adjusted_mean = float(adjusted.mean())
         win_rate = float((excess > 0.0).mean()) if not excess.empty else 0.0
-        sharpe = adjusted_mean / (adjusted_std + float(epsilon))
+        stable_window = adjusted_std <= float(epsilon)
+        sharpe = 0.0 if stable_window else adjusted_mean / adjusted_std
         active_positive = adjusted_mean > 0.0
-        active_persistent = active_positive and win_rate >= 0.5 and sharpe > 0.0
+        active_persistent = active_positive and win_rate >= 0.5 and (stable_window or sharpe > 0.0)
         rows.append(
             {
                 "window_name": window_name,

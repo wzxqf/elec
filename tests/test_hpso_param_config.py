@@ -8,8 +8,8 @@ from src.config.load_config import load_runtime_config
 def test_v033_config_uses_hybrid_pso() -> None:
     config = load_runtime_config(Path.cwd())
 
-    assert config["version"] == "v0.36"
-    assert config["training"]["algorithm"] == "HYBRID_PSO_V036"
+    assert config["version"] == "v0.38"
+    assert config["training"]["algorithm"] == "HYBRID_PSO_V038"
     assert config["reward"]["cvar_alpha"] == 0.99
     assert "parameter_compiler" in config
     assert "blocks" in config["parameter_compiler"]["upper"]

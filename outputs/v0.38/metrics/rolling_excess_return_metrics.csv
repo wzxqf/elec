@@ -1,0 +1,11 @@
+window_name,window_excess_return_mean,window_excess_return_volatility,window_excess_return_win_rate,window_excess_return_max_drawdown,window_policy_risk_adjusted_sharpe,active_excess_return_positive,active_excess_return_persistent,dynamic_lock_only_outperformed,excess_return_conclusion
+window_01,243968.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_02,-291213696.0,0.0,0.0,0.0,0.0,False,False,False,未持续跑赢 dynamic_lock_only
+window_03,-49967536.0,0.0,0.0,0.0,0.0,False,False,False,未持续跑赢 dynamic_lock_only
+window_04,-151477776.0,0.0,0.0,0.0,0.0,False,False,False,未持续跑赢 dynamic_lock_only
+window_05,78345408.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_06,44654592.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_07,15648816.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_08,20766592.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_09,72543872.0,0.0,1.0,0.0,0.0,True,True,True,持续跑赢 dynamic_lock_only
+window_10,-16533376.0,0.0,0.0,0.0,0.0,False,False,False,未持续跑赢 dynamic_lock_only

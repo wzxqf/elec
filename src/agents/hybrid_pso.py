@@ -3,6 +3,7 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
+import re
 from typing import Any
 
 import numpy as np
@@ -60,6 +61,19 @@ def _resolve_device(config: dict[str, Any]) -> str:
 
 def _randn(generator: torch.Generator, shape: tuple[int, ...], device: str) -> torch.Tensor:
     return torch.randn(shape, generator=generator, device=device, dtype=torch.float32)
+
+
+def _infer_release_version(config: dict[str, Any]) -> str:
+    project = config.get("project", {})
+    project_version = project.get("version")
+    if project_version:
+        return str(project_version)
+
+    algorithm = str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V036")).upper()
+    match = re.search(r"_V(\d+)$", algorithm)
+    if match:
+        return f"v0.{int(match.group(1))}"
+    return "v0.36"
 
 
 def train_hybrid_pso_model(
@@ -155,8 +169,8 @@ def train_hybrid_pso_model(
         lower_best=VectorList(global_lower_best.detach().cpu().tolist()),
         best_score=global_best_score,
         metadata={
-            "version": "v0.33",
-            "algorithm": str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V033")),
+            "version": _infer_release_version(config),
+            "algorithm": str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V036")),
             "score_kernel_device": device,
         },
     )

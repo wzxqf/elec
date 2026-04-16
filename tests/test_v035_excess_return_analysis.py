@@ -39,3 +39,18 @@ def test_summarize_rolling_excess_return_emits_conclusions() -> None:
 
     assert "window_policy_risk_adjusted_sharpe" in summary.columns
     assert "dynamic_lock_only_outperformed" in summary.columns
+
+
+def test_summarize_rolling_excess_return_clamps_flat_volatility_sharpe() -> None:
+    policy_metrics = pd.DataFrame(
+        {
+            "window_name": ["window_01", "window_01"],
+            "policy_risk_adjusted_excess_return_w": [2.0, 2.0],
+            "excess_profit_w": [3.0, 3.0],
+        }
+    )
+
+    summary = summarize_rolling_excess_return(policy_metrics, epsilon=1.0e-6)
+
+    assert summary.loc[0, "window_policy_risk_adjusted_sharpe"] == 0.0
+    assert bool(summary.loc[0, "active_excess_return_persistent"]) is True

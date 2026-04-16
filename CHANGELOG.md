@@ -1,5 +1,14 @@
 # 更新日志
 
+## v0.38
+
+- 正式版本号升级为 `v0.38`，根配置 `project.version` 与 `training.algorithm` 同步切换到 `v0.38 / HYBRID_PSO_V038`。
+- `src/config/load_config.py` 现正式放行 `HYBRID_PSO_V038`，避免版本快照、主配置和运行时校验之间继续脱节。
+- `src/agents/hybrid_pso.py` 不再把模型元数据硬编码回写为旧版；模型 `metadata.version` 现优先取 `project.version`，缺失时再按算法标签推断。
+- 训练与回测日志不再硬编码 `v0.36`，统一改为读取当前运行配置中的版本号，消除版本文案漂移。
+- `summarize_rolling_excess_return()` 现对零波动窗口执行 Sharpe 去失真保护：当政策风险调整后收益序列波动率低于 `epsilon` 时，Sharpe 归零，持续跑赢判定改由“正超额收益 + 胜率”保持稳定。
+- 新增/更新回归测试，覆盖 `v0.38` 配置放行、模型元数据版本回写与零波动窗口 Sharpe 保护。
+
 ## v0.36
 
 - 主训练主线升级为 `HYBRID_PSO_V036`，在不改变“双层参数化 HPSO + 小时级规则修正 + 15 分钟代理结算”边界的前提下，引入配置驱动的参数编译器。

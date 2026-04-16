@@ -6,6 +6,13 @@ from typing import Any
 from src.utils.io import load_yaml
 
 
+SUPPORTED_HYBRID_PSO_ALGORITHMS = {
+    "HYBRID_PSO_V033",
+    "HYBRID_PSO_V036",
+    "HYBRID_PSO_V038",
+}
+
+
 REQUIRED_SECTIONS = [
     "project",
     "data",
@@ -75,11 +82,12 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
     algorithm = str(training.get("algorithm", "")).upper()
-    if algorithm in {"HYBRID_PSO_V033", "HYBRID_PSO_V036"}:
+    if algorithm in SUPPORTED_HYBRID_PSO_ALGORITHMS:
         _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
         _require_keys("hybrid_pso", hybrid_pso, ["seed", "upper", "lower"])
     else:
-        raise ValueError(f"不支持的 training.algorithm: {algorithm}。当前仅支持 HYBRID_PSO_V033 / HYBRID_PSO_V036。")
+        supported = " / ".join(sorted(SUPPORTED_HYBRID_PSO_ALGORITHMS))
+        raise ValueError(f"不支持的 training.algorithm: {algorithm}。当前仅支持 {supported}。")
     _require_keys("reward", reward, ["baseline_strategy", "cvar_alpha", "lambda_tail", "lambda_hedge", "lambda_trade", "lambda_violate"])
     _require_keys("feature_selection", feature_selection, ["enabled", "feature_include_for_agent", "feature_exclude_for_agent", "feature_keep_for_report_only"])
     _require_keys("policy_projection", policy_projection, ["mode", "clip_method", "violation_penalty_scale"])
