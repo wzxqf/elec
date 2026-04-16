@@ -256,7 +256,10 @@ def main() -> int:
     output_dir = project_root / "outputs" / version
     mpl_config_dir = project_root / ".cache" / "matplotlib"
     mpl_config_dir.mkdir(parents=True, exist_ok=True)
+    (output_dir / "logs").mkdir(parents=True, exist_ok=True)
     runtime_status_path = output_dir / "logs" / "runtime_status.json"
+    stdout_log_path = output_dir / "logs" / "runner_stdout.log"
+    stderr_log_path = output_dir / "logs" / "runner_stderr.log"
     run_cmd = [str(python_exe), "-m", "src.scripts.run_pipeline"]
 
     print(f"Project root: {project_root}")
@@ -271,24 +274,27 @@ def main() -> int:
     env = os.environ.copy()
     env["MPLCONFIGDIR"] = str(mpl_config_dir)
     env["ELEC_RUNTIME_STATUS_PATH"] = str(runtime_status_path)
-    process = subprocess.Popen(run_cmd, cwd=project_root, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    monitor = ResourceMonitor(process.pid)
-    start_time = time.perf_counter()
-    try:
-        while True:
-            return_code = process.poll()
-            status = read_status_snapshot(runtime_status_path)
-            resources = monitor.sample()
-            line = format_progress_line(status, resources, elapsed_seconds=time.perf_counter() - start_time, width=180)
-            print("\r" + line.ljust(180), end="", flush=True)
-            if return_code is not None:
-                break
-            time.sleep(PANEL_REFRESH_SECONDS)
-    finally:
-        monitor.close()
+    with stdout_log_path.open("w", encoding="utf-8") as stdout_handle, stderr_log_path.open("w", encoding="utf-8") as stderr_handle:
+        process = subprocess.Popen(run_cmd, cwd=project_root, env=env, stdout=stdout_handle, stderr=stderr_handle)
+        monitor = ResourceMonitor(process.pid)
+        start_time = time.perf_counter()
+        try:
+            while True:
+                return_code = process.poll()
+                status = read_status_snapshot(runtime_status_path)
+                resources = monitor.sample()
+                line = format_progress_line(status, resources, elapsed_seconds=time.perf_counter() - start_time, width=180)
+                print("\r" + line.ljust(180), end="", flush=True)
+                if return_code is not None:
+                    break
+                time.sleep(PANEL_REFRESH_SECONDS)
+        finally:
+            monitor.close()
     print()
     if process.returncode != 0:
         print(f"Pipeline failed. Check logs under {output_dir / 'logs'}")
+        print(f"stdout log: {stdout_log_path}")
+        print(f"stderr log: {stderr_log_path}")
     return int(process.returncode or 0)
 
 

@@ -291,7 +291,7 @@ def build_market_rule_constraints_markdown(
             "- 政策解析: `src/policy/policy_parser.py` 生成结构化规则表。",
             "- 制度状态: `src/policy/policy_regime.py` 生成周度当前状态和四组前瞻状态。",
             "- 价格口径: `src/backtest/settlement.py` 根据 `lt_price_linked_active` 切换中长期价格代理。",
-            "- 下层边际空间: `src/rules/hourly_hedge.py` 和 `src/agents/hpso.py` 保留带宽、平滑、非负等诊断字段；HPSO v0.3 不再执行硬裁剪。",
+            "- 下层边际空间: `src/training/score_kernel.py` 与 `src/backtest/materialize.py` 输出参数化电量决策、政策投影结果和 15 分钟结算指标。",
             "- 输出位置: `outputs/<version>/reports/market_rule_constraints.md`。",
             "",
         ]

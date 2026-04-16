@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from uuid import uuid4
 
 import run_all
+from src.scripts import run_pipeline
 
 
 def test_read_status_snapshot_returns_defaults_for_missing_file() -> None:
@@ -70,3 +72,49 @@ def test_format_progress_line_includes_stage_progress_and_resources() -> None:
     assert "显存 5.5/16.0GB" in line
     assert "iter 40/80" in line
     assert "\n" not in line
+
+
+def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
+    status_path = Path(".cache") / "tests" / f"pipeline-status-{uuid4().hex}.json"
+    monkeypatch.setenv("ELEC_RUNTIME_STATUS_PATH", str(status_path))
+
+    original_prepare = run_pipeline.prepare_project_context
+    original_train = run_pipeline.run_train
+    original_evaluate = run_pipeline.run_evaluate
+    original_backtest = run_pipeline.run_backtest
+
+    def fake_prepare_project_context(*args, **kwargs):
+        return {
+            "config": {"version": "v0.33", "training": {"algorithm": "HYBRID_PSO_V033"}},
+            "output_paths": {"reports": Path(".cache") / "tests"},
+        }
+
+    def fake_run_train(context):
+        payload = json.loads(status_path.read_text(encoding="utf-8"))
+        assert payload["stage"] == "训练"
+        return {"model": object(), "device": "cpu"}
+
+    def fake_run_evaluate(context, model=None):
+        return {"metrics": {"total_procurement_cost": 1.0, "total_profit": 2.0, "cvar99": 3.0}}
+
+    def fake_run_backtest(context, model=None):
+        class _Summary:
+            aggregate = {"window_count": 1.0, "mean_total_procurement_cost": 3.0, "mean_total_profit": 4.0, "mean_cvar99": 5.0}
+
+        return {"rolling_summary": _Summary()}
+
+    monkeypatch.setattr(run_pipeline, "prepare_project_context", fake_prepare_project_context)
+    monkeypatch.setattr(run_pipeline, "run_train", fake_run_train)
+    monkeypatch.setattr(run_pipeline, "run_evaluate", fake_run_evaluate)
+    monkeypatch.setattr(run_pipeline, "run_backtest", fake_run_backtest)
+    try:
+        run_pipeline.main()
+    finally:
+        monkeypatch.setattr(run_pipeline, "prepare_project_context", original_prepare)
+        monkeypatch.setattr(run_pipeline, "run_train", original_train)
+        monkeypatch.setattr(run_pipeline, "run_evaluate", original_evaluate)
+        monkeypatch.setattr(run_pipeline, "run_backtest", original_backtest)
+        monkeypatch.delenv("ELEC_RUNTIME_STATUS_PATH", raising=False)
+
+    final_payload = json.loads(status_path.read_text(encoding="utf-8"))
+    assert final_payload["stage"] == "完成"

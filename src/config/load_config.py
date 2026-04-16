@@ -12,23 +12,19 @@ REQUIRED_SECTIONS = [
     "outputs",
     "split",
     "rolling_validation",
-    "cost",
-    "constraints",
-    "reward",
-    "env",
-    "rules",
-    "training",
-    "scenario",
-    "benchmarks",
+    "rolling_retrain",
     "feature_selection",
+    "reward",
+    "training",
     "policy_regime",
     "reporting",
     "analysis",
-    "sensitivity",
-    "robustness",
-    "search",
-    "hpso",
-    "policy",
+    "policy_deep",
+    "policy_projection",
+    "upper_strategy",
+    "lower_strategy",
+    "economics",
+    "hybrid_pso",
 ]
 
 
@@ -60,37 +56,34 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     outputs = _require_section(root_config, "outputs")
     split = _require_section(root_config, "split")
     rolling_validation = _require_section(root_config, "rolling_validation")
-    cost = _require_section(root_config, "cost")
-    constraints = _require_section(root_config, "constraints")
-    reward = _require_section(root_config, "reward")
-    env = _require_section(root_config, "env")
-    rules = _require_section(root_config, "rules")
-    training = _require_section(root_config, "training")
-    scenario = _require_section(root_config, "scenario")
-    benchmarks = _require_section(root_config, "benchmarks")
+    rolling_retrain = _require_section(root_config, "rolling_retrain")
     feature_selection = _require_section(root_config, "feature_selection")
+    reward = _require_section(root_config, "reward")
+    training = _require_section(root_config, "training")
     policy_regime = _require_section(root_config, "policy_regime")
     reporting = _require_section(root_config, "reporting")
     analysis = _require_section(root_config, "analysis")
-    sensitivity = _require_section(root_config, "sensitivity")
-    robustness = _require_section(root_config, "robustness")
-    search = _require_section(root_config, "search")
-    hpso = _require_section(root_config, "hpso")
+    hybrid_pso = _require_section(root_config, "hybrid_pso")
+    policy_deep = _require_section(root_config, "policy_deep")
+    policy_projection = _require_section(root_config, "policy_projection")
+    upper_strategy = _require_section(root_config, "upper_strategy")
+    lower_strategy = _require_section(root_config, "lower_strategy")
+    economics = _require_section(root_config, "economics")
 
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
     algorithm = str(training.get("algorithm", "")).upper()
-    if algorithm == "HPSO_PARAM_POLICY":
+    if algorithm == "HYBRID_PSO_V033":
         _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
+        _require_keys("hybrid_pso", hybrid_pso, ["seed", "upper", "lower"])
     else:
-        _require_keys("training", training, ["policy", "total_timesteps", "eval_freq", "checkpoint_freq", "learning_rate", "n_steps", "batch_size", "n_epochs", "gamma", "gae_lambda", "clip_range", "ent_coef", "vf_coef", "max_grad_norm", "seed", "device", "use_vec_normalize"])
-    _require_keys("constraints", constraints, ["lock_ratio_min", "lock_ratio_max", "delta_h_max", "delta_lock_cap"])
+        raise ValueError(f"不支持的 training.algorithm: {algorithm}。v0.33 仅支持 HYBRID_PSO_V033。")
+    _require_keys("reward", reward, ["baseline_strategy", "cvar_alpha", "lambda_tail", "lambda_hedge", "lambda_trade", "lambda_violate"])
     _require_keys("feature_selection", feature_selection, ["enabled", "feature_include_for_agent", "feature_exclude_for_agent", "feature_keep_for_report_only"])
-    if algorithm == "HPSO_PARAM_POLICY":
-        _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "parameter_dimension", "theta_layout", "swarm", "bootstrap", "upper", "lower", "objective_weights"])
-    else:
-        _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "upper", "lower", "objective_weights"])
-    policy = _require_section(root_config, "policy")
+    _require_keys("policy_projection", policy_projection, ["mode", "clip_method", "violation_penalty_scale"])
+    _require_keys("upper_strategy", upper_strategy, ["contract_curve_hours", "feature_columns", "parameter_layout"])
+    _require_keys("lower_strategy", lower_strategy, ["feature_columns", "parameter_layout"])
+    _require_keys("economics", economics, ["retail_tariff_yuan_per_mwh", "imbalance_penalty_multiplier", "adjustment_cost_yuan_per_mwh", "friction_cost_yuan_per_mwh"])
 
     runtime = {
         "config_path": str(config_path),
@@ -106,30 +99,42 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "outputs": outputs,
         "split": split,
         "rolling_validation": rolling_validation,
-        "cost": cost,
-        "constraints": constraints,
-        "reward": reward,
-        "env": env,
-        "rules": {"rules": rules, **rules},
-        "rules_only": rules,
-        "training": training,
-        "scenario": scenario,
-        "benchmarks": benchmarks,
+        "rolling_retrain": rolling_retrain,
         "feature_selection": feature_selection,
+        "reward": reward,
+        "training": training,
         "policy_regime": policy_regime,
         "reporting": reporting,
         "analysis": analysis,
-        "sensitivity": sensitivity,
-        "robustness": robustness,
-        "search": search,
-        "hpso": hpso,
-        "policy": policy,
+        "hybrid_pso": hybrid_pso,
+        "policy_deep": policy_deep,
+        "policy_projection": policy_projection,
+        "upper_strategy": upper_strategy,
+        "lower_strategy": lower_strategy,
+        "economics": economics,
     }
+
+    for optional_section in [
+        "cost",
+        "constraints",
+        "env",
+        "rules",
+        "scenario",
+        "benchmarks",
+        "sensitivity",
+        "robustness",
+        "search",
+        "hpso",
+        "policy",
+    ]:
+        value = root_config.get(optional_section)
+        if isinstance(value, dict):
+            runtime[optional_section] = value
 
     runtime.update(data)
     runtime.update(training)
     runtime["algorithm"] = algorithm
     runtime["seed"] = training["seed"]
     runtime["device"] = training["device"]
-    runtime["rules"] = rules
+    runtime["rules"] = root_config.get("rules", {})
     return runtime

@@ -5,8 +5,6 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from src.agents.hpso_param_policy import split_theta
-
 
 FORBIDDEN_DECISION_FIELDS = {
     "net_load_id",
@@ -25,10 +23,6 @@ def _lag_or_zero(frame: pd.DataFrame, name: str) -> np.ndarray:
     if source_name in frame.columns:
         return frame[source_name].shift(1).fillna(0.0).to_numpy(dtype=float, copy=False)
     return np.zeros(len(frame), dtype=float)
-
-
-def _signal(value: float, scale: float) -> float:
-    return float(np.clip(value / max(scale, 1e-9), -1.0, 1.0))
 
 
 def _decision_audit(frame: pd.DataFrame) -> pd.DataFrame:
@@ -53,7 +47,6 @@ def apply_causal_rolling_hedge(
     config: dict[str, Any],
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
     frame = hourly_frame.copy().reset_index(drop=True)
-    parts = split_theta(theta)
     lower_cfg = config.get("policy", {}).get("lower", {})
     non_negative_spot = bool(lower_cfg.get("non_negative_spot", True))
     smooth_limit = float(lower_cfg.get("smooth_limit_mwh", 420.0))
@@ -66,58 +59,21 @@ def apply_causal_rolling_hedge(
     spread_lag = _lag_or_zero(frame, "price_spread_lag1")
     load_lag = _lag_or_zero(frame, "load_dev_lag1")
     renewable_lag = _lag_or_zero(frame, "renewable_dev_lag1")
-    da_price = frame.get("全网统一出清价格_日前", pd.Series(np.zeros(len(frame)))).to_numpy(dtype=float, copy=False)
 
     ancillary_tight = float(policy_state.get("ancillary_freq_reserve_tight", 0.0) or 0.0)
     peak_pause = float(policy_state.get("ancillary_peak_shaving_pause", 0.0) or 0.0)
-    policy_shrink = 1.0 - 0.10 * ancillary_tight - 0.05 * peak_pause
-    policy_shrink = float(np.clip(policy_shrink, 0.2, 1.0))
+    policy_shrink = float(np.clip(1.0 - 0.10 * ancillary_tight - 0.05 * peak_pause, 0.2, 1.0))
     exposure = float(np.clip(exposure_bandwidth, 0.0, 1.0))
     bandwidth = np.maximum(np.abs(q_base), 1.0) * exposure * policy_shrink
 
     deltas = []
     previous_delta = 0.0
     for index in range(len(frame)):
-        spread_features = np.array(
-            [
-                1.0,
-                _signal(spread_lag[index], 100.0),
-                _signal(da_price[index], 500.0),
-                _signal(previous_delta, max(smooth_limit, 1.0)),
-                ancillary_tight,
-                peak_pause,
-            ],
-            dtype=float,
-        )
-        load_features = np.array(
-            [
-                1.0,
-                _signal(load_lag[index], 1000.0),
-                _signal(q_base[index], 5000.0),
-                _signal(previous_delta, max(smooth_limit, 1.0)),
-                ancillary_tight,
-                peak_pause,
-            ],
-            dtype=float,
-        )
-        renewable_features = np.array(
-            [
-                1.0,
-                _signal(renewable_lag[index], 1000.0),
-                float(policy_state.get("renewable_mechanism_active", 0.0) or 0.0),
-                _signal(previous_delta, max(smooth_limit, 1.0)),
-            ],
-            dtype=float,
-        )
-        smooth_features = np.array(
-            [1.0, _signal(previous_delta, max(smooth_limit, 1.0)), ancillary_tight, peak_pause],
-            dtype=float,
-        )
         raw_signal = (
-            float(spread_features @ parts.lower.spread_response)
-            + float(load_features @ parts.lower.load_forecast_response)
-            + float(renewable_features @ parts.lower.renewable_response)
-            - 0.25 * float(smooth_features @ parts.lower.smoothing_response)
+            0.45 * np.clip(spread_lag[index] / 100.0, -1.0, 1.0)
+            + 0.35 * np.clip(load_lag[index] / 1000.0, -1.0, 1.0)
+            + 0.20 * np.clip(renewable_lag[index] / 1000.0, -1.0, 1.0)
+            - 0.15 * np.clip(previous_delta / max(smooth_limit, 1.0), -1.0, 1.0)
         )
         target_delta = float(np.tanh(raw_signal) * bandwidth[index])
         delta = float(np.clip(target_delta, previous_delta - smooth_limit, previous_delta + smooth_limit))

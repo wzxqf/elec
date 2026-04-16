@@ -1,5 +1,5 @@
 project:
-  version: v0.32
+  version: v0.33
   project_root: d:/elec
 
 data:
@@ -56,75 +56,87 @@ rolling_validation:
       val_start_week: "2026-02-02 00:00:00"
       val_end_week: "2026-02-23 00:00:00"
 
-cost:
-  risk_vol_weight: 0.50
-  risk_cvar_weight: 0.50
-  transaction_linear: 1.20
-  transaction_quadratic: 0.015
-  lt_adjust_cost: 0.60
-  imbalance_penalty_multiplier: 1.00
-  cvar_alpha: 0.95
-  cvar_budget_ratio: 0.18
-  cvar_budget_min: 220000.0
-  cvar_budget_eps: 1.0
-
-constraints:
-  lock_ratio_min: 0.10
-  lock_ratio_max: 0.85
-  delta_h_max: 0.12
-  delta_lock_cap: 0.12
+rolling_retrain:
+  enabled: true
+  mode: expanding
+  train_min_weeks: 8
+  val_weeks: 2
+  test_weeks: 1
+  step_weeks: 1
 
 reward:
-  strong_baseline: dynamic_lock_only
-  alpha_cost: 1.15
-  beta_tail_risk: 0.55
-  lambda_action_smooth: 0.12
-  lambda_hourly_smooth: 0.08
-  lambda_hedge_error: 0.18
+  baseline_strategy: dynamic_lock_only
+  cvar_alpha: 0.99
+  lambda_tail: 0.65
+  lambda_hedge: 0.18
+  lambda_trade: 0.10
+  lambda_violate: 1.00
   robust_eps: 1.0e-6
 
-env:
-  include_prev_reward: true
-  reward_temperature: 2.2
-
-rules:
-  price_spread_weight: 0.45
-  load_dev_weight: 0.35
-  renewable_dev_weight: 0.20
-  spread_threshold: 8.0
-  load_dev_threshold: 120.0
-  renewable_dev_threshold: 100.0
-  band_base_multiplier: 1.05
-  band_floor_mwh: 30.0
-  band_cap_ratio: 1.10
-  ancillary_tight_multiplier: 0.88
-  peak_shaving_pause_multiplier: 0.92
-  price_spike_shrink: 0.12
-  gamma_max: 420.0
-  non_negative_clip: true
-  signal_clip: 1.0
-  smoothing_mode: soft_clip
-
 training:
-  algorithm: HPSO_PARAM_POLICY
+  algorithm: HYBRID_PSO_V033
   seed: 42
   device: cuda
   allow_cpu: true
+
+policy_projection:
+  mode: policy_only
+  clip_method: projection_only
+  violation_penalty_scale: 1.0
+  enforce_non_negative_position: true
+  bind_to_policy_states:
+    - renewable_mechanism_active
+    - lt_price_linked_active
+    - ancillary_freq_reserve_tight
+    - ancillary_peak_shaving_pause
+
+upper_strategy:
+  contract_curve_hours: 24
+  feature_columns:
+    - prev_spread_mean
+    - prev_da_price_mean
+    - prev_id_price_mean
+    - prev_load_dev_std
+    - prev_renewable_ratio_da_mean
+    - renewable_mechanism_active
+    - lt_price_linked_active
+    - forward_price_linkage_days
+    - forward_mechanism_execution_days
+  parameter_layout:
+    contract_adjustment_weights: 3
+    exposure_band_weights: 3
+    contract_curve_weights: 4
+    policy_gate_weights: 2
+  adjustment_scale_mwh: 0.30
+  exposure_band_scale_mwh: 0.25
+
+lower_strategy:
+  feature_columns:
+    - price_spread
+    - load_dev
+    - renewable_dev
+    - ancillary_freq_reserve_tight
+    - ancillary_peak_shaving_pause
+  parameter_layout:
+    spread_response: 2
+    load_deviation_response: 2
+    renewable_response: 2
+    policy_shrink_response: 2
+  smooth_window_hours: 3
+
+economics:
+  retail_tariff_yuan_per_mwh: 430.0
+  imbalance_penalty_multiplier: 1.00
+  adjustment_cost_yuan_per_mwh: 0.60
+  friction_cost_yuan_per_mwh: 1.20
+  risk_cost_yuan_per_mwh: 0.0
+  baseline_strategy: dynamic_lock_only
 
 scenario:
   train_sequence_length: 96
   block_size: 3
   bootstrap_seed: 42
   training_sequence_method: block_bootstrap
-
-benchmarks:
-  fixed_lock_ratio: 0.60
-  dynamic_lock_base: 0.55
-  dynamic_lock_spread_penalty: 0.10
-  dynamic_lock_renewable_bonus: 0.08
-  dynamic_lock_policy_bonus: 0.05
-  dynamic_lock_linked_price_penalty: 0.08
-  rule_only_bandwidth: 0.70
 
 feature_selection:
   enabled: true
@@ -244,123 +256,18 @@ search:
       - 0.08
       - 0.18
 
-hpso:
-  device: cuda
-  allow_cpu: true
+hybrid_pso:
   seed: 42
-  parameter_dimension: 64
-  theta_layout:
-    upper_total: 40
-    lower_total: 24
-    upper:
-      lock_delta_weights: 16
-      bandwidth_weights: 12
-      curve_shape_weights: 8
-      policy_gate_weights: 4
-    lower:
-      spread_response: 6
-      load_forecast_response: 6
-      renewable_response: 4
-      smoothing_response: 4
-      policy_band_shrink: 4
-  swarm:
+  upper:
+    particles: 64
+    iterations: 80
+    dimension: 12
+  lower:
     particles: 48
     iterations: 80
-    inertia_weight: 0.70
-    cognitive_factor: 1.45
-    social_factor: 1.45
-    initial_temperature: 1.0
-    cooling_rate: 0.96
-    perturbation_scale: 0.05
-    stagnation_window: 10
-    backprop_steps: 0
-    backprop_learning_rate: 0.0
-    backprop_clip_norm: 5.0
-  bootstrap:
-    sequence_length: 96
-    block_size: 3
-    scenario_repeats: 4
-  upper:
-    particles: 32
-    iterations: 40
-    inertia_weight: 0.72
-    cognitive_factor: 1.45
-    social_factor: 1.45
-    initial_temperature: 1.0
-    cooling_rate: 0.94
-    perturbation_scale: 0.06
-    stagnation_window: 8
-    backprop_steps: 4
-    backprop_learning_rate: 0.02
-    backprop_clip_norm: 5.0
-    contract_adjustment_initial_radius: 1.0
-    exposure_bandwidth_min: 0.0
-    exposure_bandwidth_max: 0.85
-  lower:
-    particles: 24
-    iterations: 35
-    inertia_weight: 0.68
-    cognitive_factor: 1.35
-    social_factor: 1.55
-    initial_temperature: 1.0
-    cooling_rate: 0.93
-    perturbation_scale: 0.05
-    stagnation_window: 7
-    backprop_steps: 4
-    backprop_learning_rate: 0.02
-    backprop_clip_norm: 5.0
-    spot_delta_initial_radius_multiplier: 1.0
-  objective_weights:
-    procurement_cost: 1.00
-    dynamic_baseline_gap: 1.15
-    tail_risk: 0.55
-    risk: 0.50
-    transaction: 1.00
-    weekly_lock_change: 0.60
-    hourly_smooth: 0.08
-    hedge_error: 0.18
-    contract_adjustment_quadratic: 5.00
-    spot_delta_quadratic: 1.00
-    constraint_violation: 1000000.0
+    dimension: 8
 
-policy:
-  upper:
-    lock_delta_scale: 0.12
-    bandwidth_min: 0.0
-    bandwidth_max: 0.85
-    state_features:
-      - prev_spread_mean
-      - prev_da_price_mean
-      - prev_id_price_mean
-      - prev_load_dev_std
-      - prev_renewable_ratio_da_mean
-      - renewable_mechanism_active
-      - lt_price_linked_active
-      - forward_price_linkage_days
-      - forward_mechanism_execution_days
-  lower:
-    rolling_mode: causal
-    non_negative_spot: true
-    smooth_limit_mwh: 420.0
-  contract_curve:
-    enabled: true
-    periods: 24
-    base_profile_source: train_da_net_load
-    shape_adjustment_scale: 0.20
-    positive_floor: 0.05
-    peak_hours:
-      - 8
-      - 9
-      - 10
-      - 11
-      - 18
-      - 19
-      - 20
-      - 21
-    valley_hours:
-      - 0
-      - 1
-      - 2
-      - 3
-      - 4
-      - 5
+policy_deep:
+  llm_candidate_parser:
+    enabled: false
+    cache_only: true

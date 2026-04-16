@@ -228,6 +228,8 @@ hpso:
   device: cuda
   allow_cpu: true
   seed: 42
+  parallel:
+    worker_count: 8
   parameter_dimension: 64
   theta_layout:
     upper_total: 40

@@ -1,39 +1,24 @@
-from __future__ import annotations
-
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from src.backtest.benchmarks import build_benchmark_actions
-from src.backtest.runtime_cache import prepare_runtime_bundle
-from src.backtest.simulator import simulate_strategy
+from src.backtest.rolling_pipeline import build_rolling_retrain_plan
 from src.config.load_config import load_runtime_config
 from src.data.loader import load_raw_total_csv, locate_total_csv
 from src.data.preprocess import build_data_quality_markdown, clean_total_data
-from src.data.scenario_generator import RollingValidationWindow, WeekSplit, build_bootstrap_sequence, build_rolling_validation_windows, build_week_split
+from src.data.scenario_generator import WeekSplit, build_week_split
 from src.data.weekly_builder import build_weekly_bundle
-from src.policy.policy_parser import parse_policy_environment
-from src.policy.policy_regime import build_policy_state_trace
-from src.policy.policy_tables import build_policy_rule_summary_markdown
 from src.policy.market_constraints import (
     build_market_rule_constraints,
     build_market_rule_constraints_markdown,
     validate_market_rule_alignment,
 )
+from src.policy_deep.regime_builder import build_policy_deep_context
+from src.training.tensor_bundle import compile_training_tensor_bundle
 from src.utils.io import dump_yaml, resolve_output_paths, save_json, save_markdown
 from src.utils.logger import configure_logging
 from src.utils.seeds import set_global_seed
-
-
-def _robust_summary(series: pd.Series, eps: float) -> dict[str, float]:
-    clean = pd.to_numeric(series, errors="coerce").dropna()
-    if clean.empty:
-        return {"median": 0.0, "iqr": max(eps, 1.0)}
-    return {
-        "median": float(clean.median()),
-        "iqr": float(max(clean.quantile(0.75) - clean.quantile(0.25), eps)),
-    }
 
 
 def load_project_config(project_root: str | Path) -> dict[str, Any]:
@@ -46,65 +31,33 @@ def _build_feature_manifest(
     policy_trace: pd.DataFrame,
     config: dict[str, Any],
 ) -> tuple[pd.DataFrame, list[str]]:
-    feature_cfg = config["feature_selection"]
-    include_set = set(feature_cfg.get("feature_include_for_agent", []))
-    exclude_set = set(feature_cfg.get("feature_exclude_for_agent", []))
-    report_only_set = set(feature_cfg.get("feature_keep_for_report_only", []))
-    base_rows = base_manifest.set_index("column").to_dict(orient="index") if not base_manifest.empty else {}
-    policy_columns = set(policy_trace.columns) - {"week_start"}
+    include_set = set(config["feature_selection"].get("feature_include_for_agent", []))
+    exclude_set = set(config["feature_selection"].get("feature_exclude_for_agent", []))
     rows: list[dict[str, Any]] = []
     agent_columns: list[str] = []
-
+    policy_columns = set(policy_trace.columns) - {"week_start"}
+    base_rows = base_manifest.set_index("column").to_dict(orient="index") if not base_manifest.empty else {}
     for column in weekly_features.columns:
         if column == "week_start":
             continue
         numeric = pd.api.types.is_numeric_dtype(weekly_features[column])
-        meta = base_rows.get(column, {})
-        source = meta.get("source")
-        formula = meta.get("formula")
-        if source is None:
-            if column in policy_columns:
-                source = "政策状态"
-                formula = "政策解析与制度状态回填"
-            else:
-                source = "周度聚合"
-                formula = ""
-
-        if column in policy_columns:
-            selected_for_agent = bool(numeric and column in include_set and column not in exclude_set)
-        else:
-            selected_for_agent = bool(numeric and column not in exclude_set)
-        if column in report_only_set:
-            selected_for_agent = False
-        if selected_for_agent:
+        source = base_rows.get(column, {}).get("source", "政策状态" if column in policy_columns else "周度聚合")
+        selected = bool(numeric and column not in exclude_set and (column in include_set or column not in policy_columns))
+        rows.append({"column": column, "source": source, "is_numeric": numeric, "selected_for_agent": selected})
+        if selected:
             agent_columns.append(column)
-
-        rows.append(
-            {
-                "column": column,
-                "source": source,
-                "formula": formula,
-                "is_numeric": bool(numeric),
-                "selected_for_agent": bool(selected_for_agent),
-                "report_only": bool(column in report_only_set),
-            }
-        )
-
-    manifest = pd.DataFrame(rows)
-    return manifest, agent_columns
+    return pd.DataFrame(rows), agent_columns
 
 
-def _rolling_windows_to_dict(windows: list[RollingValidationWindow]) -> list[dict[str, Any]]:
-    payload = []
-    for window in windows:
-        payload.append(
-            {
-                "name": window.name,
-                "train": [pd.Timestamp(week).strftime("%Y-%m-%d") for week in window.train],
-                "val": [pd.Timestamp(week).strftime("%Y-%m-%d") for week in window.val],
-            }
-        )
-    return payload
+def subset_bundle_for_weeks(bundle: dict[str, Any], weeks: list[pd.Timestamp]) -> dict[str, Any]:
+    week_set = {pd.Timestamp(week) for week in weeks}
+    subset = dict(bundle)
+    for key in ["weekly_features", "weekly_metadata", "policy_state_trace"]:
+        subset[key] = bundle[key].loc[bundle[key]["week_start"].isin(week_set)].reset_index(drop=True)
+    for key in ["hourly", "quarter"]:
+        subset[key] = bundle[key].loc[bundle[key]["week_start"].isin(week_set)].reset_index(drop=True)
+    subset["tensor_bundle"] = compile_training_tensor_bundle(subset, device=bundle["tensor_bundle"].device)
+    return subset
 
 
 def prepare_project_context(project_root: str | Path, logger_name: str = "pipeline") -> dict[str, Any]:
@@ -124,155 +77,78 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     save_markdown(build_data_quality_markdown(report), output_paths["reports"] / "data_quality_report.md")
 
     bundle = build_weekly_bundle(cleaned, config)
-    policy_result = parse_policy_environment(config["policy_directory"])
-    policy_trace = build_policy_state_trace(bundle["weekly_metadata"], policy_result.rule_table, policy_result.inventory, config)
-    market_constraints = build_market_rule_constraints(config, policy_result.rule_table)
-    market_constraint_violations = validate_market_rule_alignment(config, policy_result.rule_table, policy_trace)
-    save_markdown(
-        build_policy_rule_summary_markdown(policy_result.inventory, policy_result.rule_table, policy_result.failures),
-        output_paths["reports"] / "policy_rule_summary.md",
+    policy_deep = build_policy_deep_context(
+        policy_directory=config["policy_directory"],
+        weekly_metadata=bundle["weekly_metadata"],
+        config=config,
     )
-    save_markdown(
-        build_market_rule_constraints_markdown(
-            config=config,
-            constraints=market_constraints,
-            rule_table=policy_result.rule_table,
-            violations=market_constraint_violations,
-        ),
-        output_paths["reports"] / "market_rule_constraints.md",
-    )
-    policy_result.inventory.to_csv(output_paths["metrics"] / "policy_file_inventory.csv", index=False)
-    policy_result.inventory.to_csv(output_paths["metrics"] / "policy_metadata_index.csv", index=False)
-    policy_result.rule_table.to_csv(output_paths["metrics"] / "policy_rule_table.csv", index=False)
-    policy_result.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
-    policy_trace.to_csv(output_paths["metrics"] / "policy_state_trace.csv", index=False)
-    market_constraints.to_csv(output_paths["metrics"] / "market_rule_constraints.csv", index=False)
+    market_constraints = build_market_rule_constraints(config, policy_deep.rule_table)
+    market_constraint_violations = validate_market_rule_alignment(config, policy_deep.rule_table, policy_deep.state_trace)
 
-    bundle["weekly_metadata"] = bundle["weekly_metadata"].merge(policy_trace, on="week_start", how="left")
+    bundle["weekly_metadata"] = bundle["weekly_metadata"].merge(policy_deep.state_trace, on="week_start", how="left")
     bundle["weekly_features"] = bundle["weekly_features"].merge(
-        policy_trace.drop(
-            columns=[
-                "policy_sources",
-                "policy_names",
-                "failed_policy_files",
-                "active_state_groups",
-                "mechanism_stage_label",
-                "forward_price_linkage_type",
-                "forward_mechanism_execution_type",
-                "forward_ancillary_coupling_type",
-                "forward_info_forecast_boundary_type",
-            ],
-            errors="ignore",
-        ),
+        policy_deep.state_trace.drop(columns=["policy_sources", "policy_names", "failed_policy_files", "active_state_groups"], errors="ignore"),
         on="week_start",
         how="left",
     )
-    bundle["policy_inventory"] = policy_result.inventory
-    bundle["policy_metadata_index"] = policy_result.inventory
-    bundle["policy_rule_table"] = policy_result.rule_table
-    bundle["policy_state_trace"] = policy_trace
-    bundle["policy_failures"] = policy_result.failures
-    bundle["policy_parse_failures"] = policy_result.failures
+    bundle["policy_inventory"] = policy_deep.inventory
+    bundle["policy_document_units"] = policy_deep.document_units
+    bundle["policy_candidate_rules"] = policy_deep.candidate_rules
+    bundle["policy_reviewed_rules"] = policy_deep.reviewed_rules
+    bundle["policy_rule_table"] = policy_deep.rule_table
+    bundle["policy_state_trace"] = policy_deep.state_trace
+    bundle["policy_failures"] = policy_deep.failures
     bundle["market_rule_constraints"] = market_constraints
     bundle["market_rule_constraint_violations"] = market_constraint_violations
 
     feature_manifest, agent_feature_columns = _build_feature_manifest(
         weekly_features=bundle["weekly_features"],
         base_manifest=bundle["feature_manifest"],
-        policy_trace=policy_trace,
+        policy_trace=policy_deep.state_trace,
         config=config,
     )
     bundle["feature_manifest"] = feature_manifest
     bundle["agent_feature_columns"] = agent_feature_columns
-    prepare_runtime_bundle(bundle)
+    bundle["tensor_bundle"] = compile_training_tensor_bundle(bundle, device=config["training"]["device"])
 
     split = build_week_split(config, bundle["weekly_features"], bundle["weekly_metadata"])
-    rolling_validation_windows = build_rolling_validation_windows(
-        config,
-        sorted(pd.to_datetime(bundle["weekly_features"]["week_start"]).tolist()),
-    )
-    all_eval_weeks = sorted(set(split.train + split.val + split.test))
-    benchmark_actions = build_benchmark_actions(
-        all_eval_weeks,
-        bundle["weekly_features"],
-        config,
-        weekly_feature_by_week=bundle.get("weekly_feature_by_week"),
-    )
-    dynamic_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["dynamic_lock_only"], config, "dynamic_lock_only")
-    fixed_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["fixed_lock"], config, "fixed_lock")
-    rule_baseline = simulate_strategy(bundle, all_eval_weeks, benchmark_actions["rule_only"], config, "rule_only")
+    rolling_plan = build_rolling_retrain_plan(config, sorted(pd.to_datetime(bundle["weekly_features"]["week_start"]).tolist()))
 
-    reward_reference = dynamic_baseline["weekly_results"][
-        ["week_start", "procurement_cost_w", "risk_term_w"]
-    ].rename(
-        columns={
-            "procurement_cost_w": "baseline_cost_w",
-            "risk_term_w": "baseline_risk_w",
-        }
-    )
-    train_week_set = {pd.Timestamp(week) for week in split.train}
-    dynamic_train = dynamic_baseline["weekly_results"].loc[
-        dynamic_baseline["weekly_results"]["week_start"].isin(train_week_set)
-    ]
-    fixed_train = fixed_baseline["weekly_results"].loc[fixed_baseline["weekly_results"]["week_start"].isin(train_week_set)]
-    rule_train = rule_baseline["weekly_results"].loc[rule_baseline["weekly_results"]["week_start"].isin(train_week_set)]
-    delta_cost_series = pd.concat(
-        [
-            fixed_train["procurement_cost_w"].reset_index(drop=True) - dynamic_train["procurement_cost_w"].reset_index(drop=True),
-            rule_train["procurement_cost_w"].reset_index(drop=True) - dynamic_train["procurement_cost_w"].reset_index(drop=True),
-        ],
-        ignore_index=True,
-    )
-    reward_robust_stats = {
-        "delta_cost": _robust_summary(delta_cost_series, float(config["reward"]["robust_eps"])),
-    }
-    bundle["reward_reference"] = reward_reference
-    bundle["reward_robust_stats"] = reward_robust_stats
-    bundle["baseline_dynamic_results"] = dynamic_baseline["weekly_results"]
-    bundle["baseline_fixed_results"] = fixed_baseline["weekly_results"]
-    bundle["baseline_rule_results"] = rule_baseline["weekly_results"]
-    prepare_runtime_bundle(bundle)
-
-    train_sequence = build_bootstrap_sequence(
-        train_weeks=split.train,
-        sequence_length=int(config["scenario"]["train_sequence_length"]),
-        block_size=int(config["scenario"]["block_size"]),
-        seed=int(config["scenario"]["bootstrap_seed"]),
-    )
-
-    bundle["feature_manifest"].to_csv(output_paths["metrics"] / "feature_manifest.csv", index=False)
-    save_json(
-        {
-            "version": config["version"],
-            "config_path": config["config_path"],
-            "agent_feature_columns": agent_feature_columns,
-            "report_only_columns": config["feature_selection"]["feature_keep_for_report_only"],
-            "manifest": bundle["feature_manifest"].to_dict(orient="records"),
-        },
-        output_paths["reports"] / "feature_manifest.json",
+    policy_deep.inventory.to_csv(output_paths["metrics"] / "policy_file_inventory.csv", index=False)
+    policy_deep.document_units.to_csv(output_paths["metrics"] / "policy_document_units.csv", index=False)
+    policy_deep.candidate_rules.to_csv(output_paths["metrics"] / "policy_rule_candidates.csv", index=False)
+    policy_deep.reviewed_rules.to_csv(output_paths["metrics"] / "policy_rule_reviewed.csv", index=False)
+    policy_deep.rule_table.to_csv(output_paths["metrics"] / "policy_rule_table.csv", index=False)
+    policy_deep.state_trace.to_csv(output_paths["metrics"] / "policy_state_trace.csv", index=False)
+    policy_deep.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
+    market_constraints.to_csv(output_paths["metrics"] / "market_rule_constraints.csv", index=False)
+    save_markdown(
+        build_market_rule_constraints_markdown(
+            config=config,
+            constraints=market_constraints,
+            rule_table=policy_deep.rule_table,
+            violations=market_constraint_violations,
+        ),
+        output_paths["reports"] / "market_rule_constraints.md",
     )
     bundle["weekly_metadata"].to_csv(output_paths["metrics"] / "weekly_metadata.csv", index=False)
     bundle["weekly_features"].to_csv(output_paths["metrics"] / "weekly_features.csv", index=False)
-    reward_reference.to_csv(output_paths["metrics"] / "reward_reference_dynamic_baseline.csv", index=False)
+    feature_manifest.to_csv(output_paths["metrics"] / "feature_manifest.csv", index=False)
+    save_json(
+        {
+            "version": config["version"],
+            "agent_feature_columns": agent_feature_columns,
+            "manifest": feature_manifest.to_dict(orient="records"),
+        },
+        output_paths["reports"] / "feature_manifest.json",
+    )
     dump_yaml(config["raw_experiment_config"], output_paths["reports"] / "train_config_snapshot.yaml")
-
     logger.info("已加载数据文件: %s", csv_path)
-    logger.info("15分钟记录数: %s", len(bundle["quarter"]))
-    logger.info("小时记录数: %s", len(bundle["hourly"]))
-    logger.info("周度样本数: %s", len(bundle["weekly_metadata"]))
-    logger.info("政策文件数: %s", len(policy_result.inventory))
-    logger.info("政策规则数: %s", len(policy_result.rule_table))
-    logger.info("政策解析失败文件数: %s", len(policy_result.failures))
-    logger.info("市场规则约束数: %s", len(market_constraints))
-    logger.info("市场规则约束校验问题数: %s", len(market_constraint_violations))
-    logger.info("奖励强基准: %s", config["reward"]["strong_baseline"])
-    logger.info("预热周: %s", [week.strftime("%Y-%m-%d") for week in split.warmup])
-    logger.info("训练周: %s", [week.strftime("%Y-%m-%d") for week in split.train])
-    logger.info("验证周: %s", [week.strftime("%Y-%m-%d") for week in split.val])
-    logger.info("回测周: %s", [week.strftime("%Y-%m-%d") for week in split.test])
-    if rolling_validation_windows:
-        logger.info("滚动验证窗口: %s", _rolling_windows_to_dict(rolling_validation_windows))
-
+    logger.info("训练算法: %s", config["training"]["algorithm"])
+    logger.info("政策来源文件数: %s", len(policy_deep.inventory))
+    logger.info("政策候选规则数: %s", len(policy_deep.candidate_rules))
+    logger.info("政策正式规则数: %s", len(policy_deep.rule_table))
+    logger.info("滚动重训窗口数: %s", len(rolling_plan))
     return {
         "config": config,
         "output_paths": output_paths,
@@ -283,8 +159,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         "data_quality_report": report,
         "bundle": bundle,
         "split": split,
-        "train_sequence": train_sequence,
-        "rolling_validation_windows": rolling_validation_windows,
+        "rolling_plan": rolling_plan,
     }
 
 

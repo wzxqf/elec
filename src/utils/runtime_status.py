@@ -30,8 +30,17 @@ def write_runtime_status(path: str | Path, payload: dict[str, Any]) -> None:
     status_path.parent.mkdir(parents=True, exist_ok=True)
     merged = {**DEFAULT_RUNTIME_STATUS, **payload}
     temp_path = status_path.with_suffix(status_path.suffix + ".tmp")
-    temp_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
-    temp_path.replace(status_path)
+    serialized = json.dumps(merged, ensure_ascii=False, indent=2)
+    temp_path.write_text(serialized, encoding="utf-8")
+    try:
+        temp_path.replace(status_path)
+    except PermissionError:
+        status_path.write_text(serialized, encoding="utf-8")
+        if temp_path.exists():
+            try:
+                temp_path.unlink(missing_ok=True)
+            except PermissionError:
+                pass
 
 
 class RuntimeStatusTracker:

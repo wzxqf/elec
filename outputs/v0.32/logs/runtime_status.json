@@ -1,7 +1,7 @@
 {
-  "stage": "完成",
-  "phase_name": "全量流水线",
-  "phase_progress": 1.0,
-  "total_progress": 1.0,
-  "message": "流水线执行完成"
+  "stage": "训练",
+  "phase_name": "HPSO 参数训练",
+  "phase_progress": 0.0375,
+  "total_progress": 0.012499999999999999,
+  "message": "iter 3/80 best 1495365065.6466"
 }
