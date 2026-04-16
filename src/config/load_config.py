@@ -25,6 +25,7 @@ REQUIRED_SECTIONS = [
     "lower_strategy",
     "economics",
     "hybrid_pso",
+    "parameter_compiler",
 ]
 
 
@@ -64,6 +65,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     reporting = _require_section(root_config, "reporting")
     analysis = _require_section(root_config, "analysis")
     hybrid_pso = _require_section(root_config, "hybrid_pso")
+    parameter_compiler = _require_section(root_config, "parameter_compiler")
     policy_deep = _require_section(root_config, "policy_deep")
     policy_projection = _require_section(root_config, "policy_projection")
     upper_strategy = _require_section(root_config, "upper_strategy")
@@ -73,11 +75,11 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
     algorithm = str(training.get("algorithm", "")).upper()
-    if algorithm == "HYBRID_PSO_V033":
+    if algorithm in {"HYBRID_PSO_V033", "HYBRID_PSO_V036"}:
         _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
         _require_keys("hybrid_pso", hybrid_pso, ["seed", "upper", "lower"])
     else:
-        raise ValueError(f"不支持的 training.algorithm: {algorithm}。v0.33 仅支持 HYBRID_PSO_V033。")
+        raise ValueError(f"不支持的 training.algorithm: {algorithm}。当前仅支持 HYBRID_PSO_V033 / HYBRID_PSO_V036。")
     _require_keys("reward", reward, ["baseline_strategy", "cvar_alpha", "lambda_tail", "lambda_hedge", "lambda_trade", "lambda_violate"])
     _require_keys("feature_selection", feature_selection, ["enabled", "feature_include_for_agent", "feature_exclude_for_agent", "feature_keep_for_report_only"])
     _require_keys("policy_projection", policy_projection, ["mode", "clip_method", "violation_penalty_scale"])
@@ -107,6 +109,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "reporting": reporting,
         "analysis": analysis,
         "hybrid_pso": hybrid_pso,
+        "parameter_compiler": parameter_compiler,
         "policy_deep": policy_deep,
         "policy_projection": policy_projection,
         "upper_strategy": upper_strategy,

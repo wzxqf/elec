@@ -4,11 +4,13 @@ from typing import Any
 import pandas as pd
 
 from src.backtest.rolling_pipeline import build_rolling_retrain_plan
+from src.analysis.model_layout_reporting import build_parameter_layout_markdown, build_parameter_layout_payload
 from src.config.load_config import load_runtime_config
 from src.data.loader import load_raw_total_csv, locate_total_csv
 from src.data.preprocess import build_data_quality_markdown, clean_total_data
 from src.data.scenario_generator import WeekSplit, build_week_split
 from src.data.weekly_builder import build_weekly_bundle
+from src.model_layout.compiler import compile_parameter_layout
 from src.policy.market_constraints import (
     build_market_rule_constraints,
     build_market_rule_constraints_markdown,
@@ -109,6 +111,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     )
     bundle["feature_manifest"] = feature_manifest
     bundle["agent_feature_columns"] = agent_feature_columns
+    compiled_parameter_layout = compile_parameter_layout(config=config, bundle=bundle)
+    bundle["compiled_parameter_layout"] = compiled_parameter_layout
     bundle["tensor_bundle"] = compile_training_tensor_bundle(bundle, device=config["training"]["device"])
 
     split = build_week_split(config, bundle["weekly_features"], bundle["weekly_metadata"])
@@ -142,6 +146,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         },
         output_paths["reports"] / "feature_manifest.json",
     )
+    save_json(build_parameter_layout_payload(compiled_parameter_layout), output_paths["reports"] / "compiled_parameter_layout.json")
+    save_markdown(build_parameter_layout_markdown(compiled_parameter_layout), output_paths["reports"] / "parameter_layout_summary.md")
     dump_yaml(config["raw_experiment_config"], output_paths["reports"] / "train_config_snapshot.yaml")
     logger.info("已加载数据文件: %s", csv_path)
     logger.info("训练算法: %s", config["training"]["algorithm"])

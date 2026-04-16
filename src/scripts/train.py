@@ -22,10 +22,13 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
             f"- 设备: {runtime['score_kernel_device']}",
             f"- 上层粒子数: {runtime['upper_particles']}",
             f"- 下层粒子数: {runtime['lower_particles']}",
+            f"- 上层真实维度: {runtime.get('upper_dim', 'n/a')}",
+            f"- 下层真实维度: {runtime.get('lower_dim', 'n/a')}",
             f"- 迭代轮数: {runtime['iterations']}",
             f"- 最优目标值: {training['model'].best_score:.4f}",
             f"- 模型路径: {context['output_paths']['models'] / 'hybrid_pso_model.json'}",
             f"- 训练轨迹: {context['output_paths']['metrics'] / 'hybrid_pso_training_trace.csv'}",
+            f"- 参数布局摘要: {context['output_paths']['reports'] / 'parameter_layout_summary.md'}",
             "",
         ]
     )
@@ -36,10 +39,14 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
     status_path = context.get("runtime_status_path", Path.cwd() / ".cache" / "train_runtime_status.json")
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_tracker = RuntimeStatusTracker(status_path)
-    logger.info("开始执行 v0.33 训练模块。")
+    logger.info("开始执行 v0.36 训练模块。")
     train_bundle = subset_bundle_for_weeks(context["bundle"], context["split"].train)
     status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=0.0, total_progress=0.1, message="编译张量包")
-    training_result = train_hybrid_pso_model(train_bundle["tensor_bundle"], context["config"])
+    training_result = train_hybrid_pso_model(
+        train_bundle["tensor_bundle"],
+        context["config"],
+        compiled_layout=train_bundle.get("compiled_parameter_layout"),
+    )
     save_hybrid_pso_model(training_result.model, context["output_paths"]["models"] / "hybrid_pso_model.json")
     training_result.training_trace.to_csv(context["output_paths"]["metrics"] / "hybrid_pso_training_trace.csv", index=False)
     summary = build_train_summary(

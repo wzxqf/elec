@@ -11,6 +11,9 @@ import torch
 class TrainingTensorBundle:
     device: str
     week_index: pd.Index
+    weekly_feature_columns: list[str]
+    policy_columns: list[str]
+    hourly_feature_columns: list[str]
     weekly_feature_tensor: torch.Tensor
     policy_tensor: torch.Tensor
     hourly_tensor: torch.Tensor
@@ -126,6 +129,9 @@ def compile_training_tensor_bundle(bundle: dict[str, Any], device: str = "cpu") 
     return TrainingTensorBundle(
         device=resolved_device,
         week_index=week_index,
+        weekly_feature_columns=agent_columns,
+        policy_columns=policy_columns,
+        hourly_feature_columns=["net_load_da", "net_load_id", "price_spread", "load_dev", "renewable_dev"],
         weekly_feature_tensor=weekly_feature_tensor.to(resolved_device),
         policy_tensor=policy_tensor.to(resolved_device),
         hourly_tensor=hourly_tensor.to(resolved_device),

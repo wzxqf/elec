@@ -59,6 +59,7 @@ def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
         lower_particle=model.lower_best,
         strategy_name="hybrid_pso_validation",
         config=context["config"],
+        compiled_layout=val_bundle.get("compiled_parameter_layout"),
     )
     validation.weekly_results.to_csv(context["output_paths"]["metrics"] / "validation_weekly_results.csv", index=False)
     pd.DataFrame([validation.metrics]).to_csv(context["output_paths"]["metrics"] / "validation_metrics.csv", index=False)

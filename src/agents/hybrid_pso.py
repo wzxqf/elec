@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+from src.model_layout.schema import CompiledParameterLayout
 from src.training.score_kernel import batch_score_particles
 from src.training.tensor_bundle import TrainingTensorBundle
 
@@ -61,7 +62,11 @@ def _randn(generator: torch.Generator, shape: tuple[int, ...], device: str) -> t
     return torch.randn(shape, generator=generator, device=device, dtype=torch.float32)
 
 
-def train_hybrid_pso_model(tensor_bundle: TrainingTensorBundle, config: dict[str, Any]) -> HybridPSOTrainResult:
+def train_hybrid_pso_model(
+    tensor_bundle: TrainingTensorBundle,
+    config: dict[str, Any],
+    compiled_layout: CompiledParameterLayout | None = None,
+) -> HybridPSOTrainResult:
     hybrid_cfg = config["hybrid_pso"]
     device = _resolve_device(config)
     seed = int(hybrid_cfg.get("seed", 42))
@@ -70,8 +75,13 @@ def train_hybrid_pso_model(tensor_bundle: TrainingTensorBundle, config: dict[str
     upper_particles = int(upper_cfg["particles"])
     lower_particles = int(lower_cfg["particles"])
     iterations = int(max(upper_cfg["iterations"], lower_cfg["iterations"]))
-    upper_dim = int(upper_cfg["dimension"])
-    lower_dim = int(lower_cfg["dimension"])
+    layout = compiled_layout
+    if layout is None:
+        upper_dim = int(upper_cfg["dimension"])
+        lower_dim = int(lower_cfg["dimension"])
+    else:
+        upper_dim = int(layout.upper.total_dimension)
+        lower_dim = int(layout.lower.total_dimension)
 
     generator = torch.Generator(device=device if device != "cpu" else "cpu")
     generator.manual_seed(seed)
@@ -146,7 +156,7 @@ def train_hybrid_pso_model(tensor_bundle: TrainingTensorBundle, config: dict[str
         best_score=global_best_score,
         metadata={
             "version": "v0.33",
-            "algorithm": "HYBRID_PSO_V033",
+            "algorithm": str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V033")),
             "score_kernel_device": device,
         },
     )
@@ -158,6 +168,8 @@ def train_hybrid_pso_model(tensor_bundle: TrainingTensorBundle, config: dict[str
             "upper_particles": upper_particles,
             "lower_particles": lower_particles,
             "iterations": iterations,
+            "upper_dim": upper_dim,
+            "lower_dim": lower_dim,
         },
         training_trace=pd.DataFrame(trace_rows),
     )

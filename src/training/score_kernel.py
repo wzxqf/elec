@@ -5,6 +5,7 @@ from typing import Any
 
 import torch
 
+from src.model_layout.schema import CompiledParameterLayout, ParameterBlockSpec
 from src.training.tensor_bundle import TrainingTensorBundle
 
 
@@ -61,12 +62,45 @@ def _cfg(config: dict[str, Any] | None, path: list[str], default: float) -> floa
     return float(current)
 
 
+def _find_block(layout_blocks: list[ParameterBlockSpec], block_name: str) -> ParameterBlockSpec:
+    for block in layout_blocks:
+        if block.name == block_name:
+            return block
+    raise KeyError(block_name)
+
+
+def _block_slice(particles: torch.Tensor, block: ParameterBlockSpec) -> torch.Tensor:
+    return particles[:, block.slice_start:block.slice_end]
+
+
+def _column_indices(available_columns: list[str], required_columns: list[str]) -> list[int]:
+    lookup = {column: idx for idx, column in enumerate(available_columns)}
+    missing = [column for column in required_columns if column not in lookup]
+    if missing:
+        raise KeyError(", ".join(missing))
+    return [lookup[column] for column in required_columns]
+
+
+def _curve_basis(curve_dim: int, device: str) -> torch.Tensor:
+    hours = torch.linspace(0.0, 1.0, steps=24, device=device, dtype=torch.float32)
+    components: list[torch.Tensor] = []
+    for idx in range(curve_dim):
+        if idx == 0:
+            components.append(torch.ones_like(hours))
+        elif idx % 2 == 1:
+            components.append(torch.cos(torch.pi * (idx // 2 + 1) * hours))
+        else:
+            components.append(torch.sin(torch.pi * (idx // 2) * hours))
+    return torch.stack(components[:curve_dim], dim=0)
+
+
 def batch_score_particles(
     tensor_bundle: TrainingTensorBundle,
     upper_particles: torch.Tensor,
     lower_particles: torch.Tensor,
     device: str = "cpu",
     config: dict[str, Any] | None = None,
+    compiled_layout: CompiledParameterLayout | None = None,
 ) -> ParticleScoreResult:
     score_device = _resolve_device(device)
     weekly_features = torch.nan_to_num(tensor_bundle.weekly_feature_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
@@ -85,50 +119,87 @@ def batch_score_particles(
     week_count, hour_count = weekly_features.shape[0], hourly_tensor.shape[1]
     interval_count = price_tensor.shape[1]
 
-    feature_dim = min(weekly_features.shape[1], upper.shape[1])
-    feature_signal = weekly_features[:, :feature_dim] @ upper[:, :feature_dim].T
-    feature_signal = feature_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
+    if compiled_layout is None:
+        feature_dim = min(weekly_features.shape[1], upper.shape[1])
+        feature_signal = weekly_features[:, :feature_dim] @ upper[:, :feature_dim].T
+        feature_signal = feature_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
 
-    policy_dim = min(policy_tensor.shape[1], upper.shape[1])
-    if policy_dim > 0:
-        policy_signal = policy_tensor[:, :policy_dim] @ upper[:, :policy_dim].T
-        policy_signal = policy_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
-        policy_projection_active = (policy_tensor[:, :policy_dim].abs().mean(dim=1) > 0).float().view(1, 1, week_count)
+        policy_dim = min(policy_tensor.shape[1], upper.shape[1])
+        if policy_dim > 0:
+            policy_signal = policy_tensor[:, :policy_dim] @ upper[:, :policy_dim].T
+            policy_signal = policy_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
+            policy_projection_active = (policy_tensor[:, :policy_dim].abs().mean(dim=1) > 0).float().view(1, 1, week_count)
+        else:
+            policy_signal = torch.zeros((upper_count, lower_count, week_count), dtype=torch.float32, device=score_device)
+            policy_projection_active = torch.zeros((1, 1, week_count), dtype=torch.float32, device=score_device)
+        upper_curve_seed = upper[:, -4:] if upper.shape[1] >= 4 else torch.nn.functional.pad(upper, (max(0, 4 - upper.shape[1]), 0))
+        curve_base = torch.linspace(-1.0, 1.0, steps=24, device=score_device, dtype=torch.float32)
+        curve_components = torch.stack(
+            [
+                torch.ones_like(curve_base),
+                curve_base,
+                torch.cos(torch.pi * curve_base),
+                torch.sin(torch.pi * curve_base),
+            ],
+            dim=0,
+        )
+        contract_curve_logits = torch.einsum("uc,ch->uh", upper_curve_seed[:, :4], curve_components)
+        lower_groups = lower.view(lower_count, 4, -1).mean(dim=-1)
+        spread_coef = lower_groups[:, 0].view(1, lower_count, 1, 1)
+        load_coef = lower_groups[:, 1].view(1, lower_count, 1, 1)
+        renewable_coef = lower_groups[:, 2].view(1, lower_count, 1, 1)
+        policy_shrink = torch.sigmoid(lower_groups[:, 3]).view(1, lower_count, 1, 1)
+        action_head = None
     else:
-        policy_signal = torch.zeros((upper_count, lower_count, week_count), dtype=torch.float32, device=score_device)
-        policy_projection_active = torch.zeros((1, 1, week_count), dtype=torch.float32, device=score_device)
+        weekly_block = _find_block(compiled_layout.upper.blocks, "weekly_feature_weights")
+        weekly_indices = _column_indices(tensor_bundle.weekly_feature_columns, weekly_block.columns)
+        weekly_feature_matrix = weekly_features[:, weekly_indices]
+        weekly_weight_block = _block_slice(upper, weekly_block)
+        feature_signal = weekly_feature_matrix @ weekly_weight_block.T
+        feature_signal = feature_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
+
+        policy_block = _find_block(compiled_layout.upper.blocks, "policy_feature_weights")
+        policy_indices = _column_indices(tensor_bundle.policy_columns, policy_block.columns)
+        policy_feature_matrix = policy_tensor[:, policy_indices]
+        policy_weight_block = _block_slice(upper, policy_block)
+        policy_signal = policy_feature_matrix @ policy_weight_block.T
+        policy_signal = policy_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
+        policy_projection_active = (policy_feature_matrix.abs().mean(dim=1) > 0).float().view(1, 1, week_count)
+
+        curve_block = _find_block(compiled_layout.upper.blocks, "contract_curve_latent")
+        upper_curve_seed = _block_slice(upper, curve_block)
+        curve_components = _curve_basis(upper_curve_seed.shape[1], score_device)
+        contract_curve_logits = torch.einsum("uc,ch->uh", upper_curve_seed, curve_components)
+
+        spread_block = _block_slice(lower, _find_block(compiled_layout.lower.blocks, "spread_response"))
+        load_block = _block_slice(lower, _find_block(compiled_layout.lower.blocks, "load_deviation_response"))
+        renewable_block = _block_slice(lower, _find_block(compiled_layout.lower.blocks, "renewable_response"))
+        shrink_block = _block_slice(lower, _find_block(compiled_layout.lower.blocks, "policy_shrink_response"))
+        spread_coef = spread_block.mean(dim=1).view(1, lower_count, 1, 1)
+        load_coef = load_block.mean(dim=1).view(1, lower_count, 1, 1)
+        renewable_coef = renewable_block.mean(dim=1).view(1, lower_count, 1, 1)
+        policy_shrink = torch.sigmoid(shrink_block.mean(dim=1)).view(1, lower_count, 1, 1)
+        action_head = _block_slice(upper, _find_block(compiled_layout.upper.blocks, "action_head"))
 
     # Upper layer: weekly contract adjustment, contract position, exposure band.
-    contract_adjustment_mwh_raw = 0.30 * torch.tanh(0.15 * feature_signal + 0.05 * policy_signal) * forecast_load.view(1, 1, week_count)
+    if action_head is not None and action_head.shape[1] > 0:
+        contract_bias = action_head[:, 0].view(upper_count, 1, 1)
+        exposure_bias = action_head[:, 1].view(upper_count, 1, 1) if action_head.shape[1] > 1 else 0.0
+    else:
+        contract_bias = 0.0
+        exposure_bias = 0.0
+    contract_adjustment_mwh_raw = 0.30 * torch.tanh(0.15 * feature_signal + 0.05 * policy_signal + contract_bias) * forecast_load.view(1, 1, week_count)
     policy_scale = torch.clamp(1.0 - 0.15 * torch.sigmoid(policy_signal), min=0.60, max=1.0)
     contract_adjustment_mwh_exec = contract_adjustment_mwh_raw * policy_scale
     contract_position_mwh = torch.relu(0.60 * forecast_load.view(1, 1, week_count) + contract_adjustment_mwh_exec)
-    exposure_band_mwh = torch.relu(0.20 * forecast_load.view(1, 1, week_count) * (1.0 + torch.tanh(0.10 * feature_signal)))
+    exposure_band_mwh = torch.relu(0.20 * forecast_load.view(1, 1, week_count) * (1.0 + torch.tanh(0.10 * feature_signal + exposure_bias)))
 
-    # Build a smooth 24h contract curve from four shape factors inferred from the upper particle.
-    curve_base = torch.linspace(-1.0, 1.0, steps=24, device=score_device, dtype=torch.float32)
-    upper_curve_seed = upper[:, -4:] if upper.shape[1] >= 4 else torch.nn.functional.pad(upper, (max(0, 4 - upper.shape[1]), 0))
-    curve_components = torch.stack(
-        [
-            torch.ones_like(curve_base),
-            curve_base,
-            torch.cos(torch.pi * curve_base),
-            torch.sin(torch.pi * curve_base),
-        ],
-        dim=0,
-    )
-    contract_curve_logits = torch.einsum("uc,ch->uh", upper_curve_seed[:, :4], curve_components)
     contract_curve = torch.softmax(contract_curve_logits, dim=-1).unsqueeze(1).unsqueeze(2).expand(upper_count, lower_count, week_count, 24)
 
     # Lower layer: hourly spot hedge responses within the exposure band.
     spread = hourly_tensor[..., 2].view(1, 1, week_count, hour_count)
     load_dev = hourly_tensor[..., 3].view(1, 1, week_count, hour_count)
     renewable_dev = hourly_tensor[..., 4].view(1, 1, week_count, hour_count)
-    lower_groups = lower.view(lower_count, 4, -1).mean(dim=-1)
-    spread_coef = lower_groups[:, 0].view(1, lower_count, 1, 1)
-    load_coef = lower_groups[:, 1].view(1, lower_count, 1, 1)
-    renewable_coef = lower_groups[:, 2].view(1, lower_count, 1, 1)
-    policy_shrink = torch.sigmoid(lower_groups[:, 3]).view(1, lower_count, 1, 1)
     spot_hedge_limit_mwh = (exposure_band_mwh.unsqueeze(-1) / max(hour_count, 1)) * (0.50 + 0.50 * policy_shrink)
     spot_hedge_limit_mwh = spot_hedge_limit_mwh.expand(upper_count, lower_count, week_count, hour_count)
     raw_hourly_signal = 0.02 * spread_coef * spread + 0.01 * load_coef * load_dev + 0.01 * renewable_coef * renewable_dev

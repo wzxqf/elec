@@ -40,7 +40,7 @@ def _build_backtest_summary(summary: dict[str, Any], rolling_excess_return_metri
 
 def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="backtest")
-    logger.info("开始执行 v0.33 回测模块。")
+    logger.info("开始执行 v0.36 回测模块。")
     window_records: list[dict[str, Any]] = []
     parameter_rows: list[dict[str, Any]] = []
     validation_frames: list[pd.DataFrame] = []
@@ -52,7 +52,11 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         train_bundle = subset_bundle_for_weeks(context["bundle"], window.train_weeks)
         val_bundle = subset_bundle_for_weeks(context["bundle"], window.val_weeks)
         test_bundle = subset_bundle_for_weeks(context["bundle"], window.test_weeks)
-        training = train_hybrid_pso_model(train_bundle["tensor_bundle"], context["config"])
+        training = train_hybrid_pso_model(
+            train_bundle["tensor_bundle"],
+            context["config"],
+            compiled_layout=train_bundle.get("compiled_parameter_layout"),
+        )
         window_model: HybridPSOModel = training.model
         val_result = materialize_particle_pair(
             tensor_bundle=val_bundle["tensor_bundle"],
@@ -60,6 +64,7 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
             lower_particle=window_model.lower_best,
             strategy_name=f"{window.window_name}_validation",
             config=context["config"],
+            compiled_layout=val_bundle.get("compiled_parameter_layout"),
         )
         test_result = materialize_particle_pair(
             tensor_bundle=test_bundle["tensor_bundle"],
@@ -67,6 +72,7 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
             lower_particle=window_model.lower_best,
             strategy_name=f"{window.window_name}_test",
             config=context["config"],
+            compiled_layout=test_bundle.get("compiled_parameter_layout"),
         )
         window_records.append(
             {

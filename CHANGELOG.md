@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.36
+
+- 主训练主线升级为 `HYBRID_PSO_V036`，在不改变“双层参数化 HPSO + 小时级规则修正 + 15 分钟代理结算”边界的前提下，引入配置驱动的参数编译器。
+- 新增 `src/model_layout/schema.py` 与 `src/model_layout/compiler.py`，将 `experiment_config.yaml` 中的 `parameter_compiler` 声明编译为上下层参数块、特征映射和真实维度，不再依赖隐式手写维度。
+- 根配置新增 `parameter_compiler` 节，上层正式拆分为 `weekly_feature_weights`、`policy_feature_weights`、`contract_curve_latent`、`action_head`，下层正式拆分为 `spread_response`、`load_deviation_response`、`renewable_response`、`policy_shrink_response`。
+- `prepare_project_context()` 现会在训练前完成参数编译，并输出 `compiled_parameter_layout.json` 与 `parameter_layout_summary.md`，使“配置 -> 参数块 -> 真实维度”路径可审计。
+- `train_hybrid_pso_model()` 现支持直接消费编译后的布局，runtime profile 新增 `upper_dim` 与 `lower_dim`；`train_summary.md` 同步记录真实维度和参数布局摘要路径。
+- `batch_score_particles()` 现支持按编译后的参数块逐块取参，废除主线中的“只看前 `min(特征数, 粒子维度)` 个特征”退化路径；上层后段特征和显式 `contract_curve_latent` 块现可真实影响打分。
+- 训练、验证、滚动回测与物化链路已统一传递 `compiled_layout`，避免训练使用新布局而回测仍走旧截断逻辑的口径漂移。
+- `hybrid_pso` 默认搜索预算提升为：上层 `160` 粒子、下层 `128` 粒子、上下层 `240` 轮；配置中的回退维度占位同步提升到 `140 / 32`。
+- 新增 `tests/test_v036_parameter_compiler.py`、`tests/test_v036_prepare_context.py`、`tests/test_v036_hybrid_pso.py`、`tests/test_v036_score_kernel.py`，并保持既有 HPSO 与运行入口测试通过。
+
 ## v0.35
 
 - 正式主线继续保持为双层 `HYBRID_PSO_V033`，不恢复 PPO / SB3 / gym 或其他上层 DRL 训练栈，`run_all.py` 仍作为全量项目的一键入口。

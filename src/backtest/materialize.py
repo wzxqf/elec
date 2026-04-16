@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 import torch
 
+from src.model_layout.schema import CompiledParameterLayout
 from src.training.score_kernel import batch_score_particles
 from src.training.tensor_bundle import TrainingTensorBundle
 
@@ -67,10 +68,18 @@ def materialize_particle_pair(
     lower_particle: list[float] | torch.Tensor,
     strategy_name: str,
     config: dict[str, Any] | None = None,
+    compiled_layout: CompiledParameterLayout | None = None,
 ) -> MaterializedStrategyResult:
     upper = torch.as_tensor(upper_particle, dtype=torch.float32, device=tensor_bundle.weekly_feature_tensor.device).view(1, -1)
     lower = torch.as_tensor(lower_particle, dtype=torch.float32, device=tensor_bundle.weekly_feature_tensor.device).view(1, -1)
-    scored = batch_score_particles(tensor_bundle, upper, lower, device=tensor_bundle.device, config=config)
+    scored = batch_score_particles(
+        tensor_bundle,
+        upper,
+        lower,
+        device=tensor_bundle.device,
+        config=config,
+        compiled_layout=compiled_layout,
+    )
     contract_adjustment_raw = scored.contract_adjustment_mwh_raw[0, 0].detach().cpu().numpy()
     contract_adjustment_exec = scored.contract_adjustment_mwh_exec[0, 0].detach().cpu().numpy()
     contract_position = scored.contract_position_mwh[0, 0].detach().cpu().numpy()
