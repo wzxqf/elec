@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.35
+
+- 正式主线继续保持为双层 `HYBRID_PSO_V033`，不恢复 PPO / SB3 / gym 或其他上层 DRL 训练栈，`run_all.py` 仍作为全量项目的一键入口。
+- 新增 `src/analysis/module1.py`、`src/analysis/excess_return.py`、`src/analysis/reporting.py`，将 `v0.35` 的评估层和分析层从训练主链中独立出来，避免把论文表达指标回灌到正式优化目标。
+- 周度数据层补齐 `da_id_cross_corr_w`、`extreme_event_flag_w`、`extreme_price_spike_flag_w` 等基础字段，并在物化层新增 `lock_ratio_proxy_w`、`curve_match_score_w`、`stability_score_w`，用于模块1正式输出。
+- 新增 `contract_value_weekly.csv` 与 `risk_factor_manifest.csv`，正式输出“中长期合约价值评估 + 五类风险因子”结果，不再停留在零散代理字段层面。
+- 新增 `policy_risk_adjusted_metrics.csv` 与 `rolling_excess_return_metrics.csv`，正式输出政策风险调整后超额收益、窗口胜率、窗口最大回撤和政策风险调整后夏普比率。
+- 新增 `module1_summary.md`、`market_mechanism_analysis.md`、`excess_return_validation_summary.md`，并同步扩充 `validation_summary.md`、`backtest_summary.md`、`rolling_audit_summary.md` 与 `run_summary.md`。
+- 修复 `v0.35` 首轮集成中 `curve_match_score_w` 计算对整周 168 小时负荷曲线与 24 点合约曲线直接做差导致验证阶段中断的问题，现改为按 `hour_index % 24` 聚合到 24 点日内形状后再比较。
+- 新增 `tests/test_v035_weekly_builder.py`、`tests/test_v035_materialize.py`、`tests/test_v035_module1_analysis.py`、`tests/test_v035_excess_return_analysis.py`、`tests/test_v035_script_outputs.py`，并同步更新 `run_all` 相关回归测试。
+- 根配置升级为 `project.version: v0.35`，正式产物写入 `outputs/v0.35/<真实输出>`。
+
 ## v0.31
 
 - 新增市场规则约束归集模块 `src/policy/market_constraints.py`，将中长期结算口径、24 时段合约曲线、96 点现货结算、零售侧单一售电公司、辅助服务边界、新能源机制电价、2026 年中长期价格联动和计量可追踪性归结为可查阅约束。
