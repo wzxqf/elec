@@ -16,6 +16,11 @@ from src.data.weekly_builder import build_weekly_bundle
 from src.policy.policy_parser import parse_policy_environment
 from src.policy.policy_regime import build_policy_state_trace
 from src.policy.policy_tables import build_policy_rule_summary_markdown
+from src.policy.market_constraints import (
+    build_market_rule_constraints,
+    build_market_rule_constraints_markdown,
+    validate_market_rule_alignment,
+)
 from src.utils.io import dump_yaml, resolve_output_paths, save_json, save_markdown
 from src.utils.logger import configure_logging
 from src.utils.seeds import set_global_seed
@@ -121,15 +126,27 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     bundle = build_weekly_bundle(cleaned, config)
     policy_result = parse_policy_environment(config["policy_directory"])
     policy_trace = build_policy_state_trace(bundle["weekly_metadata"], policy_result.rule_table, policy_result.inventory, config)
+    market_constraints = build_market_rule_constraints(config, policy_result.rule_table)
+    market_constraint_violations = validate_market_rule_alignment(config, policy_result.rule_table, policy_trace)
     save_markdown(
         build_policy_rule_summary_markdown(policy_result.inventory, policy_result.rule_table, policy_result.failures),
         output_paths["reports"] / "policy_rule_summary.md",
+    )
+    save_markdown(
+        build_market_rule_constraints_markdown(
+            config=config,
+            constraints=market_constraints,
+            rule_table=policy_result.rule_table,
+            violations=market_constraint_violations,
+        ),
+        output_paths["reports"] / "market_rule_constraints.md",
     )
     policy_result.inventory.to_csv(output_paths["metrics"] / "policy_file_inventory.csv", index=False)
     policy_result.inventory.to_csv(output_paths["metrics"] / "policy_metadata_index.csv", index=False)
     policy_result.rule_table.to_csv(output_paths["metrics"] / "policy_rule_table.csv", index=False)
     policy_result.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
     policy_trace.to_csv(output_paths["metrics"] / "policy_state_trace.csv", index=False)
+    market_constraints.to_csv(output_paths["metrics"] / "market_rule_constraints.csv", index=False)
 
     bundle["weekly_metadata"] = bundle["weekly_metadata"].merge(policy_trace, on="week_start", how="left")
     bundle["weekly_features"] = bundle["weekly_features"].merge(
@@ -156,6 +173,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     bundle["policy_state_trace"] = policy_trace
     bundle["policy_failures"] = policy_result.failures
     bundle["policy_parse_failures"] = policy_result.failures
+    bundle["market_rule_constraints"] = market_constraints
+    bundle["market_rule_constraint_violations"] = market_constraint_violations
 
     feature_manifest, agent_feature_columns = _build_feature_manifest(
         weekly_features=bundle["weekly_features"],
@@ -244,6 +263,8 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     logger.info("政策文件数: %s", len(policy_result.inventory))
     logger.info("政策规则数: %s", len(policy_result.rule_table))
     logger.info("政策解析失败文件数: %s", len(policy_result.failures))
+    logger.info("市场规则约束数: %s", len(market_constraints))
+    logger.info("市场规则约束校验问题数: %s", len(market_constraint_violations))
     logger.info("奖励强基准: %s", config["reward"]["strong_baseline"])
     logger.info("预热周: %s", [week.strftime("%Y-%m-%d") for week in split.warmup])
     logger.info("训练周: %s", [week.strftime("%Y-%m-%d") for week in split.train])

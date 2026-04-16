@@ -139,7 +139,7 @@ def build_policy_state_trace(
         state = {"week_start": week_start}
         state.update(DEFAULT_POLICY_STATE)
 
-        active_mask = ordered_rules["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min) <= week_end
+        active_mask = ordered_rules["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min) <= week_start
         if end_series is not None:
             active_mask &= end_series.isna() | (end_series >= week_start)
         active_rules = ordered_rules.loc[active_mask].copy()

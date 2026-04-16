@@ -1,79 +1,72 @@
 project:
   version: v0.31
   project_root: d:/elec
-
 data:
-  sample_start: "2025-11-01 00:00:00"
-  sample_end: "2026-03-20 23:45:00"
-  buffer_end: "2026-03-28 23:45:00"
+  sample_start: '2025-11-01 00:00:00'
+  sample_end: '2026-03-20 23:45:00'
+  buffer_end: '2026-03-28 23:45:00'
   policy_directory: d:/elec/政策环境
   data_candidates:
-    - d:/elec/total.csv
-    - d:/elec/data/total.csv
+  - d:/elec/total.csv
+  - d:/elec/data/total.csv
   expected_frequency_minutes: 15
   datetime_column: datetime
   duplicate_strategy: mean
   settlement_interval_hours: 0.25
   hour_interval_hours: 1.0
   week_period: W-SUN
-  scan_buffer_end: "2026-03-28 23:45:00"
+  scan_buffer_end: '2026-03-28 23:45:00'
   feature_quantiles:
-    - 0.25
-    - 0.50
-    - 0.75
+  - 0.25
+  - 0.5
+  - 0.75
   weekly_target_column: net_load_da_mwh
   actual_target_column: net_load_id_mwh
   lt_price:
     preferred_columns: []
     fallback_method: previous_week_da_mean
     warmup_label: warmup_unavailable
-    linked_effective_start: "2026-02-01 00:00:00"
-
+    linked_effective_start: '2026-02-01 00:00:00'
 outputs:
   root: d:/elec/outputs
-
 split:
-  train_start_week: "2025-11-03 00:00:00"
-  train_end_week: "2026-01-26 00:00:00"
-  val_start_week: "2026-02-02 00:00:00"
-  val_end_week: "2026-02-23 00:00:00"
-  test_start_week: "2026-03-02 00:00:00"
-  test_end_week: "2026-03-16 00:00:00"
-
+  train_start_week: '2025-11-03 00:00:00'
+  train_end_week: '2026-01-26 00:00:00'
+  val_start_week: '2026-02-02 00:00:00'
+  val_end_week: '2026-02-23 00:00:00'
+  test_start_week: '2026-03-02 00:00:00'
+  test_end_week: '2026-03-16 00:00:00'
 rolling_validation:
   enabled: true
   windows:
-    - name: 窗口A
-      train_end_week: "2026-01-05 00:00:00"
-      val_start_week: "2026-01-12 00:00:00"
-      val_end_week: "2026-02-02 00:00:00"
-    - name: 窗口B
-      train_end_week: "2026-01-19 00:00:00"
-      val_start_week: "2026-01-26 00:00:00"
-      val_end_week: "2026-02-16 00:00:00"
-    - name: 窗口C
-      train_end_week: "2026-01-26 00:00:00"
-      val_start_week: "2026-02-02 00:00:00"
-      val_end_week: "2026-02-23 00:00:00"
-
+  - name: 窗口A
+    train_end_week: '2026-01-05 00:00:00'
+    val_start_week: '2026-01-12 00:00:00'
+    val_end_week: '2026-02-02 00:00:00'
+  - name: 窗口B
+    train_end_week: '2026-01-19 00:00:00'
+    val_start_week: '2026-01-26 00:00:00'
+    val_end_week: '2026-02-16 00:00:00'
+  - name: 窗口C
+    train_end_week: '2026-01-26 00:00:00'
+    val_start_week: '2026-02-02 00:00:00'
+    val_end_week: '2026-02-23 00:00:00'
 cost:
-  risk_vol_weight: 0.50
-  risk_cvar_weight: 0.50
-  transaction_linear: 1.20
+  risk_vol_weight: 0.5
+  risk_cvar_weight: 0.5
+  transaction_linear: 1.2
   transaction_quadratic: 0.015
-  lt_adjust_cost: 0.60
-  imbalance_penalty_multiplier: 1.00
+  lt_adjust_cost: 0.6
+  imbalance_penalty_multiplier: 1.0
   cvar_alpha: 0.95
   cvar_budget_ratio: 0.18
   cvar_budget_min: 220000.0
   cvar_budget_eps: 1.0
-
 constraints:
-  lock_ratio_min: 0.10
+  lock_ratio_min: 0.1
   lock_ratio_max: 0.85
   delta_h_max: 0.12
   delta_lock_cap: 0.12
-
 reward:
   strong_baseline: dynamic_lock_only
   alpha_cost: 1.15
@@ -81,22 +74,20 @@ reward:
   lambda_action_smooth: 0.12
   lambda_hourly_smooth: 0.08
   lambda_hedge_error: 0.18
-  robust_eps: 1.0e-6
-
+  robust_eps: 1.0e-06
 env:
   include_prev_reward: true
   reward_temperature: 2.2
-
 rules:
   price_spread_weight: 0.45
   load_dev_weight: 0.35
-  renewable_dev_weight: 0.20
+  renewable_dev_weight: 0.2
   spread_threshold: 8.0
   load_dev_threshold: 120.0
   renewable_dev_threshold: 100.0
   band_base_multiplier: 1.05
   band_floor_mwh: 30.0
-  band_cap_ratio: 1.10
+  band_cap_ratio: 1.1
   ancillary_tight_multiplier: 0.88
   peak_shaving_pause_multiplier: 0.92
   price_spike_shrink: 0.12
@@ -104,7 +95,6 @@ rules:
   non_negative_clip: true
   signal_clip: 1.0
   smoothing_mode: soft_clip
-
 training:
   algorithm: HPSO
   policy: MlpPolicy
@@ -124,59 +114,53 @@ training:
   seed: 42
   device: cuda
   use_vec_normalize: false
-
 scenario:
   train_sequence_length: 96
   block_size: 3
   bootstrap_seed: 42
   training_sequence_method: block_bootstrap
-
 benchmarks:
-  fixed_lock_ratio: 0.60
+  fixed_lock_ratio: 0.6
   dynamic_lock_base: 0.55
-  dynamic_lock_spread_penalty: 0.10
+  dynamic_lock_spread_penalty: 0.1
   dynamic_lock_renewable_bonus: 0.08
   dynamic_lock_policy_bonus: 0.05
   dynamic_lock_linked_price_penalty: 0.08
-  rule_only_bandwidth: 0.70
-
+  rule_only_bandwidth: 0.7
 feature_selection:
   enabled: true
   feature_include_for_agent:
-    - lt_settlement_base
-    - spot_marginal_exposure
-    - ancillary_freq_reserve_tight
-    - ancillary_peak_shaving_pause
-    - renewable_mechanism_active
-    - mechanism_price_floor
-    - mechanism_price_ceiling
-    - mechanism_volume_ratio_max
-    - lt_price_linked_active
-    - fixed_price_ratio_max
-    - linked_price_ratio_min
-    - forward_price_linkage_days
-    - forward_mechanism_execution_days
+  - lt_settlement_base
+  - spot_marginal_exposure
+  - ancillary_freq_reserve_tight
+  - ancillary_peak_shaving_pause
+  - renewable_mechanism_active
+  - mechanism_price_floor
+  - mechanism_price_ceiling
+  - mechanism_volume_ratio_max
+  - lt_price_linked_active
+  - fixed_price_ratio_max
+  - linked_price_ratio_min
+  - forward_price_linkage_days
+  - forward_mechanism_execution_days
   feature_exclude_for_agent: []
   feature_keep_for_report_only:
-    - policy_count
-    - policy_source_file_count
-    - policy_parse_failure_count
-    - policy_names
-    - policy_sources
-    - active_state_groups
-
+  - policy_count
+  - policy_source_file_count
+  - policy_parse_failure_count
+  - policy_names
+  - policy_sources
+  - active_state_groups
 policy_regime:
   pre_switch_window_days: 28
   countdown_cap_days: 60
   default_effective_end: null
   continue_on_parse_error: true
-
 reporting:
   use_intraday_proxy_settlement: true
-  settlement_note: "15分钟日内代理结算口径"
+  settlement_note: 15分钟日内代理结算口径
   use_estimated_lt_price: true
-  lt_price_note: "2026-02 前采用上一自然周日前均价代理，2026-02 起采用 40% 日前固定价 + 60% 日内联动价混合代理"
-
+  lt_price_note: 2026-02 前采用上一自然周日前均价代理，2026-02 起采用 40% 日前固定价 + 60% 日内联动价混合代理
 analysis:
   sensitivity_export_prefix: sensitivity
   robustness_export_prefix: robustness
@@ -184,34 +168,31 @@ analysis:
   worker_count: 8
   export_rule_trace: true
   export_settlement_trace: true
-
 sensitivity:
   beta_tail_risk:
-    - 0.40
-    - 0.55
-    - 0.70
+  - 0.4
+  - 0.55
+  - 0.7
   market_vol_scale:
-    - 0.80
-    - 1.00
-    - 1.20
+  - 0.8
+  - 1.0
+  - 1.2
   price_cap_multiplier:
-    - 0.90
-    - 1.00
-    - 1.10
-
+  - 0.9
+  - 1.0
+  - 1.1
 robustness:
   contract_ratio_shift:
-    - -0.10
-    - 0.00
-    - 0.10
+  - -0.1
+  - 0.0
+  - 0.1
   policy_cutoffs:
-    - "2026-01-01"
-    - "2026-02-01"
+  - '2026-01-01'
+  - '2026-02-01'
   forecast_error_scale:
-    - 0.80
-    - 1.00
-    - 1.20
-
+  - 0.8
+  - 1.0
+  - 1.2
 search:
   enabled: true
   stage1_trials: 24
@@ -222,42 +203,41 @@ search:
   worker_count: 1
   stage1_ranges:
     learning_rate:
-      - 0.00008
-      - 0.00025
+    - 8.0e-05
+    - 0.00025
     n_steps_choices:
-      - 128
-      - 256
+    - 128
+    - 256
     batch_size_choices:
-      - 32
-      - 64
+    - 32
+    - 64
     gamma:
-      - 0.99
-      - 0.997
+    - 0.99
+    - 0.997
     gae_lambda:
-      - 0.95
-      - 0.985
+    - 0.95
+    - 0.985
     clip_range:
-      - 0.10
-      - 0.18
+    - 0.1
+    - 0.18
     ent_coef:
-      - 0.002
-      - 0.010
+    - 0.002
+    - 0.01
     lambda_hedge_error:
-      - 0.10
-      - 0.30
+    - 0.1
+    - 0.3
     lambda_hourly_smooth:
-      - 0.04
-      - 0.12
+    - 0.04
+    - 0.12
     gamma_max:
-      - 300.0
-      - 500.0
+    - 300.0
+    - 500.0
     band_base_multiplier:
-      - 0.95
-      - 1.15
+    - 0.95
+    - 1.15
     price_spike_shrink:
-      - 0.08
-      - 0.18
-
+    - 0.08
+    - 0.18
 hpso:
   device: cuda
   allow_cpu: true
@@ -293,11 +273,11 @@ hpso:
     backprop_clip_norm: 5.0
     spot_delta_initial_radius_multiplier: 1.0
   objective_weights:
-    risk: 0.50
-    transaction: 1.00
-    weekly_lock_change: 0.60
+    risk: 0.5
+    transaction: 1.0
+    weekly_lock_change: 0.6
     hourly_smooth: 0.08
     hedge_error: 0.18
-    contract_adjustment_quadratic: 5.00
-    spot_delta_quadratic: 1.00
+    contract_adjustment_quadratic: 5.0
+    spot_delta_quadratic: 1.0
     constraint_violation: 1000000.0
