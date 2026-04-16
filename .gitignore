@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 .cache/
+.worktrees/
 .DS_Store
 .idea/
 docs/gamma_algorithm_implementation_ppt.md
