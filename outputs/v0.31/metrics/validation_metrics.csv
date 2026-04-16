@@ -1,0 +1,2 @@
+strategy,total_procurement_cost,avg_weekly_cost,weekly_cost_volatility,cvar,hedge_error,mean_reward,avg_adjustment_mwh,total_trans_cost,max_drawdown,settlement_records
+hpso_validation,6833113662.363794,1708278415.5909486,309917587.8063983,2002253102.5189512,7632.822360716385,-0.5668133977990408,7415.912771438222,1149645028.759921,5024722540.777147,2688

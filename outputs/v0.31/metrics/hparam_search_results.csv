@@ -1,0 +1,2 @@
+stage,candidate_id,avg_val_total_procurement_cost,avg_val_cvar,avg_val_mean_reward,avg_cost_gap_vs_dynamic_lock_only,avg_cvar_gap_vs_dynamic_lock_only,ranking_score
+HPSO滚动验证,hpso_default,8052741571.941169,2521799356.4706426,-0.5978741188638471,3993766193.292965,659546586.9625438,8085718901.289296
