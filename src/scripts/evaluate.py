@@ -6,6 +6,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from src.agents.hpso_param_policy import HPSOParamPolicyModel, load_hpso_param_policy, simulate_param_policy_strategy
 from src.agents.hpso import HPSOModel, evaluate_hpso_policy
 from src.scripts.common import prepare_project_context
 from src.scripts.train import run_train
@@ -32,7 +33,7 @@ def build_validation_summary(context: dict[str, Any], validation: dict[str, Any]
         f"- 验证周范围: {context['split'].val[0]} 至 {context['split'].val[-1]}",
         f"- 主算法: {algorithm}",
         f"- 实际特征数: {len(agent_feature_columns)}",
-        f"- 周度动作语义: {'HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽' if algorithm == 'HPSO' else '基准底仓残差 + 边际敞口带宽'}",
+        f"- 周度动作语义: {'HPSO 参数化策略 theta 推断底仓残差 + 边际敞口带宽 + 24小时曲线' if algorithm == 'HPSO_PARAM_POLICY' else ('HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽' if algorithm == 'HPSO' else '基准底仓残差 + 边际敞口带宽')}",
         f"- 单轮 episode 跑通: 是",
         f"- 奖励有限值检查: {'通过' if np.isfinite(metrics['mean_reward']) else '未通过'}",
         f"- NaN / inf 检查: 通过",
@@ -50,7 +51,20 @@ def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="evaluate")
     logger.info("开始执行验证模块。")
     algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
-    if algorithm == "HPSO":
+    if algorithm == "HPSO_PARAM_POLICY":
+        model_path = context["output_paths"]["models"] / "hpso_param_policy.json"
+        if model is None:
+            model = load_hpso_param_policy(model_path)
+        if not isinstance(model, HPSOParamPolicyModel):
+            raise TypeError("HPSO_PARAM_POLICY 验证需要 HPSOParamPolicyModel。")
+        validation = simulate_param_policy_strategy(
+            bundle=context["bundle"],
+            weeks=context["split"].val,
+            theta=model.theta,
+            config=context["config"],
+            strategy_name="hpso_param_policy_validation",
+        )
+    elif algorithm == "HPSO":
         model = model or HPSOModel(device=str(context["config"]["hpso"].get("device", context["config"].get("device", "cpu"))), config=context["config"])
         model_path = Path("HPSO")
         validation = evaluate_hpso_policy(

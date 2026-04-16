@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import os
 from typing import Any
 
 import pandas as pd
@@ -10,6 +11,7 @@ from src.scripts.common import prepare_project_context, split_to_dict
 from src.scripts.evaluate import run_evaluate
 from src.scripts.train import run_train
 from src.utils.io import save_markdown
+from src.utils.runtime_status import RuntimeStatusTracker
 
 
 def _frame_to_markdown(frame: pd.DataFrame) -> str:
@@ -31,14 +33,39 @@ def _frame_to_markdown(frame: pd.DataFrame) -> str:
     return "\n".join(lines)
 
 
+def _main_result_key(results: dict[str, dict]) -> str:
+    if "hpso_param_policy" in results:
+        return "hpso_param_policy"
+    if "hpso" in results:
+        return "hpso"
+    return "ppo"
+
+
+def _model_iterations(config: dict[str, Any], main_key: str) -> int:
+    if main_key == "hpso_param_policy":
+        return int(config["hpso"]["swarm"]["iterations"])
+    if main_key == "hpso":
+        return int(config["hpso"]["upper"]["iterations"])
+    return int(config["total_timesteps"])
+
+
+def _action_semantics(main_key: str) -> str:
+    if main_key == "hpso_param_policy":
+        return "HPSO 参数化策略 theta 推断底仓残差 + 边际敞口带宽 + 24小时曲线"
+    if main_key == "hpso":
+        return "HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽"
+    return "基准底仓残差 + 边际敞口带宽"
+
+
 def _build_run_summary(context: dict[str, Any], training: dict[str, Any], validation: dict[str, Any], backtest: dict[str, Any]) -> str:
     config = context["config"]
     data_quality = context["data_quality_report"]
     split_dict = split_to_dict(context["split"])
     validation_metrics = validation["metrics"]
-    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
+    main_key = _main_result_key(backtest["results"])
     test_metrics = backtest["results"][main_key]["metrics"]
     agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
+    runtime_profile = training.get("runtime_profile", {})
     lines = [
         "# 运行总结",
         "",
@@ -64,11 +91,13 @@ def _build_run_summary(context: dict[str, Any], training: dict[str, Any], valida
         "## 模型与训练",
         "",
         f"- 主算法: {main_key.upper()}",
-        f"- 策略网络: {config.get('policy', 'N/A')}",
-        f"- 训练步数: {config['hpso']['upper']['iterations'] if main_key == 'hpso' else config['total_timesteps']}",
+        f"- 策略网络: {'参数化规则策略' if main_key == 'hpso_param_policy' else config.get('policy', 'N/A')}",
+        f"- 训练步数: {_model_iterations(config, main_key)}",
         f"- 训练设备: {training['device']}",
+        f"- 主算设备: {runtime_profile.get('rollout_compute_device', training['device'])}",
+        f"- 并行 worker: {runtime_profile.get('parallel_workers', 1)}",
         f"- 是否使用 GPU: {'是' if training['gpu_used'] else '否'}",
-        f"- 周度动作语义: {'HPSO 搜索不设硬限的中长期合约调整量 + 诊断性边际敞口带宽' if main_key == 'hpso' else '基准底仓残差 + 边际敞口带宽'}",
+        f"- 周度动作语义: {_action_semantics(main_key)}",
         f"- 实际特征数: {len(agent_feature_columns)}",
         f"- 最新模型路径: {training['model_path'] or 'HPSO 无模型文件'}",
         f"- 最优模型路径: {training['best_model_path'] or 'HPSO 无模型文件'}",
@@ -108,7 +137,7 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
     weekly_features = bundle["weekly_features"].copy().sort_values("week_start").reset_index(drop=True)
     feature_manifest = bundle["feature_manifest"].copy().sort_values(["selected_for_agent", "column"], ascending=[False, True]).reset_index(drop=True)
     validation_weekly = validation["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
-    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
+    main_key = _main_result_key(backtest["results"])
     ppo_weekly = backtest["results"][main_key]["weekly_results"].copy().sort_values("week_start").reset_index(drop=True)
     ppo_hourly = backtest["results"][main_key]["hourly_results"].copy().sort_values(["week_start", "hour"]).reset_index(drop=True)
     benchmark_frame = backtest["metrics_frame"].copy()
@@ -121,13 +150,13 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
         [
             {
                 "算法": main_key.upper(),
-                "策略网络": context["config"].get("policy", "N/A"),
+                "策略网络": "参数化规则策略" if main_key == "hpso_param_policy" else context["config"].get("policy", "N/A"),
                 "训练设备": training["device"],
-                "总训练步数": int(context["config"]["hpso"]["upper"]["iterations"] if main_key == "hpso" else context["config"]["total_timesteps"]),
+                "总训练步数": _model_iterations(context["config"], main_key),
                 "状态维度": int(len(bundle.get("agent_feature_columns", []))),
                 "动作维度": 2,
-                "动作一语义": "不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差",
-                "动作二语义": "诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽",
+                "动作一语义": "64维theta推断底仓残差" if main_key == "hpso_param_policy" else ("不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差"),
+                "动作二语义": "边际敞口带宽与24小时曲线参数" if main_key == "hpso_param_policy" else ("诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽"),
                 "训练周数": len(context["split"].train),
                 "验证周数": len(context["split"].val),
                 "回测周数": len(context["split"].test),
@@ -238,15 +267,15 @@ def _build_detailed_run_report(context: dict[str, Any], training: dict[str, Any]
 def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, Any], validation: dict[str, Any], backtest: dict[str, Any]) -> None:
     metrics_dir: Path = context["output_paths"]["metrics"]
     agent_feature_columns = context["bundle"].get("agent_feature_columns", [])
-    main_key = "hpso" if "hpso" in backtest["results"] else "ppo"
+    main_key = _main_result_key(backtest["results"])
 
     model_profile = pd.DataFrame(
         [
             {
                 "算法": main_key.upper(),
-                "策略网络": context["config"].get("policy", "N/A"),
+                "策略网络": "参数化规则策略" if main_key == "hpso_param_policy" else context["config"].get("policy", "N/A"),
                 "训练设备": training["device"],
-                "总训练步数": int(context["config"]["hpso"]["upper"]["iterations"] if main_key == "hpso" else context["config"]["total_timesteps"]),
+                "总训练步数": _model_iterations(context["config"], main_key),
                 "n_steps": int(context["config"].get("n_steps", 0)),
                 "batch_size": int(context["config"].get("batch_size", 0)),
                 "n_epochs": int(context["config"].get("n_epochs", 0)),
@@ -257,8 +286,8 @@ def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, 
                 "vf_coef": float(context["config"].get("vf_coef", 0.0)),
                 "随机种子": int(context["config"]["seed"]),
                 "周度特征维度": int(len(agent_feature_columns)),
-                "动作一语义": "不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差",
-                "动作二语义": "诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽",
+                "动作一语义": "64维theta推断底仓残差" if main_key == "hpso_param_policy" else ("不设硬限的中长期合约调整量" if main_key == "hpso" else "dynamic_lock_only 基准底仓残差"),
+                "动作二语义": "边际敞口带宽与24小时曲线参数" if main_key == "hpso_param_policy" else ("诊断性边际敞口带宽" if main_key == "hpso" else "边际敞口带宽"),
             }
         ]
     )
@@ -279,12 +308,21 @@ def _save_detailed_practice_tables(context: dict[str, Any], training: dict[str, 
 
 
 def main() -> dict[str, Any]:
+    status_path = Path(os.environ.get("ELEC_RUNTIME_STATUS_PATH", Path.cwd() / ".cache" / "runtime_status.json"))
+    status_tracker = RuntimeStatusTracker(status_path)
+    status_tracker.update(stage="初始化", phase_name="准备上下文", phase_progress=0.0, total_progress=0.0, message="加载配置与数据")
     context = prepare_project_context(Path.cwd(), logger_name="pipeline")
+    context["runtime_status_path"] = status_path
     logger = context["logger"]
     logger.info("开始执行全量流水线。")
+    status_tracker.update(stage="初始化", phase_name="准备上下文", phase_progress=1.0, total_progress=0.02, message="上下文准备完成")
 
+    status_tracker.update(stage="训练", phase_name="训练模块", phase_progress=0.0, total_progress=0.02, message="开始训练")
     training = run_train(context)
+    status_tracker.update(stage="验证", phase_name="验证模块", phase_progress=0.0, total_progress=1.0 / 3.0, message="开始验证")
     validation = run_evaluate(context, model=training["model"])
+    status_tracker.update(stage="验证", phase_name="验证模块", phase_progress=1.0, total_progress=2.0 / 3.0, message="验证完成")
+    status_tracker.update(stage="回测", phase_name="回测模块", phase_progress=0.0, total_progress=2.0 / 3.0, message="开始回测")
     backtest = run_backtest(context, model=training["model"])
 
     save_markdown(
@@ -296,6 +334,7 @@ def main() -> dict[str, Any]:
         context["output_paths"]["reports"] / "detailed_run_report.md",
     )
     _save_detailed_practice_tables(context, training, validation, backtest)
+    status_tracker.update(stage="完成", phase_name="全量流水线", phase_progress=1.0, total_progress=1.0, message="流水线执行完成")
     logger.info("流水线执行完成。")
     return {
         "training": training,

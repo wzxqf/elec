@@ -16,6 +16,7 @@ from src.backtest.simulator import _allocate_weekly_lt_to_hourly, _get_week_fram
 
 
 ObjectiveFn = Callable[[torch.Tensor], torch.Tensor]
+ProgressCallback = Callable[[dict[str, Any]], None]
 
 
 @dataclass(frozen=True)
@@ -81,6 +82,7 @@ class HybridParticleSwarmOptimizer:
         settings: HPSOSettings,
         objective: ObjectiveFn,
         bounded_mask: torch.Tensor | None = None,
+        progress_callback: ProgressCallback | None = None,
     ) -> None:
         if lower.shape != upper.shape:
             raise ValueError("HPSO lower/upper bounds must have the same shape.")
@@ -94,6 +96,27 @@ class HybridParticleSwarmOptimizer:
             self.bounded_mask = bounded_mask.to(settings.device, dtype=torch.bool)
         self.settings = settings
         self.objective = objective
+        self.progress_callback = progress_callback
+
+    def _emit_progress(
+        self,
+        iteration: int,
+        total_iterations: int,
+        best_score: float,
+        temperature: float,
+        stagnated: bool,
+    ) -> None:
+        if self.progress_callback is None:
+            return
+        self.progress_callback(
+            {
+                "iteration": int(iteration),
+                "total_iterations": int(total_iterations),
+                "best_score": float(best_score),
+                "temperature": float(temperature),
+                "stagnated": bool(stagnated),
+            }
+        )
 
     def _clamp_positions(self, positions: torch.Tensor) -> torch.Tensor:
         clipped = torch.minimum(torch.maximum(positions, self.lower), self.upper)
@@ -168,6 +191,13 @@ class HybridParticleSwarmOptimizer:
                 **bp_stats,
             }
         ]
+        self._emit_progress(
+            iteration=0,
+            total_iterations=settings.iterations,
+            best_score=gbest_score,
+            temperature=float(settings.initial_temperature),
+            stagnated=False,
+        )
 
         for iteration in range(1, settings.iterations + 1):
             r1 = torch.rand(shape, generator=generator, device=settings.device, dtype=torch.float64)
@@ -206,6 +236,13 @@ class HybridParticleSwarmOptimizer:
                     "stagnated": bool(stagnated),
                     **bp_stats,
                 }
+            )
+            self._emit_progress(
+                iteration=iteration,
+                total_iterations=settings.iterations,
+                best_score=gbest_score,
+                temperature=float(temperature),
+                stagnated=bool(stagnated),
             )
 
         return gbest_position.detach().cpu(), gbest_score, pd.DataFrame(records)

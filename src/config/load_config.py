@@ -28,6 +28,7 @@ REQUIRED_SECTIONS = [
     "robustness",
     "search",
     "hpso",
+    "policy",
 ]
 
 
@@ -78,10 +79,18 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
 
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
-    _require_keys("training", training, ["policy", "total_timesteps", "eval_freq", "checkpoint_freq", "learning_rate", "n_steps", "batch_size", "n_epochs", "gamma", "gae_lambda", "clip_range", "ent_coef", "vf_coef", "max_grad_norm", "seed", "device", "use_vec_normalize"])
+    algorithm = str(training.get("algorithm", "")).upper()
+    if algorithm == "HPSO_PARAM_POLICY":
+        _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
+    else:
+        _require_keys("training", training, ["policy", "total_timesteps", "eval_freq", "checkpoint_freq", "learning_rate", "n_steps", "batch_size", "n_epochs", "gamma", "gae_lambda", "clip_range", "ent_coef", "vf_coef", "max_grad_norm", "seed", "device", "use_vec_normalize"])
     _require_keys("constraints", constraints, ["lock_ratio_min", "lock_ratio_max", "delta_h_max", "delta_lock_cap"])
     _require_keys("feature_selection", feature_selection, ["enabled", "feature_include_for_agent", "feature_exclude_for_agent", "feature_keep_for_report_only"])
-    _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "upper", "lower", "objective_weights"])
+    if algorithm == "HPSO_PARAM_POLICY":
+        _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "parameter_dimension", "theta_layout", "swarm", "bootstrap", "upper", "lower", "objective_weights"])
+    else:
+        _require_keys("hpso", hpso, ["device", "allow_cpu", "seed", "upper", "lower", "objective_weights"])
+    policy = _require_section(root_config, "policy")
 
     runtime = {
         "config_path": str(config_path),
@@ -114,9 +123,13 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "robustness": robustness,
         "search": search,
         "hpso": hpso,
+        "policy": policy,
     }
 
     runtime.update(data)
     runtime.update(training)
+    runtime["algorithm"] = algorithm
+    runtime["seed"] = training["seed"]
+    runtime["device"] = training["device"]
     runtime["rules"] = rules
     return runtime

@@ -8,6 +8,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
+from src.agents.hpso_param_policy import HPSOParamPolicyModel, load_hpso_param_policy, simulate_param_policy_strategy
 from src.agents.hpso import HPSOModel, evaluate_hpso_policy, simulate_hpso_strategy
 from src.backtest.benchmarks import build_benchmark_actions
 from src.backtest.simulator import simulate_strategy
@@ -26,6 +27,9 @@ def _resolve_main_model(output_paths: dict[str, Path]) -> Path | None:
 
 def _ensure_main_model(context: dict[str, Any]):
     algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
+    if algorithm == "HPSO_PARAM_POLICY":
+        model_path = context["output_paths"]["models"] / "hpso_param_policy.json"
+        return load_hpso_param_policy(model_path)
     if algorithm == "HPSO":
         return HPSOModel(device=str(context["config"]["hpso"].get("device", context["config"].get("device", "cpu"))), config=context["config"])
     from src.agents.train_ppo import load_model, train_model
@@ -59,7 +63,7 @@ def _save_core_figures(results: dict[str, dict], output_paths: dict[str, Path]) 
     from src.utils.plotting import save_bar_plot, save_line_plot, save_multi_line_plot
 
     weekly = pd.concat([payload["weekly_results"] for payload in results.values()], ignore_index=True)
-    main_key = "hpso" if "hpso" in results else "ppo"
+    main_key = "hpso_param_policy" if "hpso_param_policy" in results else ("hpso" if "hpso" in results else "ppo")
 
     weekly_cost = weekly.pivot(index="week_start", columns="strategy", values="procurement_cost_w").sort_index()
     save_multi_line_plot(
@@ -363,6 +367,25 @@ def _build_rolling_validation_summary(detail_frame: pd.DataFrame, summary_frame:
 
 def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
     config = context["config"]
+    if str(config["training"].get("algorithm", "PPO")).upper() == "HPSO_PARAM_POLICY":
+        empty = pd.DataFrame(
+            [
+                {
+                    "stage": "HPSO参数化策略",
+                    "candidate_id": "trained_theta",
+                    "avg_val_total_procurement_cost": 0.0,
+                    "avg_val_cvar": 0.0,
+                    "avg_val_mean_reward": 0.0,
+                    "avg_cost_gap_vs_dynamic_lock_only": 0.0,
+                    "avg_cvar_gap_vs_dynamic_lock_only": 0.0,
+                    "ranking_score": 0.0,
+                }
+            ]
+        )
+        empty.to_csv(context["output_paths"]["metrics"] / "hparam_search_results.csv", index=False)
+        pd.DataFrame().to_csv(context["output_paths"]["metrics"] / "rolling_validation_metrics.csv", index=False)
+        save_markdown("# 滚动验证摘要\n\n- v0.32 使用训练期 HPSO 搜索 theta；验证和回测只做推断。\n", context["output_paths"]["reports"] / "rolling_validation_summary.md")
+        return empty
     if str(config["training"].get("algorithm", "PPO")).upper() == "HPSO":
         rows: list[dict[str, Any]] = []
         for window in context["rolling_validation_windows"]:
@@ -461,12 +484,15 @@ def run_hparam_search(context: dict[str, Any]) -> pd.DataFrame:
 
 
 def _build_backtest_summary(context: dict[str, Any], results: dict[str, dict], metrics_frame: pd.DataFrame) -> str:
-    main_key = "hpso" if "hpso" in results else "ppo"
+    main_key = "hpso_param_policy" if "hpso_param_policy" in results else ("hpso" if "hpso" in results else "ppo")
     main_metrics = results[main_key]["metrics"]
     clip_stats = results[main_key]["weekly_results"][
         ["bound_clip_count", "smooth_clip_count", "soft_clip_count", "non_negative_clip_count"]
     ].sum()
-    model_label = "HPSO 无模型文件" if main_key == "hpso" else str(_resolve_main_model(context["output_paths"]))
+    if main_key == "hpso_param_policy":
+        model_label = str(context["output_paths"]["models"] / "hpso_param_policy.json")
+    else:
+        model_label = "HPSO 无模型文件" if main_key == "hpso" else str(_resolve_main_model(context["output_paths"]))
     lines = [
         "# 回测摘要",
         "",
@@ -569,7 +595,18 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     model = model or _ensure_main_model(context)
     algorithm = str(context["config"]["training"].get("algorithm", "PPO")).upper()
 
-    if algorithm == "HPSO":
+    if algorithm == "HPSO_PARAM_POLICY":
+        if not isinstance(model, HPSOParamPolicyModel):
+            raise TypeError("HPSO_PARAM_POLICY 回测需要 HPSOParamPolicyModel。")
+        main_key = "hpso_param_policy"
+        main_result = simulate_param_policy_strategy(
+            bundle=context["bundle"],
+            weeks=context["split"].test,
+            theta=model.theta,
+            config=context["config"],
+            strategy_name=main_key,
+        )
+    elif algorithm == "HPSO":
         main_key = "hpso"
         main_result = evaluate_hpso_policy(
             model=model,
@@ -612,7 +649,12 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         index=False,
     )
     results[main_key]["weekly_results"].to_csv(context["output_paths"]["metrics"] / "weekly_results.csv", index=False)
-    if main_key == "hpso":
+    if main_key == "hpso_param_policy":
+        results[main_key]["weekly_results"].to_csv(context["output_paths"]["metrics"] / "weekly_results.csv", index=False)
+        results[main_key]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hpso_policy_inference_trace.csv", index=False)
+        results[main_key]["contract_curve"].to_csv(context["output_paths"]["metrics"] / "contract_curve_24h.csv", index=False)
+        results[main_key]["information_boundary_audit"].to_csv(context["output_paths"]["metrics"] / "information_boundary_audit.csv", index=False)
+    elif main_key == "hpso":
         results[main_key]["upper_actions"].to_csv(context["output_paths"]["metrics"] / "hpso_upper_weekly_actions.csv", index=False)
         results[main_key]["hourly_results"].to_csv(context["output_paths"]["metrics"] / "hpso_hourly_delta_q.csv", index=False)
         pd.concat(
@@ -631,7 +673,9 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
 
     _save_core_figures(results, context["output_paths"])
 
-    if main_key == "hpso":
+    if main_key == "hpso_param_policy":
+        sensitivity = pd.DataFrame([{"factor": "v0.32参数策略", "value": 1.0, **main_result["metrics"]}])
+    elif main_key == "hpso":
         sensitivity = _run_hpso_sensitivity_analysis(context)
     else:
         from src.analysis.sensitivity import run_sensitivity_analysis
@@ -640,7 +684,9 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     sensitivity.to_csv(context["output_paths"]["metrics"] / "sensitivity_metrics.csv", index=False)
     save_markdown(_build_sensitivity_report(sensitivity), context["output_paths"]["reports"] / "sensitivity_report.md")
 
-    if main_key == "hpso":
+    if main_key == "hpso_param_policy":
+        robustness = pd.DataFrame([{"experiment": "v0.32参数策略", "value": "trained_theta", **main_result["metrics"]}])
+    elif main_key == "hpso":
         robustness = _run_hpso_robustness_analysis(context, model)
     else:
         from src.analysis.robustness import run_robustness_analysis

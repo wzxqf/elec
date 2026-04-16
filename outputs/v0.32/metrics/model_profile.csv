@@ -1,0 +1,2 @@
+算法,策略网络,训练设备,总训练步数,n_steps,batch_size,n_epochs,gamma,gae_lambda,clip_range,ent_coef,vf_coef,随机种子,周度特征维度,动作一语义,动作二语义
+HPSO_PARAM_POLICY,参数化规则策略,cuda,80,0,0,0,0.0,0.0,0.0,0.0,0.0,42,110,64维theta推断底仓残差,边际敞口带宽与24小时曲线参数

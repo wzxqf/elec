@@ -47,9 +47,8 @@ pip install -r requirements.txt
 ## 入口
 
 ```bash
+python run_all.py
 bash run_all.sh
-.\run_all.ps1
-run_all.bat
 python -m src.scripts.run_pipeline
 python -m src.scripts.train
 python -m src.scripts.evaluate
@@ -59,11 +58,10 @@ python -m src.scripts.diagnostics
 
 其中：
 
-- `bash run_all.sh` 为根目录一键全流程入口，固定使用 `mamba run -n torch311` 执行训练、验证、回测与报告导出。
-- Windows 环境推荐运行 `powershell -ExecutionPolicy Bypass -File .\run_all.ps1`；也可直接双击 `run_all.bat`。
-- 如需仅检查命令与输出目录而不真正执行，可运行 `bash run_all.sh --dry-run`。
-- Windows 下对应调试命令为 `powershell -ExecutionPolicy Bypass -File .\run_all.ps1 -DryRun`。
-- 若运行 `run_all.bat` 时先打印“系统找不到指定的路径”，通常是本机 `cmd.exe` 的 AutoRun 里存在失效 conda/mamba hook；直接运行 `run_all.ps1` 可避开该问题。
+- `python run_all.py` 为统一的一键全流程入口，会自动解析 `project.version`、选择 `torch311` 环境中的 Python，并执行训练、验证、回测与报告导出。
+- `bash run_all.sh` 现在只是对 `run_all.py` 的薄封装，方便类 Unix 环境调用。
+- 如需仅检查命令与输出目录而不真正执行，可运行 `python run_all.py --dry-run`。
+- Windows 不再维护 `run_all.ps1` 或 `run_all.bat`，避免多入口漂移和 `cmd.exe`/PowerShell 钩子带来的额外故障面。
 
 ## 输出
 

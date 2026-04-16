@@ -1,5 +1,5 @@
 project:
-  version: v0.31
+  version: v0.32
   project_root: d:/elec
 
 data:
@@ -106,24 +106,10 @@ rules:
   smoothing_mode: soft_clip
 
 training:
-  algorithm: HPSO
-  policy: MlpPolicy
-  total_timesteps: 50000
-  eval_freq: 1000
-  checkpoint_freq: 2000
-  learning_rate: 0.00015
-  n_steps: 256
-  batch_size: 64
-  n_epochs: 10
-  gamma: 0.995
-  gae_lambda: 0.97
-  clip_range: 0.15
-  ent_coef: 0.005
-  vf_coef: 0.5
-  max_grad_norm: 0.5
+  algorithm: HPSO_PARAM_POLICY
   seed: 42
   device: cuda
-  use_vec_normalize: false
+  allow_cpu: true
 
 scenario:
   train_sequence_length: 96
@@ -262,6 +248,38 @@ hpso:
   device: cuda
   allow_cpu: true
   seed: 42
+  parameter_dimension: 64
+  theta_layout:
+    upper_total: 40
+    lower_total: 24
+    upper:
+      lock_delta_weights: 16
+      bandwidth_weights: 12
+      curve_shape_weights: 8
+      policy_gate_weights: 4
+    lower:
+      spread_response: 6
+      load_forecast_response: 6
+      renewable_response: 4
+      smoothing_response: 4
+      policy_band_shrink: 4
+  swarm:
+    particles: 48
+    iterations: 80
+    inertia_weight: 0.70
+    cognitive_factor: 1.45
+    social_factor: 1.45
+    initial_temperature: 1.0
+    cooling_rate: 0.96
+    perturbation_scale: 0.05
+    stagnation_window: 10
+    backprop_steps: 0
+    backprop_learning_rate: 0.0
+    backprop_clip_norm: 5.0
+  bootstrap:
+    sequence_length: 96
+    block_size: 3
+    scenario_repeats: 4
   upper:
     particles: 32
     iterations: 40
@@ -293,6 +311,9 @@ hpso:
     backprop_clip_norm: 5.0
     spot_delta_initial_radius_multiplier: 1.0
   objective_weights:
+    procurement_cost: 1.00
+    dynamic_baseline_gap: 1.15
+    tail_risk: 0.55
     risk: 0.50
     transaction: 1.00
     weekly_lock_change: 0.60
@@ -301,3 +322,45 @@ hpso:
     contract_adjustment_quadratic: 5.00
     spot_delta_quadratic: 1.00
     constraint_violation: 1000000.0
+
+policy:
+  upper:
+    lock_delta_scale: 0.12
+    bandwidth_min: 0.0
+    bandwidth_max: 0.85
+    state_features:
+      - prev_spread_mean
+      - prev_da_price_mean
+      - prev_id_price_mean
+      - prev_load_dev_std
+      - prev_renewable_ratio_da_mean
+      - renewable_mechanism_active
+      - lt_price_linked_active
+      - forward_price_linkage_days
+      - forward_mechanism_execution_days
+  lower:
+    rolling_mode: causal
+    non_negative_spot: true
+    smooth_limit_mwh: 420.0
+  contract_curve:
+    enabled: true
+    periods: 24
+    base_profile_source: train_da_net_load
+    shape_adjustment_scale: 0.20
+    positive_floor: 0.05
+    peak_hours:
+      - 8
+      - 9
+      - 10
+      - 11
+      - 18
+      - 19
+      - 20
+      - 21
+    valley_hours:
+      - 0
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
