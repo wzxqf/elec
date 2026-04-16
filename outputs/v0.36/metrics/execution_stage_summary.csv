@@ -1,0 +1,5 @@
+week_start,weekly_contract_position_mwh,weekly_exposure_band_mwh,settlement_mode_label,declaration_mode
+2026-02-02,2408324.25,802774.75,linked_mix,materialized_contract_curve
+2026-02-09,2285401.25,761800.4375,linked_mix,materialized_contract_curve
+2026-02-16,1805210.125,601736.6875,linked_mix,materialized_contract_curve
+2026-02-23,1899307.375,633102.4375,linked_mix,materialized_contract_curve

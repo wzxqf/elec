@@ -1,0 +1,6 @@
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 已加载数据文件: d:\elec\total.csv
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 训练算法: HYBRID_PSO_V036
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 政策来源文件数: 18
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 政策候选规则数: 34
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 政策正式规则数: 34
+2026-04-16 22:17:21 | INFO | elec.test_v037_script_outputs | 滚动重训窗口数: 10

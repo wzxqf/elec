@@ -30,7 +30,7 @@ class RunAllScriptTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("Experiment version: v0.35", result.stdout)
+        self.assertIn("Experiment version: v0.36", result.stdout)
         self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
 
     def test_shell_wrapper_delegates_to_python_entrypoint(self) -> None:
@@ -47,7 +47,7 @@ class RunAllScriptTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn("Experiment version: v0.35", result.stdout)
+        self.assertIn("Experiment version: v0.36", result.stdout)
         self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
 
 

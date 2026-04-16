@@ -92,7 +92,7 @@ def test_run_pipeline_honors_runtime_status_env(monkeypatch) -> None:
 
     def fake_prepare_project_context(*args, **kwargs):
         return {
-            "config": {"version": "v0.35", "training": {"algorithm": "HYBRID_PSO_V033"}},
+            "config": {"version": "v0.36", "training": {"algorithm": "HYBRID_PSO_V036"}},
             "output_paths": {"reports": reports_dir, "metrics": metrics_dir},
             "bundle": {
                 "policy_rule_table": pd.DataFrame({"rule_id": ["r1"], "state_name": ["renewable_mechanism_active"]}),

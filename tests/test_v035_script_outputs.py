@@ -7,10 +7,10 @@ import pandas as pd
 from src.analysis.reporting import build_excess_return_validation_summary, build_market_mechanism_analysis, build_module1_summary
 
 
-def test_build_module1_summary_mentions_v035_outputs() -> None:
+def test_build_module1_summary_mentions_v036_outputs() -> None:
     text = build_module1_summary(
-        contract_value_path=Path("outputs/v0.35/metrics/contract_value_weekly.csv"),
-        risk_factor_path=Path("outputs/v0.35/metrics/risk_factor_manifest.csv"),
+        contract_value_path=Path("outputs/v0.36/metrics/contract_value_weekly.csv"),
+        risk_factor_path=Path("outputs/v0.36/metrics/risk_factor_manifest.csv"),
         contract_value_weekly=pd.DataFrame({"contract_value_w": [325.0], "stability_score_w": [0.8]}),
         risk_factor_manifest=pd.DataFrame({"factor_category": ["spot_price_volatility"]}),
     )

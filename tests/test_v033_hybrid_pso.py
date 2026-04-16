@@ -96,6 +96,8 @@ def test_train_hybrid_pso_model_returns_upper_and_lower_best_particles() -> None
     assert result.model.upper_best.shape == (12,)
     assert result.model.lower_best.shape == (8,)
     assert result.runtime_profile["score_kernel_device"] == "cpu"
+    assert result.model.metadata["version"] == "v0.36"
+    assert result.model.metadata["algorithm"] == "HYBRID_PSO_V036"
     assert result.training_trace.shape[0] == 3
 
 
@@ -105,12 +107,12 @@ def test_hybrid_pso_model_roundtrip() -> None:
         upper_best=[0.1] * 6,
         lower_best=[0.2] * 5,
         best_score=123.4,
-        metadata={"version": "v0.33"},
+        metadata={"version": "v0.36"},
     )
 
     save_hybrid_pso_model(model, path)
     loaded = load_hybrid_pso_model(path)
 
     assert loaded.best_score == 123.4
-    assert loaded.metadata["version"] == "v0.33"
+    assert loaded.metadata["version"] == "v0.36"
     assert loaded.upper_best == [0.1] * 6

@@ -65,7 +65,14 @@ def test_compile_training_tensor_bundle_exposes_core_tensors() -> None:
     assert tensor_bundle.device == "cpu"
     assert tensor_bundle.weekly_feature_tensor.shape == (2, 2)
     assert tensor_bundle.policy_tensor.shape == (2, 2)
-    assert tensor_bundle.hourly_tensor.shape == (2, 2, 4)
+    assert tensor_bundle.hourly_tensor.shape == (2, 2, 5)
+    assert tensor_bundle.hourly_feature_columns == [
+        "net_load_da",
+        "net_load_id",
+        "price_spread",
+        "load_dev",
+        "renewable_dev",
+    ]
     assert tensor_bundle.quarter_price_tensor.shape == (2, 2, 2)
     assert tensor_bundle.week_index.tolist() == [pd.Timestamp("2026-01-05"), pd.Timestamp("2026-01-12")]
     assert isinstance(tensor_bundle.weekly_feature_tensor, torch.Tensor)
