@@ -1,0 +1,5 @@
+strategy_name,week_count,total_procurement_cost,total_profit,mean_profit,weekly_profit_volatility,cvar99,max_drawdown,positive_week_count,negative_week_count,min_week_profit,max_week_profit,profit_delta_vs_dynamic_lock_only
+dynamic_lock_only,7,,,220940003.5,59562854.836166814,2576188.25,0.0,5,0,,,
+fixed_holding_60,7,,,214596093.1,53569381.054051414,2533050.4,0.0,5,0,,,
+static_no_spot_adjustment,7,,,227284029.1,65680855.70295237,2619326.1,0.0,5,0,,,
+simple_rolling_hedge,7,,,211424990.01125,50697212.42780282,2511542.25,0.0,5,0,,,
