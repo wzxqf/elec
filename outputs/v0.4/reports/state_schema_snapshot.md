@@ -1,7 +1,7 @@
 > version: v0.4
-> experiment_id: v0.4-840a5740
-> config_hash: 840a574028870937a87c4ff725930c4682004c50d528119e8eb3ec14af126a64
-> run_timestamp: 2026-04-17T01:29:36+08:00
+> experiment_id: v0.4-b3fe48b3
+> config_hash: b3fe48b398f1e1bba82527ec7ce6e02cd34911b26f0416093145698de77027a9
+> run_timestamp: 2026-04-17T11:38:14+08:00
 > device: cuda
 > data_range: 2025-11-01 00:00:00 -> 2026-03-20 23:45:00
 
@@ -157,6 +157,8 @@
 - `linked_price_ratio_min`
 - `forward_price_linkage_days`
 - `forward_mechanism_execution_days`
+- `lt_price_fixed_ratio`
+- `lt_price_linked_ratio`
 
 ## Policy
 

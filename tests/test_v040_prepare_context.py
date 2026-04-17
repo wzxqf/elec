@@ -3,6 +3,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pandas as pd
+
 from src.scripts.common import prepare_project_context
 
 
@@ -18,8 +20,15 @@ def test_prepare_project_context_exports_v040_manifests_and_audits() -> None:
     assert (context["output_paths"]["root"] / "artifact_index.md").exists()
 
     release_manifest = json.loads((context["output_paths"]["root"] / "release_manifest.json").read_text(encoding="utf-8"))
+    feasible_domain_summary = (context["output_paths"]["reports"] / "policy_feasible_domain_summary.md").read_text(encoding="utf-8")
+    feature_manifest = pd.read_csv(context["output_paths"]["metrics"] / "feature_manifest.csv")
+
     assert release_manifest["version"] == context["config"]["version"]
     assert release_manifest["config_hash"]
     assert release_manifest["compiled_layout_hash"]
     assert release_manifest["data_range"]["sample_start"]
     assert release_manifest["enabled_constraints"]
+    assert "policy_tightening_trigger_count" in feasible_domain_summary
+    assert "default_projection_trigger_count" in feasible_domain_summary
+    assert "selected_for_policy_head" in feature_manifest.columns
+    assert "report_only" in feature_manifest.columns

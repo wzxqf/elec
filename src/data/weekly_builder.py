@@ -18,6 +18,20 @@ def _is_partial_week(frame: pd.DataFrame, datetime_column: str) -> bool:
     return (len(frame) != expected_points) or (not is_full_span)
 
 
+def _resolve_lt_price_proxy_fields(
+    week_start: pd.Timestamp,
+    lt_price_value: float | None,
+    config: dict[str, Any],
+) -> tuple[str, float, float]:
+    lt_cfg = config.get("lt_price", {})
+    if pd.isna(lt_price_value):
+        return str(lt_cfg.get("warmup_label", "warmup_unavailable")), 0.0, 0.0
+    linked_effective_start = lt_cfg.get("linked_effective_start")
+    if linked_effective_start is not None and pd.Timestamp(week_start) >= pd.Timestamp(linked_effective_start):
+        return "linked_mix_40da_60id", 0.4, 0.6
+    return "prev_week_da_proxy", 1.0, 0.0
+
+
 def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str, Any]:
     frame_15m, feature_manifest = add_derived_features(frame)
     hourly = aggregate_hourly(frame_15m)
@@ -74,11 +88,17 @@ def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str
 
     weekly_metadata = pd.DataFrame(weekly_meta_rows).sort_values("week_start").reset_index(drop=True)
     weekly_metadata["lt_price_w"] = weekly_metadata["da_price_mean"].shift(1)
-    weekly_metadata["lt_price_source"] = np.where(
-        weekly_metadata["lt_price_w"].notna(),
-        "estimated_prev_week_da_mean",
-        config["lt_price"]["warmup_label"],
+    lt_proxy_fields = weekly_metadata.apply(
+        lambda row: _resolve_lt_price_proxy_fields(
+            week_start=pd.Timestamp(row["week_start"]),
+            lt_price_value=row.get("lt_price_w"),
+            config=config,
+        ),
+        axis=1,
+        result_type="expand",
     )
+    lt_proxy_fields.columns = ["lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"]
+    weekly_metadata[["lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"]] = lt_proxy_fields
 
     weekly_features = build_weekly_features(hourly, list(config["feature_quantiles"]))
     weekly_features = weekly_features.merge(
@@ -90,6 +110,8 @@ def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str
                 "actual_weekly_net_demand_mwh",
                 "lt_price_w",
                 "lt_price_source",
+                "lt_price_fixed_ratio",
+                "lt_price_linked_ratio",
                 "da_id_cross_corr_w",
                 "extreme_price_spike_flag_w",
                 "extreme_event_flag_w",
