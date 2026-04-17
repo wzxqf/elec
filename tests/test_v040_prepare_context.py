@@ -1,0 +1,25 @@
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from src.scripts.common import prepare_project_context
+
+
+def test_prepare_project_context_exports_v040_manifests_and_audits() -> None:
+    context = prepare_project_context(Path.cwd(), logger_name="test_prepare_context_v040")
+
+    assert "feasible_domain" in context["bundle"]
+    assert (context["output_paths"]["metrics"] / "feasible_domain_manifest.csv").exists()
+    assert (context["output_paths"]["reports"] / "policy_feasible_domain_summary.md").exists()
+    assert (context["output_paths"]["reports"] / "parameter_layout_audit.md").exists()
+    assert (context["output_paths"]["root"] / "release_manifest.json").exists()
+    assert (context["output_paths"]["root"] / "run_manifest.json").exists()
+    assert (context["output_paths"]["root"] / "artifact_index.md").exists()
+
+    release_manifest = json.loads((context["output_paths"]["root"] / "release_manifest.json").read_text(encoding="utf-8"))
+    assert release_manifest["version"] == context["config"]["version"]
+    assert release_manifest["config_hash"]
+    assert release_manifest["compiled_layout_hash"]
+    assert release_manifest["data_range"]["sample_start"]
+    assert release_manifest["enabled_constraints"]

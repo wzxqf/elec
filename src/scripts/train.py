@@ -3,6 +3,7 @@ from typing import Any
 
 from src.agents.hybrid_pso import save_hybrid_pso_model, train_hybrid_pso_model
 from src.scripts.common import prepare_project_context, split_to_dict, subset_bundle_for_weeks
+from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
 from src.utils.io import save_markdown
 from src.utils.logger import configure_logging
 from src.utils.runtime_status import RuntimeStatusTracker
@@ -11,6 +12,7 @@ from src.utils.runtime_status import RuntimeStatusTracker
 def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> str:
     split = split_to_dict(context["split"])
     runtime = training["runtime_profile"]
+    output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
     return "\n".join(
         [
             "# 训练摘要",
@@ -22,13 +24,14 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
             f"- 设备: {runtime['score_kernel_device']}",
             f"- 上层粒子数: {runtime['upper_particles']}",
             f"- 下层粒子数: {runtime['lower_particles']}",
-            f"- 上层真实维度: {runtime.get('upper_dim', 'n/a')}",
-            f"- 下层真实维度: {runtime.get('lower_dim', 'n/a')}",
+            f"- 上层真实维度: {runtime.get('upper_dim_real', runtime.get('upper_dim', 'n/a'))}",
+            f"- 下层真实维度: {runtime.get('lower_dim_real', runtime.get('lower_dim', 'n/a'))}",
             f"- 迭代轮数: {runtime['iterations']}",
             f"- 最优目标值: {training['model'].best_score:.4f}",
-            f"- 模型路径: {context['output_paths']['models'] / 'hybrid_pso_model.json'}",
-            f"- 训练轨迹: {context['output_paths']['metrics'] / 'hybrid_pso_training_trace.csv'}",
-            f"- 参数布局摘要: {context['output_paths']['reports'] / 'parameter_layout_summary.md'}",
+            f"- 模型路径: {relativize_path(context['output_paths']['models'] / 'hybrid_pso_model.json', output_root)}",
+            f"- 训练轨迹: {relativize_path(context['output_paths']['metrics'] / 'hybrid_pso_training_trace.csv', output_root)}",
+            f"- 参数布局摘要: {relativize_path(context['output_paths']['reports'] / 'parameter_layout_summary.md', output_root)}",
+            f"- 参数布局审计: {relativize_path(context['output_paths']['reports'] / 'parameter_layout_audit.md', output_root)}",
             "",
         ]
     )
@@ -56,7 +59,11 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
             "runtime_profile": training_result.runtime_profile,
         },
     )
-    save_markdown(summary, context["output_paths"]["reports"] / "train_summary.md")
+    run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
+    save_markdown(
+        prepend_report_header(summary, run_metadata, device=training_result.runtime_profile["score_kernel_device"]),
+        context["output_paths"]["reports"] / "train_summary.md",
+    )
     status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=1.0, total_progress=0.33, message="训练完成")
     logger.info("训练模块执行完成。")
     return {

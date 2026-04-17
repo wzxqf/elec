@@ -5,12 +5,17 @@ from typing import Any
 
 import pandas as pd
 
+from src.analysis.ablations import build_ablation_summary_markdown, evaluate_ablation_variants
+from src.analysis.benchmarks import build_benchmark_summary_markdown, evaluate_benchmark_strategies
+from src.analysis.constraint_reporting import build_constraint_activation_report_markdown
 from src.analysis.excess_return import build_policy_risk_adjusted_metrics, summarize_rolling_excess_return
 from src.analysis.module1 import enrich_weekly_results
+from src.analysis.robustness import build_robustness_summary_markdown, run_robustness_analysis
 from src.agents.hybrid_pso import HybridPSOModel, train_hybrid_pso_model
 from src.backtest.materialize import materialize_particle_pair
 from src.backtest.rolling_pipeline import summarize_rolling_results
 from src.scripts.common import prepare_project_context, subset_bundle_for_weeks
+from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
 from src.utils.io import save_markdown
 from src.utils.logger import configure_logging
 
@@ -38,14 +43,60 @@ def _build_backtest_summary(summary: dict[str, Any], rolling_excess_return_metri
     )
 
 
+def _aggregate_benchmark_metrics(frames: list[pd.DataFrame]) -> pd.DataFrame:
+    if not frames:
+        return pd.DataFrame()
+    combined = pd.concat(frames, ignore_index=True)
+    aggregation = {
+        "total_procurement_cost": "sum",
+        "total_profit": "sum",
+        "mean_profit": "mean",
+        "weekly_profit_volatility": "mean",
+        "cvar99": "mean",
+        "max_drawdown": "mean",
+    }
+    aggregation = {column: rule for column, rule in aggregation.items() if column in combined.columns}
+    result = combined.groupby("strategy_name", as_index=False).agg(aggregation)
+    if "total_profit" in result.columns:
+        baseline_profit = float(result.loc[result["strategy_name"] == "dynamic_lock_only", "total_profit"].iloc[0])
+        result["profit_delta_vs_dynamic_lock_only"] = result["total_profit"] - baseline_profit
+    return result.sort_values("strategy_name").reset_index(drop=True)
+
+
+def _aggregate_ablation_metrics(frames: list[pd.DataFrame]) -> pd.DataFrame:
+    if not frames:
+        return pd.DataFrame()
+    combined = pd.concat(frames, ignore_index=True)
+    aggregation = {
+        "total_procurement_cost": "sum",
+        "total_profit": "sum",
+        "weekly_cost_volatility": "mean",
+        "cvar99": "mean",
+        "hedge_error": "mean",
+        "avg_adjustment_mwh": "mean",
+        "mean_reward": "mean",
+        "max_drawdown": "mean",
+        "feasible_domain_trigger_weeks": "sum",
+    }
+    aggregation = {column: rule for column, rule in aggregation.items() if column in combined.columns}
+    result = combined.groupby("variant_name", as_index=False).agg(aggregation)
+    return result.sort_values("variant_name").reset_index(drop=True)
+
+
 def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     logger = configure_logging(context["output_paths"]["logs"], name="backtest")
     logger.info("开始执行 %s 回测模块。", context["config"]["version"])
+    output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
     window_records: list[dict[str, Any]] = []
     parameter_rows: list[dict[str, Any]] = []
     validation_frames: list[pd.DataFrame] = []
     backtest_frames: list[pd.DataFrame] = []
     policy_metric_frames: list[pd.DataFrame] = []
+    weekly_result_frames: list[pd.DataFrame] = []
+    hourly_result_frames: list[pd.DataFrame] = []
+    settlement_result_frames: list[pd.DataFrame] = []
+    benchmark_frames: list[pd.DataFrame] = []
+    ablation_frames: list[pd.DataFrame] = []
     epsilon = float(context["config"].get("analysis_v035", {}).get("sharpe_epsilon", 1.0e-6))
 
     for window in context["rolling_plan"]:
@@ -102,11 +153,26 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
             weekly_features=test_bundle["weekly_features"],
             policy_state_trace=test_bundle["policy_state_trace"],
         )
+        weekly_result_frames.append(test_result.weekly_results.assign(window_name=window.window_name))
+        hourly_result_frames.append(test_result.hourly_results.assign(window_name=window.window_name))
+        settlement_result_frames.append(test_result.settlement_results.assign(window_name=window.window_name))
         policy_metrics = build_policy_risk_adjusted_metrics(analysis_input, epsilon=epsilon)
         policy_metrics["window_name"] = window.window_name
         policy_metric_frames.append(policy_metrics)
+        benchmark_metrics = evaluate_benchmark_strategies(test_bundle, context["config"])
+        benchmark_metrics["window_name"] = window.window_name
+        benchmark_frames.append(benchmark_metrics)
+        ablation_metrics = evaluate_ablation_variants(test_bundle, window_model, context["config"])
+        ablation_metrics["window_name"] = window.window_name
+        ablation_frames.append(ablation_metrics)
 
     summary = summarize_rolling_results(window_records)
+    rolling_weekly_results = pd.concat(weekly_result_frames, ignore_index=True) if weekly_result_frames else pd.DataFrame()
+    rolling_hourly_results = pd.concat(hourly_result_frames, ignore_index=True) if hourly_result_frames else pd.DataFrame()
+    rolling_settlement_results = pd.concat(settlement_result_frames, ignore_index=True) if settlement_result_frames else pd.DataFrame()
+    benchmark_metrics = _aggregate_benchmark_metrics(benchmark_frames)
+    ablation_metrics = _aggregate_ablation_metrics(ablation_frames)
+    robustness_metrics = run_robustness_analysis(weekly_results=rolling_weekly_results, config=context["config"])
     rolling_excess_return_metrics = summarize_rolling_excess_return(
         pd.concat(policy_metric_frames, ignore_index=True) if policy_metric_frames else pd.DataFrame(),
         epsilon=epsilon,
@@ -115,25 +181,56 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
     pd.DataFrame(parameter_rows).to_csv(context["output_paths"]["metrics"] / "rolling_parameter_snapshots.csv", index=False)
     pd.concat(validation_frames, ignore_index=True).to_csv(context["output_paths"]["metrics"] / "rolling_validation_metrics.csv", index=False)
     pd.concat(backtest_frames, ignore_index=True).to_csv(context["output_paths"]["metrics"] / "rolling_backtest_metrics.csv", index=False)
+    rolling_weekly_results.to_csv(context["output_paths"]["metrics"] / "rolling_weekly_results.csv", index=False)
+    rolling_hourly_results.to_csv(context["output_paths"]["metrics"] / "rolling_hourly_results.csv", index=False)
+    rolling_settlement_results.to_csv(context["output_paths"]["metrics"] / "rolling_settlement_results.csv", index=False)
     rolling_excess_return_metrics.to_csv(context["output_paths"]["metrics"] / "rolling_excess_return_metrics.csv", index=False)
     summary.metrics.to_csv(context["output_paths"]["metrics"] / "backtest_metrics.csv", index=False)
+    benchmark_metrics.to_csv(context["output_paths"]["metrics"] / "benchmark_comparison.csv", index=False)
+    ablation_metrics.to_csv(context["output_paths"]["metrics"] / "ablation_metrics.csv", index=False)
+    robustness_metrics.to_csv(context["output_paths"]["metrics"] / "robustness_metrics.csv", index=False)
+    run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
     save_markdown(
-        _build_backtest_summary({"aggregate": summary.aggregate}, rolling_excess_return_metrics),
+        prepend_report_header(_build_backtest_summary({"aggregate": summary.aggregate}, rolling_excess_return_metrics), run_metadata),
         context["output_paths"]["reports"] / "backtest_summary.md",
     )
     save_markdown(
-        "\n".join(
-            [
-                "# 滚动回测审计摘要",
-                "",
-                f"- 窗口数: {summary.aggregate['window_count']:.0f}",
-                f"- 调度文件: {context['output_paths']['metrics'] / 'rolling_window_schedule.csv'}",
-                f"- 参数快照: {context['output_paths']['metrics'] / 'rolling_parameter_snapshots.csv'}",
-                f"- 验证指标: {context['output_paths']['metrics'] / 'rolling_validation_metrics.csv'}",
-                f"- 回测指标: {context['output_paths']['metrics'] / 'rolling_backtest_metrics.csv'}",
-                f"- 超额收益验证: {context['output_paths']['metrics'] / 'rolling_excess_return_metrics.csv'}",
-                "",
-            ]
+        prepend_report_header(build_benchmark_summary_markdown(benchmark_metrics), run_metadata),
+        context["output_paths"]["reports"] / "benchmark_summary.md",
+    )
+    save_markdown(
+        prepend_report_header(build_ablation_summary_markdown(ablation_metrics), run_metadata),
+        context["output_paths"]["reports"] / "ablation_summary.md",
+    )
+    save_markdown(
+        prepend_report_header(build_robustness_summary_markdown(robustness_metrics), run_metadata),
+        context["output_paths"]["reports"] / "robustness_summary.md",
+    )
+    save_markdown(
+        prepend_report_header(build_constraint_activation_report_markdown(rolling_weekly_results), run_metadata),
+        context["output_paths"]["reports"] / "constraint_activation_report.md",
+    )
+    save_markdown(
+        prepend_report_header(
+            "\n".join(
+                [
+                    "# 滚动回测审计摘要",
+                    "",
+                    f"- 窗口数: {summary.aggregate['window_count']:.0f}",
+                    f"- 调度文件: {relativize_path(context['output_paths']['metrics'] / 'rolling_window_schedule.csv', output_root)}",
+                    f"- 参数快照: {relativize_path(context['output_paths']['metrics'] / 'rolling_parameter_snapshots.csv', output_root)}",
+                    f"- 验证指标: {relativize_path(context['output_paths']['metrics'] / 'rolling_validation_metrics.csv', output_root)}",
+                    f"- 回测指标: {relativize_path(context['output_paths']['metrics'] / 'rolling_backtest_metrics.csv', output_root)}",
+                    f"- 周度回测明细: {relativize_path(context['output_paths']['metrics'] / 'rolling_weekly_results.csv', output_root)}",
+                    f"- 超额收益验证: {relativize_path(context['output_paths']['metrics'] / 'rolling_excess_return_metrics.csv', output_root)}",
+                    f"- 基准比较: {relativize_path(context['output_paths']['metrics'] / 'benchmark_comparison.csv', output_root)}",
+                    f"- 消融结果: {relativize_path(context['output_paths']['metrics'] / 'ablation_metrics.csv', output_root)}",
+                    f"- 稳健性结果: {relativize_path(context['output_paths']['metrics'] / 'robustness_metrics.csv', output_root)}",
+                    f"- 约束激活报告: {relativize_path(context['output_paths']['reports'] / 'constraint_activation_report.md', output_root)}",
+                    "",
+                ]
+            ),
+            run_metadata,
         ),
         context["output_paths"]["reports"] / "rolling_audit_summary.md",
     )
@@ -142,7 +239,13 @@ def run_backtest(context: dict[str, Any], model=None) -> dict[str, Any]:
         "rolling_summary": summary,
         "validation_metrics": pd.concat(validation_frames, ignore_index=True),
         "backtest_metrics": pd.concat(backtest_frames, ignore_index=True),
+        "rolling_weekly_results": rolling_weekly_results,
+        "rolling_hourly_results": rolling_hourly_results,
+        "rolling_settlement_results": rolling_settlement_results,
         "rolling_excess_return_metrics": rolling_excess_return_metrics,
+        "benchmark_metrics": benchmark_metrics,
+        "ablation_metrics": ablation_metrics,
+        "robustness_metrics": robustness_metrics,
     }
 
 

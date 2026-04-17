@@ -58,6 +58,9 @@ def _compute_metrics(
         "avg_adjustment_mwh": float(hourly_results["spot_hedge_mwh"].abs().mean()) if "spot_hedge_mwh" in hourly_results else 0.0,
         "mean_reward": float(weekly_results["reward_w"].mean()) if not weekly_results.empty else 0.0,
         "max_drawdown": max_drawdown,
+        "feasible_domain_trigger_weeks": int(
+            weekly_results.get("feasible_domain_triggered_w", pd.Series(dtype="float64")).astype(float).gt(0.0).sum()
+        ),
     }
 
 
@@ -82,9 +85,12 @@ def materialize_particle_pair(
     )
     contract_adjustment_raw = scored.contract_adjustment_mwh_raw[0, 0].detach().cpu().numpy()
     contract_adjustment_exec = scored.contract_adjustment_mwh_exec[0, 0].detach().cpu().numpy()
+    exposure_band_raw = scored.exposure_band_mwh_raw[0, 0].detach().cpu().numpy()
     contract_position = scored.contract_position_mwh[0, 0].detach().cpu().numpy()
     exposure_band = scored.exposure_band_mwh[0, 0].detach().cpu().numpy()
     policy_projection_active = scored.policy_projection_active[0, 0].detach().cpu().numpy()
+    feasible_domain_clip_gap = scored.feasible_domain_clip_gap[0, 0].detach().cpu().numpy()
+    feasible_domain_clip_active = scored.feasible_domain_clip_active[0, 0].detach().cpu().numpy()
     contract_curve = scored.contract_curve[0, 0].detach().cpu().numpy()
     spot_hedge = scored.spot_hedge_mwh[0, 0].detach().cpu().numpy()
     spot_hedge_limit = scored.spot_hedge_limit_mwh[0, 0].detach().cpu().numpy()
@@ -116,9 +122,14 @@ def materialize_particle_pair(
             "week_start": pd.Timestamp(week_start),
             "contract_adjustment_mwh_raw": float(contract_adjustment_raw[week_pos]),
             "contract_adjustment_mwh_exec": float(contract_adjustment_exec[week_pos]),
+            "exposure_band_mwh_raw": float(exposure_band_raw[week_pos]),
             "contract_position_mwh": float(contract_position[week_pos]),
             "exposure_band_mwh": float(exposure_band[week_pos]),
             "policy_projection_active": float(policy_projection_active[week_pos]),
+            "feasible_domain_triggered_w": float(feasible_domain_clip_active[week_pos]),
+            "feasible_domain_clip_gap_w": float(feasible_domain_clip_gap[week_pos]),
+            "bound_reason_code": tensor_bundle.weekly_bound_reason_codes[week_pos] if week_pos < len(tensor_bundle.weekly_bound_reason_codes) else "default",
+            "settlement_mode": tensor_bundle.weekly_settlement_modes[week_pos] if week_pos < len(tensor_bundle.weekly_settlement_modes) else "previous_week_da_proxy",
             "policy_violation_penalty_w": float(violation_penalty[week_pos]),
             "retail_revenue_w": float(retail_revenue[week_pos]),
             "procurement_cost_w": float(procurement_cost[week_pos]),

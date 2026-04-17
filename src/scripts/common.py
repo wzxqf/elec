@@ -3,6 +3,7 @@ from typing import Any
 
 import pandas as pd
 
+from src.analysis.state_audit import build_state_schema_markdown, build_tensor_bundle_audit_markdown
 from src.backtest.rolling_pipeline import build_rolling_retrain_plan
 from src.analysis.model_layout_reporting import build_parameter_layout_markdown, build_parameter_layout_payload
 from src.config.load_config import load_runtime_config
@@ -11,6 +12,7 @@ from src.data.preprocess import build_data_quality_markdown, clean_total_data
 from src.data.scenario_generator import WeekSplit, build_week_split
 from src.data.weekly_builder import build_weekly_bundle
 from src.model_layout.compiler import compile_parameter_layout
+from src.policy.feasible_domain import compile_feasible_domain
 from src.policy.market_constraints import (
     build_market_rule_constraints,
     build_market_rule_constraints_markdown,
@@ -18,6 +20,16 @@ from src.policy.market_constraints import (
 )
 from src.policy_deep.regime_builder import build_policy_deep_context
 from src.training.tensor_bundle import compile_training_tensor_bundle
+from src.utils.experiment_manifest import (
+    build_artifact_index_markdown,
+    build_feasible_domain_summary,
+    build_parameter_layout_audit_markdown,
+    build_release_manifest,
+    build_run_manifest,
+    build_run_metadata,
+    prepend_report_header,
+    relativize_path,
+)
 from src.utils.io import dump_yaml, resolve_output_paths, save_json, save_markdown
 from src.utils.logger import configure_logging
 from src.utils.seeds import set_global_seed
@@ -58,6 +70,15 @@ def subset_bundle_for_weeks(bundle: dict[str, Any], weeks: list[pd.Timestamp]) -
         subset[key] = bundle[key].loc[bundle[key]["week_start"].isin(week_set)].reset_index(drop=True)
     for key in ["hourly", "quarter"]:
         subset[key] = bundle[key].loc[bundle[key]["week_start"].isin(week_set)].reset_index(drop=True)
+    if "feasible_domain" in bundle:
+        feasible_domain = bundle["feasible_domain"]
+        subset["feasible_domain"] = type(feasible_domain)(
+            weekly_bounds=feasible_domain.weekly_bounds.loc[feasible_domain.weekly_bounds["week_start"].isin(week_set)].reset_index(drop=True),
+            hourly_bounds=feasible_domain.hourly_bounds.loc[feasible_domain.hourly_bounds["week_start"].isin(week_set)].reset_index(drop=True),
+            settlement_semantics=feasible_domain.settlement_semantics.loc[
+                feasible_domain.settlement_semantics["week_start"].isin(week_set)
+            ].reset_index(drop=True),
+        )
     subset["tensor_bundle"] = compile_training_tensor_bundle(subset, device=bundle["tensor_bundle"].device)
     return subset
 
@@ -76,7 +97,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         sample_end=config["sample_end"],
         expected_freq_minutes=int(config["expected_frequency_minutes"]),
     )
-    save_markdown(build_data_quality_markdown(report), output_paths["reports"] / "data_quality_report.md")
+    data_quality_markdown = build_data_quality_markdown(report)
 
     bundle = build_weekly_bundle(cleaned, config)
     policy_deep = build_policy_deep_context(
@@ -111,6 +132,12 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     )
     bundle["feature_manifest"] = feature_manifest
     bundle["agent_feature_columns"] = agent_feature_columns
+    feasible_domain = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=policy_deep.state_trace,
+    )
+    bundle["feasible_domain"] = feasible_domain
     compiled_parameter_layout = compile_parameter_layout(config=config, bundle=bundle)
     bundle["compiled_parameter_layout"] = compiled_parameter_layout
     bundle["tensor_bundle"] = compile_training_tensor_bundle(bundle, device=config["training"]["device"])
@@ -126,15 +153,14 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     policy_deep.state_trace.to_csv(output_paths["metrics"] / "policy_state_trace.csv", index=False)
     policy_deep.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
     market_constraints.to_csv(output_paths["metrics"] / "market_rule_constraints.csv", index=False)
-    save_markdown(
-        build_market_rule_constraints_markdown(
-            config=config,
-            constraints=market_constraints,
-            rule_table=policy_deep.rule_table,
-            violations=market_constraint_violations,
-        ),
-        output_paths["reports"] / "market_rule_constraints.md",
+    feasible_domain.weekly_bounds.to_csv(output_paths["metrics"] / "feasible_domain_manifest.csv", index=False)
+    market_rule_constraints_markdown = build_market_rule_constraints_markdown(
+        config=config,
+        constraints=market_constraints,
+        rule_table=policy_deep.rule_table,
+        violations=market_constraint_violations,
     )
+    feasible_domain_summary_markdown = build_feasible_domain_summary(feasible_domain)
     bundle["weekly_metadata"].to_csv(output_paths["metrics"] / "weekly_metadata.csv", index=False)
     bundle["weekly_features"].to_csv(output_paths["metrics"] / "weekly_features.csv", index=False)
     feature_manifest.to_csv(output_paths["metrics"] / "feature_manifest.csv", index=False)
@@ -146,9 +172,55 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         },
         output_paths["reports"] / "feature_manifest.json",
     )
-    save_json(build_parameter_layout_payload(compiled_parameter_layout), output_paths["reports"] / "compiled_parameter_layout.json")
-    save_markdown(build_parameter_layout_markdown(compiled_parameter_layout), output_paths["reports"] / "parameter_layout_summary.md")
+    layout_payload = build_parameter_layout_payload(compiled_parameter_layout)
+    save_json(layout_payload, output_paths["reports"] / "compiled_parameter_layout.json")
+    run_metadata = build_run_metadata(
+        config=config,
+        output_root=output_paths["root"],
+        compiled_layout_payload=layout_payload,
+        constraints=market_constraints,
+    )
+    state_schema_markdown = build_state_schema_markdown(bundle, bundle["tensor_bundle"])
+    tensor_bundle_audit_markdown = build_tensor_bundle_audit_markdown(bundle, bundle["tensor_bundle"])
+    save_markdown(prepend_report_header(data_quality_markdown, run_metadata), output_paths["reports"] / "data_quality_report.md")
+    save_markdown(
+        prepend_report_header(market_rule_constraints_markdown, run_metadata),
+        output_paths["reports"] / "market_rule_constraints.md",
+    )
+    save_markdown(
+        prepend_report_header(feasible_domain_summary_markdown, run_metadata),
+        output_paths["reports"] / "policy_feasible_domain_summary.md",
+    )
+    save_markdown(
+        prepend_report_header(build_parameter_layout_markdown(compiled_parameter_layout), run_metadata),
+        output_paths["reports"] / "parameter_layout_summary.md",
+    )
+    save_markdown(
+        prepend_report_header(build_parameter_layout_audit_markdown(compiled_parameter_layout), run_metadata),
+        output_paths["reports"] / "parameter_layout_audit.md",
+    )
+    save_markdown(
+        prepend_report_header(state_schema_markdown, run_metadata),
+        output_paths["reports"] / "state_schema_snapshot.md",
+    )
+    save_markdown(
+        prepend_report_header(tensor_bundle_audit_markdown, run_metadata),
+        output_paths["reports"] / "tensor_bundle_audit.md",
+    )
     dump_yaml(config["raw_experiment_config"], output_paths["reports"] / "train_config_snapshot.yaml")
+    key_outputs = {
+        "compiled_layout_path": relativize_path(output_paths["reports"] / "compiled_parameter_layout.json", output_paths["root"]),
+        "parameter_layout_audit_path": relativize_path(output_paths["reports"] / "parameter_layout_audit.md", output_paths["root"]),
+        "state_schema_snapshot_path": relativize_path(output_paths["reports"] / "state_schema_snapshot.md", output_paths["root"]),
+        "tensor_bundle_audit_path": relativize_path(output_paths["reports"] / "tensor_bundle_audit.md", output_paths["root"]),
+        "feasible_domain_manifest_path": relativize_path(output_paths["metrics"] / "feasible_domain_manifest.csv", output_paths["root"]),
+        "policy_rule_table_path": relativize_path(output_paths["metrics"] / "policy_rule_table.csv", output_paths["root"]),
+        "policy_state_trace_path": relativize_path(output_paths["metrics"] / "policy_state_trace.csv", output_paths["root"]),
+        "feature_manifest_path": relativize_path(output_paths["reports"] / "feature_manifest.json", output_paths["root"]),
+    }
+    save_json(build_release_manifest(run_metadata, config, key_outputs), output_paths["root"] / "release_manifest.json")
+    save_json(build_run_manifest(run_metadata, config, key_outputs), output_paths["root"] / "run_manifest.json")
+    save_markdown(build_artifact_index_markdown(run_metadata, key_outputs), output_paths["root"] / "artifact_index.md")
     logger.info("已加载数据文件: %s", csv_path)
     logger.info("训练算法: %s", config["training"]["algorithm"])
     logger.info("政策来源文件数: %s", len(policy_deep.inventory))
@@ -166,6 +238,7 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
         "bundle": bundle,
         "split": split,
         "rolling_plan": rolling_plan,
+        "run_metadata": run_metadata,
     }
 
 
