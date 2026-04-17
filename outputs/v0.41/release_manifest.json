@@ -3,7 +3,7 @@
   "experiment_id": "v0.41-d0f1cd29",
   "config_hash": "d0f1cd29e630e124c05e6cf7194aae745f54b32a4507faee6bb7207d66a63e29",
   "compiled_layout_hash": "05f5a9484a674da114de35d24763a0accf35b02135607eabe0cfbe3c11ec523a",
-  "run_timestamp": "2026-04-17T11:47:32+08:00",
+  "run_timestamp": "2026-04-17T15:51:38+08:00",
   "device": "cuda",
   "data_range": {
     "sample_start": "2025-11-01 00:00:00",

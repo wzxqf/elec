@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
@@ -82,6 +83,7 @@ def train_hybrid_pso_model(
     tensor_bundle: TrainingTensorBundle,
     config: dict[str, Any],
     compiled_layout: CompiledParameterLayout | None = None,
+    progress_callback: Callable[[dict[str, Any]], None] | None = None,
 ) -> HybridPSOTrainResult:
     hybrid_cfg = config["hybrid_pso"]
     device = _resolve_device(config)
@@ -148,6 +150,16 @@ def train_hybrid_pso_model(
                 "lower_particles": lower_particles,
             }
         )
+        if progress_callback is not None:
+            progress_callback(
+                {
+                    "iteration": iteration,
+                    "iterations": iterations,
+                    "phase_progress": iteration / iterations,
+                    "best_score": global_best_score,
+                    "mean_score": float(total_score.mean().item()),
+                }
+            )
 
         rand_upper_1 = torch.rand_like(upper)
         rand_upper_2 = torch.rand_like(upper)

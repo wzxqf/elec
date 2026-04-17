@@ -6,7 +6,17 @@ from src.scripts.common import prepare_project_context, split_to_dict, subset_bu
 from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
 from src.utils.io import save_json, save_markdown
 from src.utils.logger import configure_logging
-from src.utils.runtime_status import RuntimeStatusTracker
+from src.utils.runtime_status import (
+    RuntimeStatusTracker,
+    build_training_phase_name,
+    build_training_progress_message,
+    clamp_progress,
+    interpolate_progress,
+)
+
+
+TRAIN_TOTAL_PROGRESS_START = 0.05
+TRAIN_TOTAL_PROGRESS_END = 0.33
 
 
 def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> str:
@@ -48,13 +58,37 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
     status_path = context.get("runtime_status_path", Path.cwd() / ".cache" / "train_runtime_status.json")
     status_path.parent.mkdir(parents=True, exist_ok=True)
     status_tracker = RuntimeStatusTracker(status_path)
+    phase_name = build_training_phase_name(context["config"].get("training", {}).get("algorithm"))
     logger.info("开始执行 %s 训练模块。", context["config"]["version"])
     train_bundle = subset_bundle_for_weeks(context["bundle"], context["split"].train)
-    status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=0.0, total_progress=0.1, message="编译张量包")
+
+    status_tracker.update(
+        stage="训练",
+        phase_name=phase_name,
+        phase_progress=0.0,
+        total_progress=TRAIN_TOTAL_PROGRESS_START,
+        message="编译张量包",
+    )
+
+    def report_training_progress(progress: dict[str, Any]) -> None:
+        phase_progress = clamp_progress(progress.get("phase_progress", 0.0))
+        status_tracker.update(
+            stage="训练",
+            phase_name=phase_name,
+            phase_progress=phase_progress,
+            total_progress=interpolate_progress(TRAIN_TOTAL_PROGRESS_START, TRAIN_TOTAL_PROGRESS_END, phase_progress),
+            message=build_training_progress_message(progress),
+            iteration=progress.get("iteration"),
+            iterations=progress.get("iterations"),
+            best_score=progress.get("best_score"),
+            mean_score=progress.get("mean_score"),
+        )
+
     training_result = train_hybrid_pso_model(
         train_bundle["tensor_bundle"],
         context["config"],
         compiled_layout=train_bundle.get("compiled_parameter_layout"),
+        progress_callback=report_training_progress,
     )
     save_hybrid_pso_model(training_result.model, context["output_paths"]["models"] / "hybrid_pso_model.json")
     training_result.training_trace.to_csv(context["output_paths"]["metrics"] / "hybrid_pso_training_trace.csv", index=False)
@@ -81,7 +115,13 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
         prepend_report_header(summary, run_metadata, device=training_result.runtime_profile["score_kernel_device"]),
         context["output_paths"]["reports"] / "train_summary.md",
     )
-    status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=1.0, total_progress=0.33, message="训练完成")
+    status_tracker.update(
+        stage="训练",
+        phase_name=phase_name,
+        phase_progress=1.0,
+        total_progress=TRAIN_TOTAL_PROGRESS_END,
+        message="训练完成",
+    )
     logger.info("训练模块执行完成。")
     return {
         "model": training_result.model,

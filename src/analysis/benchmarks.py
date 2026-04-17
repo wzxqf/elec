@@ -9,6 +9,10 @@ from src.analysis.report_contracts import build_summary_scope_lines, infer_date_
 from src.training.tensor_bundle import TrainingTensorBundle
 
 
+def _sanitized_cpu_tensor(tensor: torch.Tensor) -> torch.Tensor:
+    return torch.nan_to_num(tensor.detach().cpu(), nan=0.0, posinf=0.0, neginf=0.0)
+
+
 def _evaluate_strategy(
     tensor_bundle: TrainingTensorBundle,
     *,
@@ -17,12 +21,12 @@ def _evaluate_strategy(
     simple_hedge: bool,
     economics: dict[str, Any],
 ) -> dict[str, float | str]:
-    forecast = tensor_bundle.forecast_weekly_load.detach().cpu()
-    actual = tensor_bundle.actual_weekly_load.detach().cpu()
-    lt_price = tensor_bundle.lt_weekly_price.detach().cpu()
-    quarter = tensor_bundle.quarter_price_tensor.detach().cpu()
+    forecast = _sanitized_cpu_tensor(tensor_bundle.forecast_weekly_load)
+    actual = _sanitized_cpu_tensor(tensor_bundle.actual_weekly_load)
+    lt_price = _sanitized_cpu_tensor(tensor_bundle.lt_weekly_price)
+    quarter = _sanitized_cpu_tensor(tensor_bundle.quarter_price_tensor)
     quarter_mask = tensor_bundle.quarter_valid_mask.detach().cpu().float()
-    hourly = tensor_bundle.hourly_tensor.detach().cpu()
+    hourly = _sanitized_cpu_tensor(tensor_bundle.hourly_tensor)
     hour_mask = tensor_bundle.hourly_valid_mask.detach().cpu().float()
 
     retail_tariff = float(economics.get("retail_tariff_yuan_per_mwh", 430.0))

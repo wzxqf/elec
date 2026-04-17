@@ -1,0 +1,15 @@
+D:\miniforge\envs\torch311\Lib\site-packages\torch\cuda\__init__.py:63: FutureWarning: The pynvml package is deprecated. Please install nvidia-ml-py instead. If you did not install pynvml directly, please report this to the maintainers of the package that installed pynvml for you.
+  import pynvml  # type: ignore[import]
+2026-04-17 15:51:38 | INFO | elec.pipeline | �Ѽ��������ļ�: d:\elec\total.csv
+2026-04-17 15:51:38 | INFO | elec.pipeline | ѵ���㷨: HYBRID_PSO_V040
+2026-04-17 15:51:38 | INFO | elec.pipeline | ������Դ�ļ���: 18
+2026-04-17 15:51:38 | INFO | elec.pipeline | ���ߺ�ѡ������: 34
+2026-04-17 15:51:38 | INFO | elec.pipeline | ������ʽ������: 34
+2026-04-17 15:51:38 | INFO | elec.pipeline | ������ѵ������: 10
+2026-04-17 15:51:38 | INFO | elec.train | ��ʼִ�� v0.42 ѵ��ģ�顣
+2026-04-17 15:52:03 | INFO | elec.train | ѵ��ģ��ִ����ɡ�
+2026-04-17 15:52:03 | INFO | elec.evaluate | ��ʼִ����֤ģ�顣
+2026-04-17 15:52:03 | INFO | elec.evaluate | ��֤ģ��ִ����ɡ�
+2026-04-17 15:52:03 | INFO | elec.backtest | ��ʼִ�� v0.42 �ز�ģ�顣
+2026-04-17 16:01:01 | INFO | elec.backtest | �ز�ģ��ִ����ɡ�
+

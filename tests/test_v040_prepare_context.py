@@ -28,7 +28,11 @@ def test_prepare_project_context_exports_v040_manifests_and_audits() -> None:
     assert release_manifest["compiled_layout_hash"]
     assert release_manifest["data_range"]["sample_start"]
     assert release_manifest["enabled_constraints"]
-    assert "policy_tightening_trigger_count" in feasible_domain_summary
-    assert "default_projection_trigger_count" in feasible_domain_summary
+    assert "summary_scope: static_policy_bound_inventory" in feasible_domain_summary
+    assert "policy_tightening_week_count" in feasible_domain_summary
+    assert "default_bound_week_count" in feasible_domain_summary
+    assert "runtime_projection_reference" in feasible_domain_summary
+    assert "policy_tightening_trigger_count" not in feasible_domain_summary
+    assert "default_projection_trigger_count" not in feasible_domain_summary
     assert "selected_for_policy_head" in feature_manifest.columns
     assert "report_only" in feature_manifest.columns

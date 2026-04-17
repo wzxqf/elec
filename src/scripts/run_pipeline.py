@@ -24,7 +24,7 @@ from src.utils.experiment_manifest import (
     relativize_path,
 )
 from src.utils.io import save_json, save_markdown
-from src.utils.runtime_status import RuntimeStatusTracker
+from src.utils.runtime_status import RuntimeStatusTracker, build_training_phase_name
 
 
 def _build_run_summary(context: dict, training: dict, validation: dict, backtest: dict) -> str:
@@ -65,13 +65,23 @@ def _load_existing_key_outputs(output_root: Path) -> dict[str, str]:
     return {}
 
 
+def _filter_existing_key_outputs(output_root: Path, key_outputs: dict[str, str]) -> dict[str, str]:
+    filtered: dict[str, str] = {}
+    for label, path in key_outputs.items():
+        candidate = Path(path)
+        resolved = candidate if candidate.is_absolute() else output_root / candidate
+        if resolved.exists():
+            filtered[str(label)] = str(path)
+    return filtered
+
+
 def _persist_manifest_updates(context: dict, extra_outputs: dict[str, str]) -> None:
     if "seed" not in context["config"] or "split" not in context["config"]:
         return
     output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
     run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
-    key_outputs = _load_existing_key_outputs(output_root)
-    key_outputs.update(extra_outputs)
+    key_outputs = _filter_existing_key_outputs(output_root, _load_existing_key_outputs(output_root))
+    key_outputs.update(_filter_existing_key_outputs(output_root, extra_outputs))
     save_json(build_release_manifest(run_metadata, context["config"], key_outputs), output_root / "release_manifest.json")
     save_json(build_run_manifest(run_metadata, context["config"], key_outputs), output_root / "run_manifest.json")
     save_markdown(build_artifact_index_markdown(run_metadata, key_outputs), output_root / "artifact_index.md")
@@ -157,7 +167,8 @@ def main() -> dict:
     status_tracker.update(stage="初始化", phase_name="准备上下文", phase_progress=0.0, total_progress=0.0, message="加载配置与数据")
     context = prepare_project_context(Path.cwd(), logger_name="pipeline")
     context["runtime_status_path"] = status_path
-    status_tracker.update(stage="训练", phase_name="Hybrid PSO 训练", phase_progress=0.0, total_progress=0.05, message="开始训练")
+    training_phase_name = build_training_phase_name(context["config"].get("training", {}).get("algorithm"))
+    status_tracker.update(stage="训练", phase_name=training_phase_name, phase_progress=0.0, total_progress=0.05, message="开始训练")
     training = run_train(context)
     status_tracker.update(stage="验证", phase_name="验证模块", phase_progress=0.0, total_progress=0.33, message="开始验证")
     validation = run_evaluate(context, model=training["model"])

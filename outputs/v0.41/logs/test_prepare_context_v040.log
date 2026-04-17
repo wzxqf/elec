@@ -1,6 +1,0 @@
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 已加载数据文件: d:\elec\total.csv
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 训练算法: HYBRID_PSO_V040
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 政策来源文件数: 18
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 政策候选规则数: 34
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 政策正式规则数: 34
-2026-04-17 11:44:08 | INFO | elec.test_prepare_context_v040 | 滚动重训窗口数: 10

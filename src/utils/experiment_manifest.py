@@ -60,9 +60,13 @@ def build_parameter_layout_audit_markdown(layout: CompiledParameterLayout) -> st
 def build_feasible_domain_summary(domain: Any) -> str:
     weekly = domain.weekly_bounds if hasattr(domain, "weekly_bounds") else pd.DataFrame()
     settlement = domain.settlement_semantics if hasattr(domain, "settlement_semantics") else pd.DataFrame()
-    triggered = int(weekly.get("feasible_domain_triggered", pd.Series(dtype="float64")).astype(bool).sum()) if not weekly.empty else 0
-    policy_tightening_trigger_count = triggered
-    default_projection_trigger_count = 0
+    if weekly.empty:
+        policy_tightening_week_count = 0
+        default_bound_week_count = 0
+    else:
+        reason_codes = weekly.get("bound_reason_code", pd.Series("default", index=weekly.index)).fillna("default").astype(str)
+        policy_tightening_week_count = int(reason_codes.ne("default").sum())
+        default_bound_week_count = int(reason_codes.eq("default").sum())
     projection_clip_mean = 0.0
     projection_clip_max = 0.0
     settlement_modes = settlement.get("settlement_mode", pd.Series(dtype="object")).dropna().astype(str).unique().tolist() if not settlement.empty else []
@@ -70,12 +74,15 @@ def build_feasible_domain_summary(domain: Any) -> str:
         [
             "# 可行域摘要",
             "",
+            "- summary_scope: static_policy_bound_inventory",
             f"- 可行域周数: {len(weekly)}",
-            f"- policy_tightening_trigger_count: {policy_tightening_trigger_count}",
-            f"- default_projection_trigger_count: {default_projection_trigger_count}",
+            f"- policy_tightening_week_count: {policy_tightening_week_count}",
+            f"- default_bound_week_count: {default_bound_week_count}",
             f"- projection_clip_mean: {projection_clip_mean:.4f}",
             f"- projection_clip_max: {projection_clip_max:.4f}",
             f"- 结算模式: {', '.join(settlement_modes) if settlement_modes else '无'}",
+            "- runtime_projection_reference: reports/constraint_activation_report.md, metrics/ablation_metrics.csv",
+            "- note: 本摘要仅统计编译期静态边界，不统计运行时投影/裁剪触发次数。",
             "",
         ]
     )

@@ -1,7 +1,7 @@
 > version: v0.41
-> experiment_id: v0.41-5dc8a2bd
-> config_hash: 5dc8a2bdd751f16563ce14f3d302c608c85f9aea6c1923404c46655592a57189
-> run_timestamp: 2026-04-17T11:44:08+08:00
+> experiment_id: v0.41-d0f1cd29
+> config_hash: d0f1cd29e630e124c05e6cf7194aae745f54b32a4507faee6bb7207d66a63e29
+> run_timestamp: 2026-04-17T15:51:38+08:00
 > device: cuda
 > data_range: 2025-11-01 00:00:00 -> 2026-03-20 23:45:00
 
