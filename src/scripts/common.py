@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import pandas as pd
 
 from src.analysis.state_audit import build_state_schema_markdown, build_tensor_bundle_audit_markdown
@@ -47,6 +48,8 @@ def _build_feature_manifest(
 ) -> tuple[pd.DataFrame, list[str]]:
     include_set = set(config["feature_selection"].get("feature_include_for_agent", []))
     exclude_set = set(config["feature_selection"].get("feature_exclude_for_agent", []))
+    report_only_set = set(config["feature_selection"].get("feature_keep_for_report_only", []))
+    policy_head_set = set(_resolve_policy_head_columns(policy_trace, config))
     rows: list[dict[str, Any]] = []
     agent_columns: list[str] = []
     policy_columns = set(policy_trace.columns) - {"week_start"}
@@ -57,10 +60,54 @@ def _build_feature_manifest(
         numeric = pd.api.types.is_numeric_dtype(weekly_features[column])
         source = base_rows.get(column, {}).get("source", "政策状态" if column in policy_columns else "周度聚合")
         selected = bool(numeric and column not in exclude_set and (column in include_set or column not in policy_columns))
-        rows.append({"column": column, "source": source, "is_numeric": numeric, "selected_for_agent": selected})
+        selected_for_policy_head = bool(numeric and column in policy_head_set)
+        report_only = bool(column in report_only_set or (numeric and not selected and not selected_for_policy_head))
+        rows.append(
+            {
+                "column": column,
+                "source": source,
+                "is_numeric": numeric,
+                "selected_for_agent": selected,
+                "selected_for_policy_head": selected_for_policy_head,
+                "report_only": report_only,
+            }
+        )
         if selected:
             agent_columns.append(column)
     return pd.DataFrame(rows), agent_columns
+
+
+def _resolve_policy_head_columns(policy_trace: pd.DataFrame, config: dict[str, Any]) -> list[str]:
+    numeric_policy_columns = [
+        column
+        for column in policy_trace.columns
+        if column != "week_start" and pd.api.types.is_numeric_dtype(policy_trace[column])
+    ]
+    compiler_cfg = config.get("parameter_compiler", {}).get("upper", {})
+    blocks = compiler_cfg.get("blocks", {})
+    policy_block = blocks.get("policy_feature_weights", {})
+    include_columns = policy_block.get("include")
+    if include_columns:
+        return [str(column) for column in include_columns if str(column) in numeric_policy_columns]
+    return numeric_policy_columns
+
+
+def _align_lt_price_metadata(weekly_metadata: pd.DataFrame) -> pd.DataFrame:
+    metadata = weekly_metadata.copy()
+    linked_active = pd.to_numeric(metadata.get("lt_price_linked_active", pd.Series(0.0, index=metadata.index)), errors="coerce").fillna(0.0)
+    lt_price_w = pd.to_numeric(metadata.get("lt_price_w", pd.Series(np.nan, index=metadata.index)), errors="coerce")
+    fixed_ratio_raw = pd.to_numeric(metadata.get("fixed_price_ratio_max", pd.Series(0.4, index=metadata.index)), errors="coerce").fillna(0.4)
+    linked_ratio_raw = pd.to_numeric(metadata.get("linked_price_ratio_min", pd.Series(0.6, index=metadata.index)), errors="coerce").fillna(0.6)
+    total_ratio = (fixed_ratio_raw + linked_ratio_raw).replace(0.0, 1.0)
+
+    metadata["lt_price_source"] = np.where(
+        lt_price_w.notna(),
+        np.where(linked_active >= 0.5, "linked_mix_40da_60id", "prev_week_da_proxy"),
+        metadata.get("lt_price_source", pd.Series("warmup_unavailable", index=metadata.index)),
+    )
+    metadata["lt_price_fixed_ratio"] = np.where(lt_price_w.notna(), np.where(linked_active >= 0.5, fixed_ratio_raw / total_ratio, 1.0), 0.0)
+    metadata["lt_price_linked_ratio"] = np.where(lt_price_w.notna(), np.where(linked_active >= 0.5, linked_ratio_raw / total_ratio, 0.0), 0.0)
+    return metadata
 
 
 def subset_bundle_for_weeks(bundle: dict[str, Any], weeks: list[pd.Timestamp]) -> dict[str, Any]:
@@ -109,8 +156,17 @@ def prepare_project_context(project_root: str | Path, logger_name: str = "pipeli
     market_constraint_violations = validate_market_rule_alignment(config, policy_deep.rule_table, policy_deep.state_trace)
 
     bundle["weekly_metadata"] = bundle["weekly_metadata"].merge(policy_deep.state_trace, on="week_start", how="left")
+    bundle["weekly_metadata"] = _align_lt_price_metadata(bundle["weekly_metadata"])
     bundle["weekly_features"] = bundle["weekly_features"].merge(
         policy_deep.state_trace.drop(columns=["policy_sources", "policy_names", "failed_policy_files", "active_state_groups"], errors="ignore"),
+        on="week_start",
+        how="left",
+    )
+    bundle["weekly_features"] = bundle["weekly_features"].drop(
+        columns=["lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"],
+        errors="ignore",
+    ).merge(
+        bundle["weekly_metadata"][["week_start", "lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"]],
         on="week_start",
         how="left",
     )

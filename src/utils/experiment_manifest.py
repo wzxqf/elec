@@ -42,6 +42,18 @@ def build_parameter_layout_audit_markdown(layout: CompiledParameterLayout) -> st
                 f"  字段: {', '.join(block.columns) if block.columns else '(none)'}",
             ]
         )
+    forward_consumption = {
+        column: block.name
+        for block in layout.upper.blocks
+        for column in block.columns
+        if str(column).startswith("forward_") and str(column).endswith("_days")
+    }
+    lines.extend(["", "## 前瞻制度状态消费位置", ""])
+    if forward_consumption:
+        for column, block_name in sorted(forward_consumption.items()):
+            lines.append(f"- `{column}` -> `{block_name}`")
+    else:
+        lines.append("- 无前瞻制度状态接入参数布局。")
     return "\n".join(lines) + "\n"
 
 
@@ -49,13 +61,20 @@ def build_feasible_domain_summary(domain: Any) -> str:
     weekly = domain.weekly_bounds if hasattr(domain, "weekly_bounds") else pd.DataFrame()
     settlement = domain.settlement_semantics if hasattr(domain, "settlement_semantics") else pd.DataFrame()
     triggered = int(weekly.get("feasible_domain_triggered", pd.Series(dtype="float64")).astype(bool).sum()) if not weekly.empty else 0
+    policy_tightening_trigger_count = triggered
+    default_projection_trigger_count = 0
+    projection_clip_mean = 0.0
+    projection_clip_max = 0.0
     settlement_modes = settlement.get("settlement_mode", pd.Series(dtype="object")).dropna().astype(str).unique().tolist() if not settlement.empty else []
     return "\n".join(
         [
             "# 可行域摘要",
             "",
             f"- 可行域周数: {len(weekly)}",
-            f"- 触发收紧窗口数: {triggered}",
+            f"- policy_tightening_trigger_count: {policy_tightening_trigger_count}",
+            f"- default_projection_trigger_count: {default_projection_trigger_count}",
+            f"- projection_clip_mean: {projection_clip_mean:.4f}",
+            f"- projection_clip_max: {projection_clip_max:.4f}",
             f"- 结算模式: {', '.join(settlement_modes) if settlement_modes else '无'}",
             "",
         ]

@@ -1,0 +1,42 @@
+{
+  "version": "v0.41",
+  "experiment_id": "v0.41-5dc8a2bd",
+  "config_hash": "5dc8a2bdd751f16563ce14f3d302c608c85f9aea6c1923404c46655592a57189",
+  "compiled_layout_hash": "05f5a9484a674da114de35d24763a0accf35b02135607eabe0cfbe3c11ec523a",
+  "run_timestamp": "2026-04-17T11:44:08+08:00",
+  "device": "cuda",
+  "data_range": {
+    "sample_start": "2025-11-01 00:00:00",
+    "sample_end": "2026-03-20 23:45:00"
+  },
+  "seed": 42,
+  "split": {
+    "train_start_week": "2025-11-03 00:00:00",
+    "train_end_week": "2026-01-26 00:00:00",
+    "val_start_week": "2026-02-02 00:00:00",
+    "val_end_week": "2026-02-23 00:00:00",
+    "test_start_week": "2026-03-02 00:00:00",
+    "test_end_week": "2026-03-16 00:00:00"
+  },
+  "compiled_layout_path": "reports/compiled_parameter_layout.json",
+  "enabled_constraints": [
+    "lt_contract_settlement_only",
+    "lt_24_period_contract_curve",
+    "spot_15min_96_settlement",
+    "retail_single_supplier_package",
+    "ancillary_peak_shaving_pause_during_spot_trial",
+    "renewable_mechanism_from_2026_01_01",
+    "lt_price_linkage_from_2026_02_01",
+    "metering_data_traceability"
+  ],
+  "key_outputs": {
+    "compiled_layout_path": "reports/compiled_parameter_layout.json",
+    "parameter_layout_audit_path": "reports/parameter_layout_audit.md",
+    "state_schema_snapshot_path": "reports/state_schema_snapshot.md",
+    "tensor_bundle_audit_path": "reports/tensor_bundle_audit.md",
+    "feasible_domain_manifest_path": "metrics/feasible_domain_manifest.csv",
+    "policy_rule_table_path": "metrics/policy_rule_table.csv",
+    "policy_state_trace_path": "metrics/policy_state_trace.csv",
+    "feature_manifest_path": "reports/feature_manifest.json"
+  }
+}

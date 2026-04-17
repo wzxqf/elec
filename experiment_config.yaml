@@ -1,5 +1,5 @@
 project:
-  version: v0.4
+  version: v0.41
   project_root: d:/elec
 
 data:
@@ -94,6 +94,8 @@ parameter_compiler:
           - lt_price_linked_active
           - forward_price_linkage_days
           - forward_mechanism_execution_days
+          - forward_ancillary_coupling_days
+          - forward_info_forecast_boundary_days
       contract_curve_latent:
         size: 12
       action_head:
@@ -157,6 +159,8 @@ upper_strategy:
     - lt_price_linked_active
     - forward_price_linkage_days
     - forward_mechanism_execution_days
+    - forward_ancillary_coupling_days
+    - forward_info_forecast_boundary_days
   parameter_layout:
     contract_adjustment_weights: 3
     exposure_band_weights: 3
@@ -209,6 +213,8 @@ feature_selection:
     - linked_price_ratio_min
     - forward_price_linkage_days
     - forward_mechanism_execution_days
+    - forward_ancillary_coupling_days
+    - forward_info_forecast_boundary_days
   feature_exclude_for_agent: []
   feature_keep_for_report_only:
     - policy_count

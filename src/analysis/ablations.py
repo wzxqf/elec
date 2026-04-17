@@ -4,6 +4,7 @@ from typing import Any
 
 import pandas as pd
 
+from src.analysis.report_contracts import build_summary_scope_lines, infer_date_range
 from src.backtest.materialize import materialize_particle_pair
 from src.training.tensor_bundle import compile_training_tensor_bundle
 
@@ -84,12 +85,29 @@ def evaluate_ablation_variants(bundle: dict[str, Any], model: Any, config: dict[
     return pd.DataFrame(rows)
 
 
-def build_ablation_summary_markdown(ablation_metrics: pd.DataFrame) -> str:
+def build_ablation_summary_markdown(
+    ablation_metrics: pd.DataFrame,
+    *,
+    sample_scope: str = "rolling_backtest_windows",
+    week_count: int | None = None,
+    aggregation_method: str = "aggregate_over_rolling_windows",
+    date_range: str | None = None,
+) -> str:
     full_profit = float(ablation_metrics.loc[ablation_metrics["variant_name"] == "full_model", "total_profit"].iloc[0]) if not ablation_metrics.empty else 0.0
+    date_range = date_range or infer_date_range(ablation_metrics)
+    week_count = week_count if week_count is not None else int(len(ablation_metrics))
     lines = [
         "# 消融总结",
         "",
     ]
+    lines.extend(
+        build_summary_scope_lines(
+            sample_scope=sample_scope,
+            week_count=week_count,
+            aggregation_method=aggregation_method,
+            date_range=date_range,
+        )
+    )
     for row in ablation_metrics.itertuples(index=False):
         lines.append(
             f"- {row.variant_name}: total_profit={float(row.total_profit):.2f}, cvar99={float(row.cvar99):.2f}, profit_delta_vs_full={float(row.total_profit) - full_profit:.2f}"

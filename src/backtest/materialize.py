@@ -64,6 +64,50 @@ def _compute_metrics(
     }
 
 
+def _resolve_projection_detail(
+    *,
+    raw_contract_adjustment: float,
+    exec_contract_adjustment: float,
+    raw_exposure_band: float,
+    exec_exposure_band: float,
+    bound_reason_code: str,
+) -> dict[str, Any]:
+    tolerance = 1.0e-6
+    reason_tokens = {token for token in str(bound_reason_code).split("|") if token}
+    if abs(raw_contract_adjustment - exec_contract_adjustment) > tolerance:
+        if "lt_price_linked" in reason_tokens and raw_contract_adjustment > exec_contract_adjustment:
+            rule_name = "policy_linked_ratio_cap"
+        elif raw_contract_adjustment < exec_contract_adjustment:
+            rule_name = "default_band_floor"
+        else:
+            rule_name = "default_band_cap"
+        return {
+            "projection_target_field": "contract_adjustment_mwh",
+            "projection_rule_name": rule_name,
+            "projection_before": float(raw_contract_adjustment),
+            "projection_after": float(exec_contract_adjustment),
+        }
+    if abs(raw_exposure_band - exec_exposure_band) > tolerance:
+        if "ancillary_tight" in reason_tokens and raw_exposure_band > exec_exposure_band:
+            rule_name = "policy_ancillary_tight_cap"
+        elif raw_exposure_band < exec_exposure_band:
+            rule_name = "default_band_floor"
+        else:
+            rule_name = "default_band_cap"
+        return {
+            "projection_target_field": "exposure_band_mwh",
+            "projection_rule_name": rule_name,
+            "projection_before": float(raw_exposure_band),
+            "projection_after": float(exec_exposure_band),
+        }
+    return {
+        "projection_target_field": "",
+        "projection_rule_name": "",
+        "projection_before": 0.0,
+        "projection_after": 0.0,
+    }
+
+
 def materialize_particle_pair(
     *,
     tensor_bundle: TrainingTensorBundle,
@@ -118,6 +162,14 @@ def materialize_particle_pair(
     hourly_rows: list[dict[str, Any]] = []
     settlement_rows: list[dict[str, Any]] = []
     for week_pos, week_start in enumerate(week_index):
+        bound_reason_code = tensor_bundle.weekly_bound_reason_codes[week_pos] if week_pos < len(tensor_bundle.weekly_bound_reason_codes) else "default"
+        projection_detail = _resolve_projection_detail(
+            raw_contract_adjustment=float(contract_adjustment_raw[week_pos]),
+            exec_contract_adjustment=float(contract_adjustment_exec[week_pos]),
+            raw_exposure_band=float(exposure_band_raw[week_pos]),
+            exec_exposure_band=float(exposure_band[week_pos]),
+            bound_reason_code=bound_reason_code,
+        )
         weekly_row = {
             "week_start": pd.Timestamp(week_start),
             "contract_adjustment_mwh_raw": float(contract_adjustment_raw[week_pos]),
@@ -128,7 +180,7 @@ def materialize_particle_pair(
             "policy_projection_active": float(policy_projection_active[week_pos]),
             "feasible_domain_triggered_w": float(feasible_domain_clip_active[week_pos]),
             "feasible_domain_clip_gap_w": float(feasible_domain_clip_gap[week_pos]),
-            "bound_reason_code": tensor_bundle.weekly_bound_reason_codes[week_pos] if week_pos < len(tensor_bundle.weekly_bound_reason_codes) else "default",
+            "bound_reason_code": bound_reason_code,
             "settlement_mode": tensor_bundle.weekly_settlement_modes[week_pos] if week_pos < len(tensor_bundle.weekly_settlement_modes) else "previous_week_da_proxy",
             "policy_violation_penalty_w": float(violation_penalty[week_pos]),
             "retail_revenue_w": float(retail_revenue[week_pos]),
@@ -143,6 +195,7 @@ def materialize_particle_pair(
             "hedge_error_w": float(hedge_error[week_pos]),
             "reward_w": float(reward[week_pos]),
             "strategy": strategy_name,
+            **projection_detail,
         }
         forecast_weekly_load = max(float(forecast_load[week_pos]), 1.0)
         lock_ratio_proxy = float(contract_position[week_pos]) / forecast_weekly_load

@@ -1,8 +1,8 @@
 # Artifact Index
 
 - version: v0.4
-- experiment_id: v0.4-840a5740
-- config_hash: 840a574028870937a87c4ff725930c4682004c50d528119e8eb3ec14af126a64
+- experiment_id: v0.4-b3fe48b3
+- config_hash: b3fe48b398f1e1bba82527ec7ce6e02cd34911b26f0416093145698de77027a9
 
 - compiled_layout_path: reports/compiled_parameter_layout.json
 - feasible_domain_manifest_path: metrics/feasible_domain_manifest.csv

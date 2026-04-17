@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import pandas as pd
 
+from src.analysis.report_contracts import build_summary_scope_lines, infer_date_range
+
 
 def run_robustness_analysis(*, weekly_results: pd.DataFrame, config: dict) -> pd.DataFrame:
     robustness_cfg = config.get("robustness", {})
@@ -58,14 +60,32 @@ def run_robustness_analysis(*, weekly_results: pd.DataFrame, config: dict) -> pd
     return result
 
 
-def build_robustness_summary_markdown(robustness_metrics: pd.DataFrame) -> str:
+def build_robustness_summary_markdown(
+    robustness_metrics: pd.DataFrame,
+    *,
+    sample_scope: str = "rolling_backtest_windows",
+    week_count: int | None = None,
+    aggregation_method: str = "scenario_sweep_over_rolling_results",
+    date_range: str | None = None,
+) -> str:
     if robustness_metrics.empty:
-        return "\n".join(["# 稳健性总结", "", "- 无可用情景。", ""])
+        lines = ["# 稳健性总结", "", *build_summary_scope_lines(sample_scope=sample_scope, week_count=week_count, aggregation_method=aggregation_method, date_range=date_range or "n/a"), "- 无可用情景。", ""]
+        return "\n".join(lines)
 
+    date_range = date_range or infer_date_range(robustness_metrics)
+    week_count = week_count if week_count is not None else int(len(robustness_metrics))
     lines = [
         "# 稳健性总结",
         "",
     ]
+    lines.extend(
+        build_summary_scope_lines(
+            sample_scope=sample_scope,
+            week_count=week_count,
+            aggregation_method=aggregation_method,
+            date_range=date_range,
+        )
+    )
     for row in robustness_metrics.itertuples(index=False):
         lines.append(
             f"- {row.scenario_name}: group={row.scenario_group}, total_profit={float(row.total_profit):.2f}, mean_cvar99={float(row.mean_cvar99):.2f}, robustness_rank={float(row.robustness_rank):.2f}"

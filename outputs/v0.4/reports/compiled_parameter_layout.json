@@ -1,6 +1,6 @@
 {
   "upper": {
-    "total_dimension": 170,
+    "total_dimension": 172,
     "blocks": [
       {
         "name": "weekly_feature_weights",
@@ -152,11 +152,13 @@
           "fixed_price_ratio_max",
           "linked_price_ratio_min",
           "forward_price_linkage_days",
-          "forward_mechanism_execution_days"
+          "forward_mechanism_execution_days",
+          "lt_price_fixed_ratio",
+          "lt_price_linked_ratio"
         ],
         "slice_start": 0,
-        "slice_end": 148,
-        "size": 148
+        "slice_end": 150,
+        "size": 150
       },
       {
         "name": "policy_feature_weights",
@@ -166,8 +168,8 @@
           "forward_price_linkage_days",
           "forward_mechanism_execution_days"
         ],
-        "slice_start": 148,
-        "slice_end": 152,
+        "slice_start": 150,
+        "slice_end": 154,
         "size": 4
       },
       {
@@ -186,8 +188,8 @@
           "latent_10",
           "latent_11"
         ],
-        "slice_start": 152,
-        "slice_end": 164,
+        "slice_start": 154,
+        "slice_end": 166,
         "size": 12
       },
       {
@@ -200,8 +202,8 @@
           "latent_4",
           "latent_5"
         ],
-        "slice_start": 164,
-        "slice_end": 170,
+        "slice_start": 166,
+        "slice_end": 172,
         "size": 6
       }
     ]
@@ -396,7 +398,9 @@
       "fixed_price_ratio_max",
       "linked_price_ratio_min",
       "forward_price_linkage_days",
-      "forward_mechanism_execution_days"
+      "forward_mechanism_execution_days",
+      "lt_price_fixed_ratio",
+      "lt_price_linked_ratio"
     ],
     "policy_state_numeric_columns": [
       "lt_settlement_base",

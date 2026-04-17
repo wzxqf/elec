@@ -4,7 +4,7 @@ from typing import Any
 from src.agents.hybrid_pso import save_hybrid_pso_model, train_hybrid_pso_model
 from src.scripts.common import prepare_project_context, split_to_dict, subset_bundle_for_weeks
 from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
-from src.utils.io import save_markdown
+from src.utils.io import save_json, save_markdown
 from src.utils.logger import configure_logging
 from src.utils.runtime_status import RuntimeStatusTracker
 
@@ -13,6 +13,9 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
     split = split_to_dict(context["split"])
     runtime = training["runtime_profile"]
     output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
+    upper_cfg_dim = int(context["config"].get("hybrid_pso", {}).get("upper", {}).get("dimension", runtime.get("upper_dim", 0)))
+    lower_cfg_dim = int(context["config"].get("hybrid_pso", {}).get("lower", {}).get("dimension", runtime.get("lower_dim", 0)))
+    compiled_layout_hash = context.get("run_metadata", {}).get("compiled_layout_hash", "n/a")
     return "\n".join(
         [
             "# 训练摘要",
@@ -24,8 +27,11 @@ def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> st
             f"- 设备: {runtime['score_kernel_device']}",
             f"- 上层粒子数: {runtime['upper_particles']}",
             f"- 下层粒子数: {runtime['lower_particles']}",
+            f"- 上层配置维度: {upper_cfg_dim}",
+            f"- 下层配置维度: {lower_cfg_dim}",
             f"- 上层真实维度: {runtime.get('upper_dim_real', runtime.get('upper_dim', 'n/a'))}",
             f"- 下层真实维度: {runtime.get('lower_dim_real', runtime.get('lower_dim', 'n/a'))}",
+            f"- compiled_layout_hash: {compiled_layout_hash}",
             f"- 迭代轮数: {runtime['iterations']}",
             f"- 最优目标值: {training['model'].best_score:.4f}",
             f"- 模型路径: {relativize_path(context['output_paths']['models'] / 'hybrid_pso_model.json', output_root)}",
@@ -52,6 +58,17 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
     )
     save_hybrid_pso_model(training_result.model, context["output_paths"]["models"] / "hybrid_pso_model.json")
     training_result.training_trace.to_csv(context["output_paths"]["metrics"] / "hybrid_pso_training_trace.csv", index=False)
+    save_json(
+        {
+            "upper_dim_config": int(context["config"].get("hybrid_pso", {}).get("upper", {}).get("dimension", training_result.runtime_profile.get("upper_dim", 0))),
+            "upper_dim_real": int(training_result.runtime_profile.get("upper_dim_real", training_result.runtime_profile.get("upper_dim", 0))),
+            "lower_dim_config": int(context["config"].get("hybrid_pso", {}).get("lower", {}).get("dimension", training_result.runtime_profile.get("lower_dim", 0))),
+            "lower_dim_real": int(training_result.runtime_profile.get("lower_dim_real", training_result.runtime_profile.get("lower_dim", 0))),
+            "compiled_layout_hash": context.get("run_metadata", {}).get("compiled_layout_hash", "n/a"),
+            "score_kernel_device": training_result.runtime_profile["score_kernel_device"],
+        },
+        context["output_paths"]["reports"] / "training_runtime_summary.json",
+    )
     summary = build_train_summary(
         context,
         {
