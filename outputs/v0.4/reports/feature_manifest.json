@@ -1,0 +1,1199 @@
+{
+  "version": "v0.4",
+  "agent_feature_columns": [
+    "prev_da_price_mean",
+    "prev_da_price_std",
+    "prev_da_price_max",
+    "prev_da_price_min",
+    "prev_da_price_q25",
+    "prev_da_price_q50",
+    "prev_da_price_q75",
+    "prev_id_price_mean",
+    "prev_id_price_std",
+    "prev_id_price_max",
+    "prev_id_price_min",
+    "prev_id_price_q25",
+    "prev_id_price_q50",
+    "prev_id_price_q75",
+    "prev_spread_mean",
+    "prev_spread_std",
+    "prev_spread_max",
+    "prev_spread_min",
+    "prev_spread_q25",
+    "prev_spread_q50",
+    "prev_spread_q75",
+    "prev_price_spread_abs_mean",
+    "prev_price_spread_abs_std",
+    "prev_price_spread_abs_max",
+    "prev_price_spread_abs_min",
+    "prev_price_spread_abs_q25",
+    "prev_price_spread_abs_q50",
+    "prev_price_spread_abs_q75",
+    "prev_net_load_da_mean",
+    "prev_net_load_da_std",
+    "prev_net_load_da_max",
+    "prev_net_load_da_min",
+    "prev_net_load_da_q25",
+    "prev_net_load_da_q50",
+    "prev_net_load_da_q75",
+    "prev_net_load_id_mean",
+    "prev_net_load_id_std",
+    "prev_net_load_id_max",
+    "prev_net_load_id_min",
+    "prev_net_load_id_q25",
+    "prev_net_load_id_q50",
+    "prev_net_load_id_q75",
+    "prev_load_dev_mean",
+    "prev_load_dev_std",
+    "prev_load_dev_max",
+    "prev_load_dev_min",
+    "prev_load_dev_q25",
+    "prev_load_dev_q50",
+    "prev_load_dev_q75",
+    "prev_wind_dev_mean",
+    "prev_wind_dev_std",
+    "prev_wind_dev_max",
+    "prev_wind_dev_min",
+    "prev_wind_dev_q25",
+    "prev_wind_dev_q50",
+    "prev_wind_dev_q75",
+    "prev_solar_dev_mean",
+    "prev_solar_dev_std",
+    "prev_solar_dev_max",
+    "prev_solar_dev_min",
+    "prev_solar_dev_q25",
+    "prev_solar_dev_q50",
+    "prev_solar_dev_q75",
+    "prev_renewable_dev_abs_mean",
+    "prev_renewable_dev_abs_std",
+    "prev_renewable_dev_abs_max",
+    "prev_renewable_dev_abs_min",
+    "prev_renewable_dev_abs_q25",
+    "prev_renewable_dev_abs_q50",
+    "prev_renewable_dev_abs_q75",
+    "prev_renewable_ratio_da_mean",
+    "prev_renewable_ratio_da_std",
+    "prev_renewable_ratio_da_max",
+    "prev_renewable_ratio_da_min",
+    "prev_renewable_ratio_da_q25",
+    "prev_renewable_ratio_da_q50",
+    "prev_renewable_ratio_da_q75",
+    "prev_renewable_ratio_id_mean",
+    "prev_renewable_ratio_id_std",
+    "prev_renewable_ratio_id_max",
+    "prev_renewable_ratio_id_min",
+    "prev_renewable_ratio_id_q25",
+    "prev_renewable_ratio_id_q50",
+    "prev_renewable_ratio_id_q75",
+    "prev_business_hour_spread_mean",
+    "prev_business_hour_spread_std",
+    "prev_business_hour_spread_max",
+    "prev_business_hour_spread_min",
+    "prev_business_hour_spread_q25",
+    "prev_business_hour_spread_q50",
+    "prev_business_hour_spread_q75",
+    "prev_peak_hour_spread_mean",
+    "prev_peak_hour_spread_std",
+    "prev_peak_hour_spread_max",
+    "prev_peak_hour_spread_min",
+    "prev_peak_hour_spread_q25",
+    "prev_peak_hour_spread_q50",
+    "prev_peak_hour_spread_q75",
+    "prev_valley_hour_spread_mean",
+    "prev_valley_hour_spread_std",
+    "prev_valley_hour_spread_max",
+    "prev_valley_hour_spread_min",
+    "prev_valley_hour_spread_q25",
+    "prev_valley_hour_spread_q50",
+    "prev_valley_hour_spread_q75",
+    "prev_tieline_da_mean",
+    "prev_tieline_da_std",
+    "prev_tieline_da_max",
+    "prev_tieline_da_min",
+    "prev_tieline_da_q25",
+    "prev_tieline_da_q50",
+    "prev_tieline_da_q75",
+    "prev_hydro_da_mean",
+    "prev_hydro_da_std",
+    "prev_hydro_da_max",
+    "prev_hydro_da_min",
+    "prev_hydro_da_q25",
+    "prev_hydro_da_q50",
+    "prev_hydro_da_q75",
+    "prev_nonmarket_da_mean",
+    "prev_nonmarket_da_std",
+    "prev_nonmarket_da_max",
+    "prev_nonmarket_da_min",
+    "prev_nonmarket_da_q25",
+    "prev_nonmarket_da_q50",
+    "prev_nonmarket_da_q75",
+    "weekofyear_sin",
+    "weekofyear_cos",
+    "is_partial_week",
+    "forecast_weekly_net_demand_mwh",
+    "actual_weekly_net_demand_mwh",
+    "lt_price_w",
+    "da_id_cross_corr_w",
+    "extreme_price_spike_flag_w",
+    "extreme_event_flag_w",
+    "lt_settlement_base",
+    "spot_marginal_exposure",
+    "ancillary_peak_shaving_pause",
+    "ancillary_freq_reserve_tight",
+    "renewable_mechanism_active",
+    "mechanism_price_floor",
+    "mechanism_price_ceiling",
+    "mechanism_volume_ratio_max",
+    "lt_price_linked_active",
+    "fixed_price_ratio_max",
+    "linked_price_ratio_min",
+    "forward_price_linkage_days",
+    "forward_mechanism_execution_days"
+  ],
+  "manifest": [
+    {
+      "column": "prev_da_price_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_da_price_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_id_price_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_spread_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_price_spread_abs_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_da_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_net_load_id_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_load_dev_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_wind_dev_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_solar_dev_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_dev_abs_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_da_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_renewable_ratio_id_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_business_hour_spread_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_peak_hour_spread_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_valley_hour_spread_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_tieline_da_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_hydro_da_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_mean",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_std",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_max",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_min",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_q25",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_q50",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "prev_nonmarket_da_q75",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "weekofyear_sin",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "weekofyear_cos",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "is_partial_week",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "forecast_weekly_net_demand_mwh",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "actual_weekly_net_demand_mwh",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "lt_price_w",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "lt_price_source",
+      "source": "周度聚合",
+      "is_numeric": false,
+      "selected_for_agent": false
+    },
+    {
+      "column": "da_id_cross_corr_w",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "extreme_price_spike_flag_w",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "extreme_event_flag_w",
+      "source": "周度聚合",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "lt_settlement_base",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "spot_marginal_exposure",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "lt_spot_coupling_state",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "ancillary_peak_shaving_pause",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "ancillary_freq_reserve_tight",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "ancillary_price_boundary_tight",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "renewable_mechanism_active",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "mechanism_price_floor",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "mechanism_price_ceiling",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "mechanism_volume_ratio_max",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "mechanism_exec_term_years",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "mechanism_stage_label",
+      "source": "政策状态",
+      "is_numeric": false,
+      "selected_for_agent": false
+    },
+    {
+      "column": "lt_price_linked_active",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "fixed_price_ratio_max",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "linked_price_ratio_min",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "lt_linkage_pre_window",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "info_disclosure_active",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "metering_boundary_improved",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forecast_boundary_improved",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "policy_count",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "policy_source_file_count",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "policy_parse_failure_count",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_price_linkage_days",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "forward_price_linkage_code",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_price_linkage_in_window",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_price_linkage_type",
+      "source": "政策状态",
+      "is_numeric": false,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_mechanism_execution_days",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": true
+    },
+    {
+      "column": "forward_mechanism_execution_code",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_mechanism_execution_in_window",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_mechanism_execution_type",
+      "source": "政策状态",
+      "is_numeric": false,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_ancillary_coupling_days",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_ancillary_coupling_code",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_ancillary_coupling_in_window",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_ancillary_coupling_type",
+      "source": "政策状态",
+      "is_numeric": false,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_info_forecast_boundary_days",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_info_forecast_boundary_code",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_info_forecast_boundary_in_window",
+      "source": "政策状态",
+      "is_numeric": true,
+      "selected_for_agent": false
+    },
+    {
+      "column": "forward_info_forecast_boundary_type",
+      "source": "政策状态",
+      "is_numeric": false,
+      "selected_for_agent": false
+    }
+  ]
+}

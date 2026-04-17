@@ -72,7 +72,9 @@ def _infer_release_version(config: dict[str, Any]) -> str:
     algorithm = str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V036")).upper()
     match = re.search(r"_V(\d+)$", algorithm)
     if match:
-        return f"v0.{int(match.group(1))}"
+        normalized = match.group(1).lstrip("0") or "0"
+        normalized = normalized.rstrip("0") or "0"
+        return f"v0.{normalized}"
     return "v0.36"
 
 
@@ -117,7 +119,7 @@ def train_hybrid_pso_model(
     social = 1.35
 
     for iteration in range(1, iterations + 1):
-        scored = batch_score_particles(tensor_bundle, upper, lower, device=device, config=config)
+        scored = batch_score_particles(tensor_bundle, upper, lower, device=device, config=config, compiled_layout=compiled_layout)
         total_score = scored.total_score
         upper_score = total_score.min(dim=1).values
         lower_score = total_score.min(dim=0).values
@@ -184,6 +186,8 @@ def train_hybrid_pso_model(
             "iterations": iterations,
             "upper_dim": upper_dim,
             "lower_dim": lower_dim,
+            "upper_dim_real": upper_dim,
+            "lower_dim_real": lower_dim,
         },
         training_trace=pd.DataFrame(trace_rows),
     )

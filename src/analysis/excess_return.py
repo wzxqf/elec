@@ -18,6 +18,16 @@ def _max_drawdown(series: pd.Series) -> float:
     return float((running_peak - cumulative).max())
 
 
+def _lower_tail_mean(series: pd.Series, quantile: float) -> float:
+    if series.empty:
+        return 0.0
+    threshold = float(series.quantile(quantile))
+    tail = series.loc[series <= threshold]
+    if tail.empty:
+        return float(series.min())
+    return float(tail.mean())
+
+
 def build_policy_risk_adjusted_metrics(weekly_results: pd.DataFrame, epsilon: float = 1.0e-6) -> pd.DataFrame:
     frame = weekly_results.copy()
     frame["week_start"] = pd.to_datetime(frame["week_start"])
@@ -57,21 +67,44 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
     for window_name, group in frame.groupby("window_name", sort=True):
         adjusted = _numeric(group, "policy_risk_adjusted_excess_return_w")
         excess = _numeric(group, "excess_profit_w")
+        sample_count = int(len(adjusted))
         adjusted_std = float(adjusted.std(ddof=0))
         adjusted_mean = float(adjusted.mean())
+        adjusted_median = float(adjusted.median()) if not adjusted.empty else 0.0
+        adjusted_p25 = float(adjusted.quantile(0.25)) if not adjusted.empty else 0.0
+        adjusted_p75 = float(adjusted.quantile(0.75)) if not adjusted.empty else 0.0
         win_rate = float((excess > 0.0).mean()) if not excess.empty else 0.0
         stable_window = adjusted_std <= float(epsilon)
-        sharpe = 0.0 if stable_window else adjusted_mean / adjusted_std
+        insufficient_samples = sample_count < 3
+        guard_triggered = stable_window or insufficient_samples
+        if insufficient_samples:
+            sharpe_warning = "insufficient_samples"
+        elif stable_window:
+            sharpe_warning = "flat_volatility"
+        else:
+            sharpe_warning = "ok"
+        sharpe = 0.0 if guard_triggered else adjusted_mean / adjusted_std
         active_positive = adjusted_mean > 0.0
         active_persistent = active_positive and win_rate >= 0.5 and (stable_window or sharpe > 0.0)
         rows.append(
             {
                 "window_name": window_name,
+                "window_sample_count": sample_count,
                 "window_excess_return_mean": float(excess.mean()) if not excess.empty else 0.0,
                 "window_excess_return_volatility": float(excess.std(ddof=0)) if len(excess) > 1 else 0.0,
                 "window_excess_return_win_rate": win_rate,
                 "window_excess_return_max_drawdown": _max_drawdown(excess),
+                "window_policy_risk_adjusted_mean": adjusted_mean,
+                "window_policy_risk_adjusted_median": adjusted_median,
+                "window_policy_risk_adjusted_p25": adjusted_p25,
+                "window_policy_risk_adjusted_p75": adjusted_p75,
+                "window_policy_risk_adjusted_volatility": adjusted_std,
+                "window_policy_risk_adjusted_cvar95": _lower_tail_mean(adjusted, 0.05),
+                "window_policy_risk_adjusted_cvar99": _lower_tail_mean(adjusted, 0.01),
                 "window_policy_risk_adjusted_sharpe": sharpe,
+                "window_sharpe_guard_triggered": guard_triggered,
+                "window_sharpe_warning": sharpe_warning,
+                "window_metrics_tier": "appendix_only" if guard_triggered else "main_text_safe",
                 "active_excess_return_positive": active_positive,
                 "active_excess_return_persistent": active_persistent,
                 "dynamic_lock_only_outperformed": float(excess.mean()) > 0.0,

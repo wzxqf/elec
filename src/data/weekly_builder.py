@@ -90,6 +90,9 @@ def build_weekly_bundle(frame: pd.DataFrame, config: dict[str, Any]) -> dict[str
                 "actual_weekly_net_demand_mwh",
                 "lt_price_w",
                 "lt_price_source",
+                "da_id_cross_corr_w",
+                "extreme_price_spike_flag_w",
+                "extreme_event_flag_w",
             ]
         ],
         on="week_start",

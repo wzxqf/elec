@@ -6,6 +6,7 @@ from typing import Any
 import torch
 
 from src.model_layout.schema import CompiledParameterLayout, ParameterBlockSpec
+from src.policy.projection import project_hourly_hedge_tensor
 from src.training.tensor_bundle import TrainingTensorBundle
 
 
@@ -26,9 +27,12 @@ class ParticleScoreResult:
     excess_profit: torch.Tensor
     contract_adjustment_mwh_raw: torch.Tensor
     contract_adjustment_mwh_exec: torch.Tensor
+    exposure_band_mwh_raw: torch.Tensor
     contract_position_mwh: torch.Tensor
     exposure_band_mwh: torch.Tensor
     policy_projection_active: torch.Tensor
+    feasible_domain_clip_gap: torch.Tensor
+    feasible_domain_clip_active: torch.Tensor
     contract_curve: torch.Tensor
     spot_hedge_mwh: torch.Tensor
     spot_hedge_limit_mwh: torch.Tensor
@@ -106,12 +110,14 @@ def batch_score_particles(
     weekly_features = torch.nan_to_num(tensor_bundle.weekly_feature_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     policy_tensor = torch.nan_to_num(tensor_bundle.policy_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     hourly_tensor = torch.nan_to_num(tensor_bundle.hourly_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
+    weekly_bounds = torch.nan_to_num(tensor_bundle.weekly_bound_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
+    hourly_bounds = torch.nan_to_num(tensor_bundle.hourly_bound_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     forecast_load = torch.nan_to_num(tensor_bundle.forecast_weekly_load.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     actual_load = torch.nan_to_num(tensor_bundle.actual_weekly_load.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     lt_price = torch.nan_to_num(tensor_bundle.lt_weekly_price.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
     price_tensor = torch.nan_to_num(tensor_bundle.quarter_price_tensor.to(score_device), nan=0.0, posinf=0.0, neginf=0.0)
-    hour_mask = tensor_bundle.hourly_valid_mask.to(score_device).unsqueeze(0).unsqueeze(0)
-    quarter_mask = tensor_bundle.quarter_valid_mask.to(score_device).unsqueeze(0).unsqueeze(0)
+    hour_mask = tensor_bundle.hourly_valid_mask.to(score_device).unsqueeze(0).unsqueeze(0).float()
+    quarter_mask = tensor_bundle.quarter_valid_mask.to(score_device).unsqueeze(0).unsqueeze(0).float()
 
     upper = upper_particles.to(score_device)
     lower = lower_particles.to(score_device)
@@ -181,7 +187,14 @@ def batch_score_particles(
         policy_shrink = torch.sigmoid(shrink_block.mean(dim=1)).view(1, lower_count, 1, 1)
         action_head = _block_slice(upper, _find_block(compiled_layout.upper.blocks, "action_head"))
 
-    # Upper layer: weekly contract adjustment, contract position, exposure band.
+    weekly_bound_lookup = {name: idx for idx, name in enumerate(tensor_bundle.weekly_bound_columns)}
+    contract_adjustment_ratio_min = weekly_bounds[:, weekly_bound_lookup["contract_adjustment_ratio_min"]].view(1, 1, week_count)
+    contract_adjustment_ratio_max = weekly_bounds[:, weekly_bound_lookup["contract_adjustment_ratio_max"]].view(1, 1, week_count)
+    exposure_band_ratio_min = weekly_bounds[:, weekly_bound_lookup["exposure_band_ratio_min"]].view(1, 1, week_count)
+    exposure_band_ratio_max = weekly_bounds[:, weekly_bound_lookup["exposure_band_ratio_max"]].view(1, 1, week_count)
+    non_negative_position_required = weekly_bounds[:, weekly_bound_lookup["non_negative_position_required"]].view(1, 1, week_count)
+    feasible_domain_triggered = weekly_bounds[:, weekly_bound_lookup["feasible_domain_triggered"]].view(1, 1, week_count)
+
     if action_head is not None and action_head.shape[1] > 0:
         contract_bias = action_head[:, 0].view(upper_count, 1, 1)
         exposure_bias = action_head[:, 1].view(upper_count, 1, 1) if action_head.shape[1] > 1 else 0.0
@@ -189,23 +202,68 @@ def batch_score_particles(
         contract_bias = 0.0
         exposure_bias = 0.0
     contract_adjustment_mwh_raw = 0.30 * torch.tanh(0.15 * feature_signal + 0.05 * policy_signal + contract_bias) * forecast_load.view(1, 1, week_count)
-    policy_scale = torch.clamp(1.0 - 0.15 * torch.sigmoid(policy_signal), min=0.60, max=1.0)
-    contract_adjustment_mwh_exec = contract_adjustment_mwh_raw * policy_scale
-    contract_position_mwh = torch.relu(0.60 * forecast_load.view(1, 1, week_count) + contract_adjustment_mwh_exec)
-    exposure_band_mwh = torch.relu(0.20 * forecast_load.view(1, 1, week_count) * (1.0 + torch.tanh(0.10 * feature_signal + exposure_bias)))
+    contract_adjustment_mwh_exec = torch.clamp(
+        contract_adjustment_mwh_raw,
+        min=contract_adjustment_ratio_min * forecast_load.view(1, 1, week_count),
+        max=contract_adjustment_ratio_max * forecast_load.view(1, 1, week_count),
+    )
+    exposure_band_mwh_raw = torch.relu(0.20 * forecast_load.view(1, 1, week_count) * (1.0 + torch.tanh(0.10 * feature_signal + exposure_bias)))
+    exposure_band_mwh = torch.clamp(
+        exposure_band_mwh_raw,
+        min=exposure_band_ratio_min * forecast_load.view(1, 1, week_count),
+        max=exposure_band_ratio_max * forecast_load.view(1, 1, week_count),
+    )
+    contract_position_raw = 0.60 * forecast_load.view(1, 1, week_count) + contract_adjustment_mwh_exec
+    contract_position_mwh = torch.where(
+        non_negative_position_required > 0.5,
+        torch.clamp_min(contract_position_raw, 0.0),
+        contract_position_raw,
+    )
 
     contract_curve = torch.softmax(contract_curve_logits, dim=-1).unsqueeze(1).unsqueeze(2).expand(upper_count, lower_count, week_count, 24)
 
-    # Lower layer: hourly spot hedge responses within the exposure band.
-    spread = hourly_tensor[..., 2].view(1, 1, week_count, hour_count)
-    load_dev = hourly_tensor[..., 3].view(1, 1, week_count, hour_count)
-    renewable_dev = hourly_tensor[..., 4].view(1, 1, week_count, hour_count)
-    spot_hedge_limit_mwh = (exposure_band_mwh.unsqueeze(-1) / max(hour_count, 1)) * (0.50 + 0.50 * policy_shrink)
-    spot_hedge_limit_mwh = spot_hedge_limit_mwh.expand(upper_count, lower_count, week_count, hour_count)
-    raw_hourly_signal = 0.02 * spread_coef * spread + 0.01 * load_coef * load_dev + 0.01 * renewable_coef * renewable_dev
-    spot_hedge_mwh = torch.tanh(raw_hourly_signal) * spot_hedge_limit_mwh * hour_mask
+    hourly_feature_lookup = {name: idx for idx, name in enumerate(tensor_bundle.hourly_feature_columns)}
 
-    # 15-minute proxy settlement and CVaR99.
+    def _hourly_feature(column: str, default: float = 0.0) -> torch.Tensor:
+        column_idx = hourly_feature_lookup.get(column)
+        if column_idx is None:
+            return torch.full((1, 1, week_count, hour_count), float(default), dtype=torch.float32, device=score_device)
+        return hourly_tensor[..., column_idx].view(1, 1, week_count, hour_count)
+
+    spread = _hourly_feature("price_spread")
+    spread_abs = _hourly_feature("price_spread_abs")
+    load_dev = _hourly_feature("load_dev")
+    renewable_dev = _hourly_feature("renewable_dev")
+    renewable_dev_abs = _hourly_feature("renewable_dev_abs")
+    business_hour_flag = _hourly_feature("business_hour_flag")
+    peak_hour_flag = _hourly_feature("peak_hour_flag")
+    valley_hour_flag = _hourly_feature("valley_hour_flag")
+    settlement_effective_flag = torch.clamp_min(_hourly_feature("settlement_effective_flag", default=1.0), 0.0)
+    hourly_bound_lookup = {name: idx for idx, name in enumerate(tensor_bundle.hourly_bound_columns)}
+    hourly_share_cap = hourly_bounds[..., hourly_bound_lookup["max_hourly_hedge_share"]].view(1, 1, week_count, hour_count)
+    hourly_ramp_share = hourly_bounds[..., hourly_bound_lookup["max_hourly_ramp_share"]].view(1, 1, week_count, hour_count)
+    raw_spot_hedge_limit_mwh = (exposure_band_mwh_raw.unsqueeze(-1) / max(hour_count, 1)) * (0.50 + 0.50 * policy_shrink)
+    raw_spot_hedge_limit_mwh = raw_spot_hedge_limit_mwh.expand(upper_count, lower_count, week_count, hour_count)
+    session_signal = 0.50 * business_hour_flag + 0.30 * peak_hour_flag - 0.20 * valley_hour_flag
+    raw_hourly_signal = 0.02 * spread_coef * spread + 0.01 * load_coef * load_dev + 0.01 * renewable_coef * renewable_dev
+    raw_hourly_signal = raw_hourly_signal + 0.005 * spread_coef * spread_abs * session_signal
+    raw_hourly_signal = raw_hourly_signal + 0.004 * renewable_coef * renewable_dev_abs * (0.50 * valley_hour_flag + 0.50 * business_hour_flag)
+    raw_hourly_signal = raw_hourly_signal * torch.where(
+        settlement_effective_flag > 0.0,
+        torch.ones_like(settlement_effective_flag),
+        torch.zeros_like(settlement_effective_flag),
+    )
+    raw_spot_hedge_mwh = torch.tanh(raw_hourly_signal) * raw_spot_hedge_limit_mwh * hour_mask
+    spot_hedge_mwh, hourly_projection_gap = project_hourly_hedge_tensor(
+        raw_spot_hedge_mwh,
+        projected_exposure_band_mwh=exposure_band_mwh,
+        hourly_share_cap=hourly_share_cap,
+        hourly_ramp_share=hourly_ramp_share,
+        hour_mask=hour_mask,
+    )
+    valid_hours = hour_mask.sum(dim=-1).clamp_min(1.0)
+    spot_hedge_limit_mwh = (exposure_band_mwh.unsqueeze(-1) / valid_hours.unsqueeze(-1)) * hourly_share_cap
+
     avg_da_price = torch.nan_to_num(price_tensor[..., 0].mean(dim=1), nan=0.0).view(1, 1, week_count)
     avg_id_price = torch.nan_to_num(price_tensor[..., 1].mean(dim=1), nan=0.0).view(1, 1, week_count)
     valid_intervals = quarter_mask.sum(dim=-1).clamp_min(1.0)
@@ -234,9 +292,15 @@ def batch_score_particles(
     adjustment_cost = torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec) * _cfg(config, ["economics", "adjustment_cost_yuan_per_mwh"], 0.6)
     friction_cost = spot_hedge_mwh.abs().sum(dim=-1) * _cfg(config, ["economics", "friction_cost_yuan_per_mwh"], 1.2)
     imbalance_cost = imbalance_energy * avg_id_price
-    policy_violation_penalty = torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec) * _cfg(config, ["policy_projection", "violation_penalty_scale"], 1.0)
+    feasible_domain_clip_gap = (
+        torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec)
+        + torch.abs(exposure_band_mwh_raw - exposure_band_mwh)
+        + hourly_projection_gap
+    )
+    feasible_domain_clip_active = (feasible_domain_clip_gap > 1.0e-6).float()
+    policy_projection_active = torch.maximum(policy_projection_active.expand(upper_count, lower_count, week_count), feasible_domain_triggered.expand(upper_count, lower_count, week_count))
+    policy_violation_penalty = feasible_domain_clip_gap * _cfg(config, ["policy_projection", "violation_penalty_scale"], 1.0)
 
-    # Dynamic-lock baseline remains the reference strategy for reward.
     baseline_position = 0.55 * forecast_load.view(1, 1, week_count) * (1.0 - 0.05 * policy_projection_active)
     baseline_interval = (baseline_position.unsqueeze(-1) / valid_intervals.unsqueeze(-1)) * quarter_mask
     baseline_interval_cost = baseline_interval * (0.6 * lt_interval_price + 0.4 * da_price)
@@ -273,9 +337,12 @@ def batch_score_particles(
         excess_profit=excess_profit.sum(dim=-1),
         contract_adjustment_mwh_raw=contract_adjustment_mwh_raw,
         contract_adjustment_mwh_exec=contract_adjustment_mwh_exec,
+        exposure_band_mwh_raw=exposure_band_mwh_raw,
         contract_position_mwh=contract_position_mwh,
         exposure_band_mwh=exposure_band_mwh,
-        policy_projection_active=policy_projection_active.expand(upper_count, lower_count, week_count),
+        policy_projection_active=policy_projection_active,
+        feasible_domain_clip_gap=feasible_domain_clip_gap,
+        feasible_domain_clip_active=feasible_domain_clip_active,
         contract_curve=contract_curve,
         spot_hedge_mwh=spot_hedge_mwh,
         spot_hedge_limit_mwh=spot_hedge_limit_mwh,

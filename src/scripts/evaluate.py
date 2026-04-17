@@ -9,6 +9,7 @@ from src.agents.hybrid_pso import load_hybrid_pso_model
 from src.backtest.materialize import materialize_particle_pair
 from src.scripts.common import prepare_project_context, subset_bundle_for_weeks
 from src.scripts.train import run_train
+from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
 from src.utils.io import save_markdown
 from src.utils.logger import configure_logging
 
@@ -20,6 +21,7 @@ def build_validation_summary(
     policy_metrics: pd.DataFrame | None = None,
 ) -> str:
     metrics = validation["metrics"]
+    output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
     policy_metrics = policy_metrics if policy_metrics is not None else pd.DataFrame()
     mean_adjusted = float(policy_metrics.get("policy_risk_adjusted_excess_return_w", pd.Series(dtype="float64")).mean() or 0.0)
     mean_penalty = float(policy_metrics.get("policy_risk_penalty_w", pd.Series(dtype="float64")).mean() or 0.0)
@@ -27,7 +29,7 @@ def build_validation_summary(
         [
             "# 验证摘要",
             "",
-            f"- 模型路径: {model_path}",
+            f"- 模型路径: {relativize_path(model_path, output_root)}",
             f"- 验证周范围: {context['split'].val[0]} 至 {context['split'].val[-1]}",
             f"- 主算法: {context['config']['training']['algorithm']}",
             f"- 累计采购成本: {metrics['total_procurement_cost']:.2f}",
@@ -76,14 +78,18 @@ def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
     contract_value_weekly.to_csv(context["output_paths"]["metrics"] / "contract_value_weekly.csv", index=False)
     risk_factor_manifest.to_csv(context["output_paths"]["metrics"] / "risk_factor_manifest.csv", index=False)
     policy_risk_metrics.to_csv(context["output_paths"]["metrics"] / "policy_risk_adjusted_metrics.csv", index=False)
+    run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
     save_markdown(
-        build_validation_summary(
-            context,
-            {
-                "metrics": validation.metrics,
-            },
-            model_path,
-            policy_risk_metrics,
+        prepend_report_header(
+            build_validation_summary(
+                context,
+                {
+                    "metrics": validation.metrics,
+                },
+                model_path,
+                policy_risk_metrics,
+            ),
+            run_metadata,
         ),
         context["output_paths"]["reports"] / "validation_summary.md",
     )

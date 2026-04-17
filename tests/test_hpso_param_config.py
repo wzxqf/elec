@@ -8,13 +8,14 @@ from src.config.load_config import load_runtime_config
 def test_v033_config_uses_hybrid_pso() -> None:
     config = load_runtime_config(Path.cwd())
 
-    assert config["version"] == "v0.38"
-    assert config["training"]["algorithm"] == "HYBRID_PSO_V038"
+    assert config["version"] == "v0.4"
+    assert config["training"]["algorithm"] == "HYBRID_PSO_V040"
     assert config["reward"]["cvar_alpha"] == 0.99
     assert "parameter_compiler" in config
     assert "blocks" in config["parameter_compiler"]["upper"]
     assert "hourly_feature_groups" in config["parameter_compiler"]["lower"]
     assert "policy_projection" in config
+    assert "policy_feasible_domain" in config
     assert "upper_strategy" in config
     assert "lower_strategy" in config
     assert "economics" in config
