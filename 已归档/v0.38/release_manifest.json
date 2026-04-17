@@ -1,0 +1,32 @@
+{
+  "version": "v0.38",
+  "experiment_id": "v0.38-b9de0d92",
+  "config_hash": "b9de0d92d612d6c40b04a707b761e5b34f842c782c610ef0a5554c5fc4a67179",
+  "compiled_layout_hash": "6ba75781060a1cee60e32d5d97160e91799289a9cfae79c815722bf1f727e10d",
+  "run_timestamp": "2026-04-17T00:47:52+08:00",
+  "device": "cuda",
+  "data_range": {
+    "sample_start": "2025-11-01 00:00:00",
+    "sample_end": "2026-03-20 23:45:00"
+  },
+  "seed": 42,
+  "compiled_layout_path": "reports/compiled_parameter_layout.json",
+  "enabled_constraints": [
+    "lt_contract_settlement_only",
+    "lt_24_period_contract_curve",
+    "spot_15min_96_settlement",
+    "retail_single_supplier_package",
+    "ancillary_peak_shaving_pause_during_spot_trial",
+    "renewable_mechanism_from_2026_01_01",
+    "lt_price_linkage_from_2026_02_01",
+    "metering_data_traceability"
+  ],
+  "key_outputs": {
+    "compiled_layout_path": "reports/compiled_parameter_layout.json",
+    "parameter_layout_audit_path": "reports/parameter_layout_audit.md",
+    "feasible_domain_manifest_path": "metrics/feasible_domain_manifest.csv",
+    "policy_rule_table_path": "metrics/policy_rule_table.csv",
+    "policy_state_trace_path": "metrics/policy_state_trace.csv",
+    "feature_manifest_path": "reports/feature_manifest.json"
+  }
+}

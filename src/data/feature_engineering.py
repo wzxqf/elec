@@ -14,15 +14,30 @@ def safe_divide(numerator: pd.Series, denominator: pd.Series) -> pd.Series:
 def add_derived_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     data = frame.copy()
     data["datetime"] = pd.to_datetime(data["datetime"])
+    hour_of_day = data["datetime"].dt.hour
     data["net_load_da"] = data["省调负荷_日前"] - data["新能源负荷-总加_日前"]
     data["net_load_id"] = data["省调负荷_日内"] - data["新能源负荷-总加_日内"]
     data["price_spread"] = data["全网统一出清价格_日内"] - data["全网统一出清价格_日前"]
+    data["price_spread_abs"] = data["price_spread"].abs()
     data["load_dev"] = data["net_load_id"] - data["net_load_da"]
+    data["load_dev_abs"] = data["load_dev"].abs()
+    data["load_dev_sign"] = np.sign(data["load_dev"])
     data["wind_dev"] = data["新能源负荷-风电_日内"] - data["新能源负荷-风电_日前"]
     data["solar_dev"] = data["新能源负荷-光伏_日内"] - data["新能源负荷-光伏_日前"]
     data["renewable_ratio_da"] = safe_divide(data["新能源负荷-总加_日前"], data["省调负荷_日前"])
     data["renewable_ratio_id"] = safe_divide(data["新能源负荷-总加_日内"], data["省调负荷_日内"])
     data["renewable_dev"] = data["wind_dev"] + data["solar_dev"]
+    data["renewable_dev_abs"] = data["renewable_dev"].abs()
+    data["renewable_dev_sign"] = np.sign(data["renewable_dev"])
+    data["business_hour_flag"] = hour_of_day.isin(range(8, 21)).astype(float)
+    data["peak_hour_flag"] = hour_of_day.isin([8, 9, 10, 11, 18, 19, 20, 21]).astype(float)
+    data["valley_hour_flag"] = hour_of_day.isin([0, 1, 2, 3, 4, 5, 6]).astype(float)
+    data["business_hour_spread"] = data["price_spread"] * data["business_hour_flag"]
+    data["peak_hour_spread"] = data["price_spread"] * data["peak_hour_flag"]
+    data["valley_hour_spread"] = data["price_spread"] * data["valley_hour_flag"]
+    data["da_price_valid_flag"] = data["全网统一出清价格_日前"].notna().astype(float)
+    data["id_price_valid_flag"] = data["全网统一出清价格_日内"].notna().astype(float)
+    data["settlement_effective_flag"] = 1.0
     data["hour"] = data["datetime"].dt.floor("h")
     data["week_start"] = data["datetime"].dt.to_period("W-SUN").apply(lambda period: period.start_time)
     data["net_load_da_mwh"] = data["net_load_da"] * 0.25
@@ -32,12 +47,26 @@ def add_derived_features(frame: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFram
         {"column": "net_load_da", "source": "派生", "formula": "省调负荷_日前 - 新能源负荷-总加_日前"},
         {"column": "net_load_id", "source": "派生", "formula": "省调负荷_日内 - 新能源负荷-总加_日内"},
         {"column": "price_spread", "source": "派生", "formula": "全网统一出清价格_日内 - 全网统一出清价格_日前"},
+        {"column": "price_spread_abs", "source": "派生", "formula": "abs(price_spread)"},
         {"column": "load_dev", "source": "派生", "formula": "net_load_id - net_load_da"},
+        {"column": "load_dev_abs", "source": "派生", "formula": "abs(load_dev)"},
+        {"column": "load_dev_sign", "source": "派生", "formula": "sign(load_dev)"},
         {"column": "wind_dev", "source": "派生", "formula": "新能源负荷-风电_日内 - 新能源负荷-风电_日前"},
         {"column": "solar_dev", "source": "派生", "formula": "新能源负荷-光伏_日内 - 新能源负荷-光伏_日前"},
         {"column": "renewable_ratio_da", "source": "派生", "formula": "新能源负荷-总加_日前 / 省调负荷_日前"},
         {"column": "renewable_ratio_id", "source": "派生", "formula": "新能源负荷-总加_日内 / 省调负荷_日内"},
         {"column": "renewable_dev", "source": "派生", "formula": "wind_dev + solar_dev"},
+        {"column": "renewable_dev_abs", "source": "派生", "formula": "abs(renewable_dev)"},
+        {"column": "renewable_dev_sign", "source": "派生", "formula": "sign(renewable_dev)"},
+        {"column": "business_hour_flag", "source": "派生", "formula": "hour in [08, 20]"},
+        {"column": "peak_hour_flag", "source": "派生", "formula": "hour in {08-11,18-21}"},
+        {"column": "valley_hour_flag", "source": "派生", "formula": "hour in {00-06}"},
+        {"column": "business_hour_spread", "source": "派生", "formula": "price_spread * business_hour_flag"},
+        {"column": "peak_hour_spread", "source": "派生", "formula": "price_spread * peak_hour_flag"},
+        {"column": "valley_hour_spread", "source": "派生", "formula": "price_spread * valley_hour_flag"},
+        {"column": "da_price_valid_flag", "source": "派生", "formula": "notna(全网统一出清价格_日前)"},
+        {"column": "id_price_valid_flag", "source": "派生", "formula": "notna(全网统一出清价格_日内)"},
+        {"column": "settlement_effective_flag", "source": "派生", "formula": "1.0"},
         {"column": "net_load_da_mwh", "source": "派生", "formula": "net_load_da * 0.25"},
         {"column": "net_load_id_mwh", "source": "派生", "formula": "net_load_id * 0.25"},
     ]
@@ -81,13 +110,18 @@ def build_weekly_features(hourly: pd.DataFrame, quantiles: list[float]) -> pd.Da
         "prev_da_price": "全网统一出清价格_日前",
         "prev_id_price": "全网统一出清价格_日内",
         "prev_spread": "price_spread",
+        "prev_price_spread_abs": "price_spread_abs",
         "prev_net_load_da": "net_load_da",
         "prev_net_load_id": "net_load_id",
         "prev_load_dev": "load_dev",
         "prev_wind_dev": "wind_dev",
         "prev_solar_dev": "solar_dev",
+        "prev_renewable_dev_abs": "renewable_dev_abs",
         "prev_renewable_ratio_da": "renewable_ratio_da",
         "prev_renewable_ratio_id": "renewable_ratio_id",
+        "prev_business_hour_spread": "business_hour_spread",
+        "prev_peak_hour_spread": "peak_hour_spread",
+        "prev_valley_hour_spread": "valley_hour_spread",
         "prev_tieline_da": "联络线总加_日前",
         "prev_hydro_da": "水电出力_日前",
         "prev_nonmarket_da": "非市场化机组出力_日前",

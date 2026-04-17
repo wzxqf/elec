@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.4
+
+- 正式版本号升级为 `v0.4`，根配置 `project.version` 与 `training.algorithm` 同步切换到 `v0.4 / HYBRID_PSO_V040`。
+- 新增 `src/policy/feasible_domain.py` 与 `src/policy/projection.py`，将制度状态正式编译为周度/小时级可行域，并在评分核中执行投影后再结算。
+- `src/training/tensor_bundle.py` 现正式携带可行域边界张量、结算模式和边界原因码；`score_kernel` 输出新增原始边际敞口、可行域裁剪幅度和裁剪激活标记。
+- `prepare_project_context()` 新增 `feasible_domain_manifest.csv`、`policy_feasible_domain_summary.md`、`parameter_layout_audit.md`、`release_manifest.json`、`run_manifest.json` 与 `artifact_index.md`。
+- `prepare_project_context()` 继续补出 `state_schema_snapshot.md`、`tensor_bundle_audit.md` 与 `docs/STATE_SCHEMA.md`，把本次实验真实状态字段、张量形状和边界字段固定成可审计产物。
+- 小时级状态补入 `price_spread_abs`、`load_dev_abs/sign`、`renewable_dev_abs/sign`、营业时段/峰谷标记、营业时段价差与结算有效标记；周度侧同步补入跨市场相关与极端事件字段。
+- 滚动回测新增 `rolling_weekly_results.csv`、`rolling_hourly_results.csv`、`rolling_settlement_results.csv`，并正式输出 `benchmark_comparison.csv`、`ablation_metrics.csv`、`robustness_metrics.csv`、`benchmark_summary.md`、`ablation_summary.md`、`robustness_summary.md` 与 `constraint_activation_report.md`。
+- 正式报告统一增加 `version / experiment_id / config_hash / run_timestamp / device / data_range` 页眉，并尽量改为输出目录相对路径。
+- `summarize_rolling_excess_return()` 现额外输出中位数、分位数、波动率、CVaR95/CVaR99 与 Sharpe 护栏字段，区分 `main_text_safe` 与 `appendix_only` 指标层级。
+
 ## v0.38
 
 - 正式版本号升级为 `v0.38`，根配置 `project.version` 与 `training.algorithm` 同步切换到 `v0.38 / HYBRID_PSO_V038`。

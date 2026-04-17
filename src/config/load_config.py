@@ -10,6 +10,7 @@ SUPPORTED_HYBRID_PSO_ALGORITHMS = {
     "HYBRID_PSO_V033",
     "HYBRID_PSO_V036",
     "HYBRID_PSO_V038",
+    "HYBRID_PSO_V040",
 }
 
 
@@ -138,6 +139,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "hpso",
         "policy",
         "analysis_v035",
+        "policy_feasible_domain",
     ]:
         value = root_config.get(optional_section)
         if isinstance(value, dict):

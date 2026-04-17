@@ -1,10 +1,10 @@
 # ARCHITECTURE.md
 
-## v0.38 总体架构
+## v0.4 总体架构
 
 当前唯一有效正式架构为：
 
-`data -> policy_deep -> tensor_bundle -> parametric_hybrid_pso -> policy_projection -> rolling_retrain -> 15m_settlement -> reporting`
+`data -> policy_deep -> feasible_domain -> tensor_bundle -> parametric_hybrid_pso -> policy_projection -> rolling_retrain -> 15m_settlement -> reporting`
 
 项目围绕湖南电力市场售电公司的购电组合与风险管理任务构建，正式主线固定为：
 
@@ -34,10 +34,13 @@
 
 - `src/training/tensor_bundle.py`：将研究样本编译为 Torch 张量包
 - `src/training/score_kernel.py`：参数化双层混合粒子群评分核
+- `src/policy/feasible_domain.py`：制度状态到可行域边界的正式编译器
+- `src/policy/projection.py`：周度/小时级动作投影器
 
 评分核正式输出以下对象：
 
 - 周度合约原始调整量与投影后执行量
+- 周度边际敞口原始量与投影后执行量
 - 周度合约持仓量
 - 现货边际风险带宽
 - 小时级现货修正量
@@ -75,6 +78,7 @@
 政策规则投影器是唯一正式业务约束器。它负责：
 
 - 将上层原始合约调整量投影到政策可行域
+- 将上层边际敞口与小时级现货修正投影到政策可行域
 - 记录 `policy_projection_active`
 - 记录 `policy_violation_penalty_w`
 - 输出政策绑定痕迹

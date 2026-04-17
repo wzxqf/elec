@@ -1,6 +1,6 @@
 # CONSTRAINTS.md
 
-## v0.38 生效约束
+## v0.4 生效约束
 
 本文件只保留当前版本有效约束。任何 PPO、SB3、gym、旧静态参数推断链、`lock_ratio` 主语义和动作裁剪链历史口径均已失效。
 
@@ -13,7 +13,7 @@
 
 ## 二、算法边界
 
-- 主算法固定为参数化双层混合粒子群 `HYBRID_PSO_V038`
+- 主算法固定为参数化双层混合粒子群 `HYBRID_PSO_V040`
 - 上层粒子直接表示周度参数化持仓策略
 - 下层粒子直接表示小时级滚动修正规则
 - 训练热路径固定为 Torch 张量评分，不得回退到 pandas 串行主链
@@ -23,6 +23,7 @@
 ## 三、约束边界
 
 - 合约调整量只经政策规则投影约束
+- 边际敞口与小时级现货修正必须先进入 `feasible_domain -> projection`
 - 不得再对业务决策使用额外极端裁剪
 - 不得使用 `lock_ratio_min`、`lock_ratio_max`、`delta_lock_cap`
 - 不得使用 `bound_clip_count`、`smooth_clip_count`、`soft_clip_count`、`non_negative_clip_count` 作为正式业务字段
