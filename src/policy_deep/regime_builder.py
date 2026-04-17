@@ -30,7 +30,7 @@ def build_policy_deep_context(
     weekly_metadata: pd.DataFrame,
     config: dict[str, Any],
 ) -> PolicyDeepContext:
-    document_result = read_policy_documents(policy_directory)
+    document_result = read_policy_documents(policy_directory, project_root=config["project_root"])
     candidate_rules = build_candidate_rules(document_result.parsed_rules, document_result.document_units)
     llm_cfg = config.get("policy_deep", {}).get("llm_candidate_parser", {})
     llm_candidates = resolve_llm_candidates(

@@ -1,7 +1,7 @@
 > version: v0.42
-> experiment_id: v0.42-d0f1cd29
-> config_hash: d0f1cd29e630e124c05e6cf7194aae745f54b32a4507faee6bb7207d66a63e29
-> run_timestamp: 2026-04-17T15:51:38+08:00
+> experiment_id: v0.42-034325fc
+> config_hash: 034325fc2ff0de18fee15d7513f170cfbc2a6492719148289436ae4dc38bc670
+> run_timestamp: 2026-04-17T16:16:23+08:00
 > device: cuda
 > data_range: 2025-11-01 00:00:00 -> 2026-03-20 23:45:00
 
@@ -22,4 +22,3 @@
 - quarter_feature_columns: 全网统一出清价格_日前, 全网统一出清价格_日内
 - weekly_bound_columns: contract_adjustment_ratio_min, contract_adjustment_ratio_max, exposure_band_ratio_min, exposure_band_ratio_max, max_hourly_hedge_share, max_hourly_ramp_share, non_negative_position_required, feasible_domain_triggered
 - hourly_bound_columns: max_hourly_hedge_share, max_hourly_ramp_share
-

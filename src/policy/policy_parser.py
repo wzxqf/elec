@@ -29,6 +29,16 @@ def _list_policy_files(policy_dir: str | Path) -> list[Path]:
     return sorted(set(files))
 
 
+def _serialize_source_file(path: Path, project_root: Path | None) -> str:
+    resolved = path.resolve()
+    if project_root is None:
+        return resolved.as_posix()
+    try:
+        return resolved.relative_to(project_root).as_posix()
+    except ValueError:
+        return resolved.as_posix()
+
+
 def _extract_docx_text(path: Path) -> str:
     with ZipFile(path) as archive:
         xml_bytes = archive.read("word/document.xml")
@@ -161,8 +171,10 @@ def _parse_docx_or_note(path: Path) -> tuple[str, str, str]:
     return "", "ok", ""
 
 
-def parse_policy_environment(policy_dir: str | Path) -> PolicyParseResult:
-    files = _list_policy_files(policy_dir)
+def parse_policy_environment(policy_dir: str | Path, project_root: str | Path | None = None) -> PolicyParseResult:
+    policy_root = Path(policy_dir).resolve()
+    project_root_path = Path(project_root).resolve() if project_root is not None else policy_root.parent
+    files = _list_policy_files(policy_root)
     inventory_rows: list[dict[str, Any]] = []
     rule_rows: list[dict[str, Any]] = []
     failure_rows: list[dict[str, Any]] = []
@@ -182,16 +194,16 @@ def parse_policy_environment(policy_dir: str | Path) -> PolicyParseResult:
                 publish_time = publish_time or _extract_notice_date(extracted_text)
             elif path.suffix.lower() in {".xlsx", ".xls"}:
                 mechanism_xlsx_summary = _extract_xlsx_summary(path)
-                mechanism_result_file = str(path)
+                mechanism_result_file = _serialize_source_file(path, project_root_path)
                 parse_note = f"sheet_names={mechanism_xlsx_summary['sheet_names']}"
         except Exception as exc:  # pragma: no cover - 容错记录
             parse_status = "failed"
             parse_note = str(exc)
-            failure_rows.append({"source_file": str(path), "error": str(exc)})
+            failure_rows.append({"source_file": _serialize_source_file(path, project_root_path), "error": str(exc)})
 
         inventory_rows.append(
             {
-                "source_file": str(path),
+                "source_file": _serialize_source_file(path, project_root_path),
                 "file_name": path.name,
                 "suffix": path.suffix.lower(),
                 "publish_time": publish_time,
@@ -205,7 +217,7 @@ def parse_policy_environment(policy_dir: str | Path) -> PolicyParseResult:
             continue
 
         policy_name = path.stem
-        source_file = str(path)
+        source_file = _serialize_source_file(path, project_root_path)
         scope = "湖南省售电周度持仓实验"
 
         if "现货市场交易实施细则" in path.name:

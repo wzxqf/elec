@@ -1,8 +1,8 @@
-project_root: /Users/dk/py/elec
+project_root: .
 sample_start: "2025-11-01 00:00:00"
 sample_end: "2026-03-20 23:45:00"
 buffer_end: "2026-03-28 23:45:00"
-policy_directory: /Users/dk/py/elec/政策环境
+policy_directory: 政策环境
 
 split:
   train_start_week: "2025-11-03 00:00:00"
@@ -13,15 +13,15 @@ split:
   test_end_week: "2026-03-16 00:00:00"
 
 data_candidates:
-  - /Users/dk/py/elec/total.csv
-  - /Users/dk/py/elec/data/total.csv
+  - total.csv
+  - data/total.csv
 
 outputs:
-  logs: /Users/dk/py/elec/outputs/logs
-  models: /Users/dk/py/elec/outputs/models
-  metrics: /Users/dk/py/elec/outputs/metrics
-  figures: /Users/dk/py/elec/outputs/figures
-  reports: /Users/dk/py/elec/outputs/reports
+  logs: outputs/logs
+  models: outputs/models
+  metrics: outputs/metrics
+  figures: outputs/figures
+  reports: outputs/reports
 
 cost:
   risk_vol_weight: 0.50

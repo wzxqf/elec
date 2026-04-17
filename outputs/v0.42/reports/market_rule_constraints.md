@@ -1,7 +1,7 @@
 > version: v0.42
-> experiment_id: v0.42-d0f1cd29
-> config_hash: d0f1cd29e630e124c05e6cf7194aae745f54b32a4507faee6bb7207d66a63e29
-> run_timestamp: 2026-04-17T15:51:38+08:00
+> experiment_id: v0.42-034325fc
+> config_hash: 034325fc2ff0de18fee15d7513f170cfbc2a6492719148289436ae4dc38bc670
+> run_timestamp: 2026-04-17T16:16:23+08:00
 > device: cuda
 > data_range: 2025-11-01 00:00:00 -> 2026-03-20 23:45:00
 
@@ -24,14 +24,14 @@
 
 | constraint_id | constraint_name | effective_start | constraint_type | model_layer | model_mapping | policy_source_files |
 | --- | --- | --- | --- | --- | --- | --- |
-| lt_contract_settlement_only | 中长期合约仅作为结算依据 | 2025-10-15 00:00:00 | 结算口径硬约束 | 上层周度中长期底仓 + 15分钟结算 | lt_settlement_base, spot_marginal_exposure, lt_spot_coupling_state, q_lt_hourly, lt_energy_15m | d:\elec\政策环境\2025.10.15湖南省电力现货市场交易实施细则.docx |
+| lt_contract_settlement_only | 中长期合约仅作为结算依据 | 2025-10-15 00:00:00 | 结算口径硬约束 | 上层周度中长期底仓 + 15分钟结算 | lt_settlement_base, spot_marginal_exposure, lt_spot_coupling_state, q_lt_hourly, lt_energy_15m | 政策环境/2025.10.15湖南省电力现货市场交易实施细则.docx |
 | lt_24_period_contract_curve | 中长期交易按每日24时段组织 | 2025-10-15 00:00:00 | 时间粒度硬约束 | 周度底仓向小时曲线分解 | _allocate_weekly_lt_to_hourly, q_lt_hourly |  |
-| spot_15min_96_settlement | 日前/实时现货按96个15分钟时段结算 | 2025-10-15 00:00:00 | 结算时间粒度硬约束 | 15分钟代理结算回测 | settlement_interval_hours=0.25, settle_week, procurement_cost_15m, imbalance_energy_15m | d:\elec\政策环境\2025.10.15湖南省电力现货市场交易实施细则.docx |
+| spot_15min_96_settlement | 日前/实时现货按96个15分钟时段结算 | 2025-10-15 00:00:00 | 结算时间粒度硬约束 | 15分钟代理结算回测 | settlement_interval_hours=0.25, settle_week, procurement_cost_15m, imbalance_energy_15m | 政策环境/2025.10.15湖南省电力现货市场交易实施细则.docx |
 | retail_single_supplier_package | 零售用户合同周期内单一售电公司与单一套餐 | 2025-10-15 00:00:00 | 收益端边界约束 | 售电公司收益端与基准策略解释 | retail package is treated as exogenous revenue-side boundary |  |
-| ancillary_peak_shaving_pause_during_spot_trial | 现货试运行期间省内调峰辅助服务暂停 | 2025-10-14 00:00:00 | 市场边界约束 | 下层小时级现货滚动修正 | ancillary_peak_shaving_pause, ancillary_freq_reserve_tight, bandwidth_multiplier | d:\elec\政策环境\2025.10.14关于进一步加强湖南电力辅助服务市场建设有关事项的通知.docx |
-| renewable_mechanism_from_2026_01_01 | 新能源机制电价自2026-01-01进入执行期 | 2026-01-01 00:00:00 | 制度时点硬约束 | 状态空间 + 新能源扰动代理 | renewable_mechanism_active, mechanism_stage_label, mechanism_price_floor, mechanism_price_ceiling, mechanism_volume_ratio_max | d:\elec\政策环境\2025.11.05 关于2025年度新能源机制电价竞价工作有关事项的通知.docx |
-| lt_price_linkage_from_2026_02_01 | 2026年度中长期价格40%固定 + 60%实时联动自2026-02执行 | 2026-02-01 00:00:00 | 制度时点硬约束 | 中长期价格代理与15分钟结算 | lt_price_linked_active, fixed_price_ratio_max, linked_price_ratio_min, resolve_settlement_context | d:\elec\政策环境\2026.01 关于完善2026年度电力中长期交易价格机制的通知.docx |
-| metering_data_traceability | 计量数据作为市场结算依据且异常处理可追踪 | 2025-10-15 00:00:00 | 数据质量约束 | 数据预处理 + 15分钟结算 | data_quality_report.md, actual_need_15m, imbalance_energy_15m | d:\elec\政策环境\2025.10.15湖南省电力市场计量实施规则.docx |
+| ancillary_peak_shaving_pause_during_spot_trial | 现货试运行期间省内调峰辅助服务暂停 | 2025-10-14 00:00:00 | 市场边界约束 | 下层小时级现货滚动修正 | ancillary_peak_shaving_pause, ancillary_freq_reserve_tight, bandwidth_multiplier | 政策环境/2025.10.14关于进一步加强湖南电力辅助服务市场建设有关事项的通知.docx |
+| renewable_mechanism_from_2026_01_01 | 新能源机制电价自2026-01-01进入执行期 | 2026-01-01 00:00:00 | 制度时点硬约束 | 状态空间 + 新能源扰动代理 | renewable_mechanism_active, mechanism_stage_label, mechanism_price_floor, mechanism_price_ceiling, mechanism_volume_ratio_max | 政策环境/2025.11.05 关于2025年度新能源机制电价竞价工作有关事项的通知.docx |
+| lt_price_linkage_from_2026_02_01 | 2026年度中长期价格40%固定 + 60%实时联动自2026-02执行 | 2026-02-01 00:00:00 | 制度时点硬约束 | 中长期价格代理与15分钟结算 | lt_price_linked_active, fixed_price_ratio_max, linked_price_ratio_min, resolve_settlement_context | 政策环境/2026.01 关于完善2026年度电力中长期交易价格机制的通知.docx |
+| metering_data_traceability | 计量数据作为市场结算依据且异常处理可追踪 | 2025-10-15 00:00:00 | 数据质量约束 | 数据预处理 + 15分钟结算 | data_quality_report.md, actual_need_15m, imbalance_energy_15m | 政策环境/2025.10.15湖南省电力市场计量实施规则.docx |
 
 ## 三、详细解释
 
@@ -57,4 +57,3 @@
 - 价格口径: `src/backtest/settlement.py` 根据 `lt_price_linked_active` 切换中长期价格代理。
 - 下层边际空间: `src/training/score_kernel.py` 与 `src/backtest/materialize.py` 输出参数化电量决策、政策投影结果和 15 分钟结算指标。
 - 输出位置: `outputs/<version>/reports/market_rule_constraints.md`。
-

@@ -1,15 +1,15 @@
 project:
-  version: v0.42
-  project_root: d:/elec
+  version: v0.43
+  project_root: .
 
 data:
   sample_start: "2025-11-01 00:00:00"
   sample_end: "2026-03-20 23:45:00"
   buffer_end: "2026-03-28 23:45:00"
-  policy_directory: d:/elec/政策环境
+  policy_directory: 政策环境
   data_candidates:
-    - d:/elec/total.csv
-    - d:/elec/data/total.csv
+    - total.csv
+    - data/total.csv
   expected_frequency_minutes: 15
   datetime_column: datetime
   duplicate_strategy: mean
@@ -30,7 +30,7 @@ data:
     linked_effective_start: "2026-02-01 00:00:00"
 
 outputs:
-  root: d:/elec/outputs
+  root: outputs
 
 split:
   train_start_week: "2025-11-03 00:00:00"

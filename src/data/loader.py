@@ -30,15 +30,17 @@ EXPECTED_COLUMNS = [
 
 
 def locate_total_csv(project_root: str | Path, candidates: Iterable[str | Path]) -> Path:
+    root = Path(project_root).resolve()
     for candidate in candidates:
         path = Path(candidate)
+        if not path.is_absolute():
+            path = root / path
         if path.exists():
-            return path
+            return path.resolve()
 
-    root = Path(project_root)
     for path in root.rglob("total.csv"):
         if path.name == "total.csv":
-            return path
+            return path.resolve()
 
     raise FileNotFoundError("未找到真实数据文件 total.csv，按要求停止执行。")
 

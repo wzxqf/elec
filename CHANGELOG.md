@@ -1,5 +1,16 @@
 # 更新日志
 
+## v0.43
+
+- 正式版本号升级为 `v0.43`，根配置 `project.version`、README 当前版本说明和当前版本相关回归测试同步切换到 `v0.43`。
+- 根配置 `experiment_config.yaml` 现正式改用项目相对路径口径：`project_root: .`、`policy_directory: 政策环境`、`data_candidates: [total.csv, data/total.csv]`、`outputs.root: outputs`，避免继续绑定本机盘符或用户目录。
+- 历史模板 `configs/default.yaml` 同步改为相对路径写法，减少跨设备复制、切换工作目录或新机器复现实验时的路径漂移。
+- `src/config/load_config.py` 新增项目路径归一化逻辑：配置文件允许写相对路径，运行时统一按项目根解析为绝对路径，不改变后续数据层、训练层和回测层的消费接口。
+- `src/utils/io.py` 与 `src/data/loader.py` 现正式支持以项目根为基准解析输出目录和 `total.csv` 候选路径，使入口脚本、上下文构建和数据定位不再依赖硬编码绝对路径。
+- `src/policy/policy_parser.py`、`src/policy_deep/document_reader.py`、`src/policy_deep/regime_builder.py` 与 `src/utils/experiment_manifest.py` 现统一把 `source_file`、`config_path`、`output_root` 等对外产物字段收敛为项目相对路径，避免新的 CSV / JSON / Markdown 结果继续泄露本地绝对目录。
+- 新增 `tests/test_relative_project_paths.py`，回归校验“相对路径配置可被正确解析”“`prepare_project_context()` 导出的清单、规则表、状态轨迹和 manifest 不再写出项目根绝对路径”。
+- 同步更新 `tests/test_run_all_progress.py` 与 `tests/test_v041_reporting_contracts.py` 的当前版本断言，保证统一入口、版本报告命名和 manifest 索引在 `v0.43` 下保持一致。
+
 ## v0.4
 
 - 正式版本号升级为 `v0.4`，根配置 `project.version` 与 `training.algorithm` 同步切换到 `v0.4 / HYBRID_PSO_V040`。

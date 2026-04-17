@@ -90,6 +90,7 @@ def build_feasible_domain_summary(domain: Any) -> str:
 
 def build_run_metadata(config: dict[str, Any], output_root: Path, compiled_layout_payload: dict[str, Any], constraints: pd.DataFrame) -> dict[str, Any]:
     config_path = Path(str(config["config_path"]))
+    project_root = Path(str(config["project_root"]))
     config_hash = hashlib.sha256(config_path.read_bytes()).hexdigest()
     compiled_layout_hash = stable_hash_payload(compiled_layout_payload)
     timestamp = datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
@@ -108,8 +109,8 @@ def build_run_metadata(config: dict[str, Any], output_root: Path, compiled_layou
             "sample_start": str(config["sample_start"]),
             "sample_end": str(config["sample_end"]),
         },
-        "config_path": str(config_path),
-        "output_root": str(output_root),
+        "config_path": relativize_path(config_path, project_root),
+        "output_root": relativize_path(output_root, project_root),
         "enabled_constraints": enabled_constraints,
     }
 

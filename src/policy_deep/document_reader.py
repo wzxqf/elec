@@ -16,8 +16,8 @@ class PolicyDocumentReadResult:
     failures: pd.DataFrame
 
 
-def read_policy_documents(policy_directory: str | Path) -> PolicyDocumentReadResult:
-    parsed = parse_policy_environment(policy_directory)
+def read_policy_documents(policy_directory: str | Path, project_root: str | Path | None = None) -> PolicyDocumentReadResult:
+    parsed = parse_policy_environment(policy_directory, project_root=project_root)
     unit_rows: list[dict[str, object]] = []
     for index, row in parsed.rule_table.reset_index(drop=True).iterrows():
         unit_rows.append(

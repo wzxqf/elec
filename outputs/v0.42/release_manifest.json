@@ -1,9 +1,9 @@
 {
   "version": "v0.42",
-  "experiment_id": "v0.42-d0f1cd29",
-  "config_hash": "d0f1cd29e630e124c05e6cf7194aae745f54b32a4507faee6bb7207d66a63e29",
+  "experiment_id": "v0.42-034325fc",
+  "config_hash": "034325fc2ff0de18fee15d7513f170cfbc2a6492719148289436ae4dc38bc670",
   "compiled_layout_hash": "05f5a9484a674da114de35d24763a0accf35b02135607eabe0cfbe3c11ec523a",
-  "run_timestamp": "2026-04-17T15:51:38+08:00",
+  "run_timestamp": "2026-04-17T16:16:23+08:00",
   "device": "cuda",
   "data_range": {
     "sample_start": "2025-11-01 00:00:00",
@@ -37,24 +37,6 @@
     "feasible_domain_manifest_path": "metrics/feasible_domain_manifest.csv",
     "policy_rule_table_path": "metrics/policy_rule_table.csv",
     "policy_state_trace_path": "metrics/policy_state_trace.csv",
-    "feature_manifest_path": "reports/feature_manifest.json",
-    "model_path": "models/hybrid_pso_model.json",
-    "train_summary_path": "reports/train_summary.md",
-    "training_runtime_summary_path": "reports/training_runtime_summary.json",
-    "validation_summary_path": "reports/validation_summary.md",
-    "backtest_summary_path": "reports/backtest_summary.md",
-    "benchmark_summary_path": "reports/benchmark_summary.md",
-    "ablation_summary_path": "reports/ablation_summary.md",
-    "robustness_summary_path": "reports/robustness_summary.md",
-    "constraint_activation_report_path": "reports/constraint_activation_report.md",
-    "run_summary_path": "reports/run_summary.md",
-    "module1_summary_path": "reports/module1_summary.md",
-    "market_mechanism_analysis_path": "reports/market_mechanism_analysis.md",
-    "excess_return_validation_summary_path": "reports/excess_return_validation_summary.md",
-    "version_report_path": "reports/v0.42报告.md",
-    "rolling_backtest_metrics_path": "metrics/rolling_backtest_metrics.csv",
-    "benchmark_comparison_path": "metrics/benchmark_comparison.csv",
-    "ablation_metrics_path": "metrics/ablation_metrics.csv",
-    "robustness_metrics_path": "metrics/robustness_metrics.csv"
+    "feature_manifest_path": "reports/feature_manifest.json"
   }
 }

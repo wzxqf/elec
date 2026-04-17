@@ -169,7 +169,7 @@ def test_run_train_persists_hybrid_pso_iteration_progress(monkeypatch) -> None:
     status_path = output_root / "logs" / "runtime_status.json"
     context = {
         "config": {
-            "version": "v0.42",
+            "version": "v0.43",
             "sample_start": "2025-11-01 00:00:00",
             "sample_end": "2026-03-20 23:45:00",
             "training": {"algorithm": "HYBRID_PSO_V040", "device": "cpu"},

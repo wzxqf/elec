@@ -1,14 +1,14 @@
 project:
   version: v0.42
-  project_root: d:/elec
+  project_root: .
 data:
   sample_start: '2025-11-01 00:00:00'
   sample_end: '2026-03-20 23:45:00'
   buffer_end: '2026-03-28 23:45:00'
-  policy_directory: d:/elec/政策环境
+  policy_directory: 政策环境
   data_candidates:
-  - d:/elec/total.csv
-  - d:/elec/data/total.csv
+  - total.csv
+  - data/total.csv
   expected_frequency_minutes: 15
   datetime_column: datetime
   duplicate_strategy: mean
@@ -28,7 +28,7 @@ data:
     warmup_label: warmup_unavailable
     linked_effective_start: '2026-02-01 00:00:00'
 outputs:
-  root: d:/elec/outputs
+  root: outputs
 split:
   train_start_week: '2025-11-03 00:00:00'
   train_end_week: '2026-01-26 00:00:00'
@@ -317,4 +317,3 @@ policy_deep:
   llm_candidate_parser:
     enabled: false
     cache_only: true
-

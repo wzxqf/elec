@@ -39,12 +39,20 @@ def save_markdown(text: str, path: str | Path) -> None:
         handle.write(text)
 
 
+def _resolve_project_path(path: str | Path, project_root: str | Path) -> Path:
+    resolved = Path(path)
+    if not resolved.is_absolute():
+        resolved = Path(project_root) / resolved
+    return resolved.resolve()
+
+
 def resolve_output_paths(config: dict[str, Any]) -> dict[str, Path]:
     outputs_config = config["outputs"]
     version = str(config.get("version") or config.get("project", {}).get("version") or "unversioned")
+    project_root = config.get("project_root", Path.cwd())
 
     if "root" in outputs_config:
-        version_root = Path(outputs_config["root"]) / version
+        version_root = _resolve_project_path(outputs_config["root"], project_root) / version
         outputs = {
             "root": version_root,
             "logs": version_root / "logs",
@@ -54,7 +62,7 @@ def resolve_output_paths(config: dict[str, Any]) -> dict[str, Path]:
             "reports": version_root / "reports",
         }
     else:
-        outputs = {key: Path(value) for key, value in outputs_config.items()}
+        outputs = {key: _resolve_project_path(value, project_root) for key, value in outputs_config.items()}
 
     ensure_directories(outputs.values())
     return outputs

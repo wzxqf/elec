@@ -50,8 +50,31 @@ def _require_keys(section_name: str, section: dict[str, Any], keys: list[str]) -
         raise KeyError(f"experiment_config.yaml 的 {section_name} 缺少字段: {', '.join(missing)}")
 
 
+def _resolve_project_path(project_root: Path, value: Any) -> str:
+    path = Path(str(value)).expanduser()
+    if not path.is_absolute():
+        path = project_root / path
+    return str(path.resolve())
+
+
+def _normalize_project_paths(
+    project_root: Path,
+    project: dict[str, Any],
+    data: dict[str, Any],
+    outputs: dict[str, Any],
+) -> None:
+    project["project_root"] = _resolve_project_path(project_root, project["project_root"])
+    data["policy_directory"] = _resolve_project_path(project_root, data["policy_directory"])
+    data["data_candidates"] = [_resolve_project_path(project_root, candidate) for candidate in data["data_candidates"]]
+    if "root" in outputs:
+        outputs["root"] = _resolve_project_path(project_root, outputs["root"])
+    else:
+        for key, value in list(outputs.items()):
+            outputs[key] = _resolve_project_path(project_root, value)
+
+
 def load_runtime_config(project_root: str | Path, filename: str = "experiment_config.yaml") -> dict[str, Any]:
-    project_root = Path(project_root)
+    project_root = Path(project_root).resolve()
     config_path = project_root / filename
     if not config_path.exists():
         raise FileNotFoundError(f"未找到根目录独立参数文件: {config_path}")
@@ -60,28 +83,29 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     for section_name in REQUIRED_SECTIONS:
         _require_section(root_config, section_name)
 
-    project = _require_section(root_config, "project")
-    data = _require_section(root_config, "data")
-    outputs = _require_section(root_config, "outputs")
-    split = _require_section(root_config, "split")
-    rolling_validation = _require_section(root_config, "rolling_validation")
-    rolling_retrain = _require_section(root_config, "rolling_retrain")
-    feature_selection = _require_section(root_config, "feature_selection")
-    reward = _require_section(root_config, "reward")
-    training = _require_section(root_config, "training")
-    policy_regime = _require_section(root_config, "policy_regime")
-    reporting = _require_section(root_config, "reporting")
-    analysis = _require_section(root_config, "analysis")
-    hybrid_pso = _require_section(root_config, "hybrid_pso")
-    parameter_compiler = _require_section(root_config, "parameter_compiler")
-    policy_deep = _require_section(root_config, "policy_deep")
-    policy_projection = _require_section(root_config, "policy_projection")
-    upper_strategy = _require_section(root_config, "upper_strategy")
-    lower_strategy = _require_section(root_config, "lower_strategy")
-    economics = _require_section(root_config, "economics")
+    project = dict(_require_section(root_config, "project"))
+    data = dict(_require_section(root_config, "data"))
+    outputs = dict(_require_section(root_config, "outputs"))
+    split = dict(_require_section(root_config, "split"))
+    rolling_validation = dict(_require_section(root_config, "rolling_validation"))
+    rolling_retrain = dict(_require_section(root_config, "rolling_retrain"))
+    feature_selection = dict(_require_section(root_config, "feature_selection"))
+    reward = dict(_require_section(root_config, "reward"))
+    training = dict(_require_section(root_config, "training"))
+    policy_regime = dict(_require_section(root_config, "policy_regime"))
+    reporting = dict(_require_section(root_config, "reporting"))
+    analysis = dict(_require_section(root_config, "analysis"))
+    hybrid_pso = dict(_require_section(root_config, "hybrid_pso"))
+    parameter_compiler = dict(_require_section(root_config, "parameter_compiler"))
+    policy_deep = dict(_require_section(root_config, "policy_deep"))
+    policy_projection = dict(_require_section(root_config, "policy_projection"))
+    upper_strategy = dict(_require_section(root_config, "upper_strategy"))
+    lower_strategy = dict(_require_section(root_config, "lower_strategy"))
+    economics = dict(_require_section(root_config, "economics"))
 
     _require_keys("project", project, ["version", "project_root"])
     _require_keys("data", data, ["sample_start", "sample_end", "buffer_end", "policy_directory", "data_candidates"])
+    _normalize_project_paths(project_root, project, data, outputs)
     algorithm = str(training.get("algorithm", "")).upper()
     if algorithm in SUPPORTED_HYBRID_PSO_ALGORITHMS:
         _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
@@ -97,7 +121,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     _require_keys("economics", economics, ["retail_tariff_yuan_per_mwh", "imbalance_penalty_multiplier", "adjustment_cost_yuan_per_mwh", "friction_cost_yuan_per_mwh"])
 
     runtime = {
-        "config_path": str(config_path),
+        "config_path": str(config_path.resolve()),
         "raw_experiment_config": root_config,
         "project": project,
         "version": project["version"],
