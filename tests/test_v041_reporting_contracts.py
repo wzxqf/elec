@@ -26,7 +26,7 @@ def test_run_pipeline_emits_v041_integrated_version_report(monkeypatch) -> None:
     def fake_prepare_project_context(*args, **kwargs):
         return {
             "config": {
-                "version": "v0.43",
+                "version": "v0.44",
                 "seed": 42,
                 "sample_start": "2025-11-01 00:00:00",
                 "sample_end": "2026-03-20 23:45:00",
@@ -48,8 +48,8 @@ def test_run_pipeline_emits_v041_integrated_version_report(monkeypatch) -> None:
                 "logs": logs_dir,
             },
             "run_metadata": {
-                "version": "v0.43",
-                "experiment_id": "v0.43-test",
+                "version": "v0.44",
+                "experiment_id": "v0.44-test",
                 "config_hash": "abc123",
                 "compiled_layout_hash": "layout123",
                 "run_timestamp": "2026-04-17T12:00:00+08:00",
@@ -158,7 +158,7 @@ def test_run_pipeline_emits_v041_integrated_version_report(monkeypatch) -> None:
         monkeypatch.setattr(run_pipeline, "run_evaluate", original_evaluate)
         monkeypatch.setattr(run_pipeline, "run_backtest", original_backtest)
 
-    version_report = reports_dir / "v0.43报告.md"
+    version_report = reports_dir / "v0.44报告.md"
     assert version_report.exists()
     report_text = version_report.read_text(encoding="utf-8")
     assert "数学模型与公式" in report_text
@@ -170,9 +170,9 @@ def test_run_pipeline_emits_v041_integrated_version_report(monkeypatch) -> None:
     run_manifest = json.loads((output_root / "run_manifest.json").read_text(encoding="utf-8"))
     artifact_index = (output_root / "artifact_index.md").read_text(encoding="utf-8")
 
-    assert release_manifest["key_outputs"]["version_report_path"] == "reports/v0.43报告.md"
-    assert run_manifest["key_outputs"]["version_report_path"] == "reports/v0.43报告.md"
-    assert "version_report_path: reports/v0.43报告.md" in artifact_index
+    assert release_manifest["key_outputs"]["version_report_path"] == "reports/v0.44报告.md"
+    assert run_manifest["key_outputs"]["version_report_path"] == "reports/v0.44报告.md"
+    assert "version_report_path: reports/v0.44报告.md" in artifact_index
     assert "train_summary_path" not in release_manifest["key_outputs"]
     assert "training_runtime_summary_path" not in release_manifest["key_outputs"]
     assert "validation_summary_path" not in release_manifest["key_outputs"]

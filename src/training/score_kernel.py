@@ -66,6 +66,14 @@ def _cfg(config: dict[str, Any] | None, path: list[str], default: float) -> floa
     return float(current)
 
 
+def _score_cfg(config: dict[str, Any] | None, key: str, default: float) -> float:
+    return _cfg(config, ["score_kernel", key], default)
+
+
+def _score_nested_cfg(config: dict[str, Any] | None, group: str, key: str, default: float) -> float:
+    return _cfg(config, ["score_kernel", group, key], default)
+
+
 def _find_block(layout_blocks: list[ParameterBlockSpec], block_name: str) -> ParameterBlockSpec:
     for block in layout_blocks:
         if block.name == block_name:
@@ -201,19 +209,31 @@ def batch_score_particles(
     else:
         contract_bias = 0.0
         exposure_bias = 0.0
-    contract_adjustment_mwh_raw = 0.30 * torch.tanh(0.15 * feature_signal + 0.05 * policy_signal + contract_bias) * forecast_load.view(1, 1, week_count)
+    contract_adjustment_mwh_raw = (
+        _score_cfg(config, "contract_adjustment_scale_ratio", 0.30)
+        * torch.tanh(
+            _score_cfg(config, "contract_adjustment_feature_scale", 0.15) * feature_signal
+            + _score_cfg(config, "contract_adjustment_policy_scale", 0.05) * policy_signal
+            + contract_bias
+        )
+        * forecast_load.view(1, 1, week_count)
+    )
     contract_adjustment_mwh_exec = torch.clamp(
         contract_adjustment_mwh_raw,
         min=contract_adjustment_ratio_min * forecast_load.view(1, 1, week_count),
         max=contract_adjustment_ratio_max * forecast_load.view(1, 1, week_count),
     )
-    exposure_band_mwh_raw = torch.relu(0.20 * forecast_load.view(1, 1, week_count) * (1.0 + torch.tanh(0.10 * feature_signal + exposure_bias)))
+    exposure_band_mwh_raw = torch.relu(
+        _score_cfg(config, "exposure_band_base_ratio", 0.20)
+        * forecast_load.view(1, 1, week_count)
+        * (1.0 + torch.tanh(_score_cfg(config, "exposure_band_feature_scale", 0.10) * feature_signal + exposure_bias))
+    )
     exposure_band_mwh = torch.clamp(
         exposure_band_mwh_raw,
         min=exposure_band_ratio_min * forecast_load.view(1, 1, week_count),
         max=exposure_band_ratio_max * forecast_load.view(1, 1, week_count),
     )
-    contract_position_raw = 0.60 * forecast_load.view(1, 1, week_count) + contract_adjustment_mwh_exec
+    contract_position_raw = _score_cfg(config, "contract_position_base_ratio", 0.60) * forecast_load.view(1, 1, week_count) + contract_adjustment_mwh_exec
     contract_position_mwh = torch.where(
         non_negative_position_required > 0.5,
         torch.clamp_min(contract_position_raw, 0.0),
@@ -242,12 +262,26 @@ def batch_score_particles(
     hourly_bound_lookup = {name: idx for idx, name in enumerate(tensor_bundle.hourly_bound_columns)}
     hourly_share_cap = hourly_bounds[..., hourly_bound_lookup["max_hourly_hedge_share"]].view(1, 1, week_count, hour_count)
     hourly_ramp_share = hourly_bounds[..., hourly_bound_lookup["max_hourly_ramp_share"]].view(1, 1, week_count, hour_count)
-    raw_spot_hedge_limit_mwh = (exposure_band_mwh_raw.unsqueeze(-1) / max(hour_count, 1)) * (0.50 + 0.50 * policy_shrink)
+    raw_spot_hedge_limit_mwh = (exposure_band_mwh_raw.unsqueeze(-1) / max(hour_count, 1)) * (
+        _score_nested_cfg(config, "hourly_limit", "base_multiplier", 0.50)
+        + _score_nested_cfg(config, "hourly_limit", "shrink_multiplier", 0.50) * policy_shrink
+    )
     raw_spot_hedge_limit_mwh = raw_spot_hedge_limit_mwh.expand(upper_count, lower_count, week_count, hour_count)
-    session_signal = 0.50 * business_hour_flag + 0.30 * peak_hour_flag - 0.20 * valley_hour_flag
-    raw_hourly_signal = 0.02 * spread_coef * spread + 0.01 * load_coef * load_dev + 0.01 * renewable_coef * renewable_dev
-    raw_hourly_signal = raw_hourly_signal + 0.005 * spread_coef * spread_abs * session_signal
-    raw_hourly_signal = raw_hourly_signal + 0.004 * renewable_coef * renewable_dev_abs * (0.50 * valley_hour_flag + 0.50 * business_hour_flag)
+    session_signal = (
+        _score_nested_cfg(config, "session_weights", "business_hour", 0.50) * business_hour_flag
+        + _score_nested_cfg(config, "session_weights", "peak_hour", 0.30) * peak_hour_flag
+        + _score_nested_cfg(config, "session_weights", "valley_hour", -0.20) * valley_hour_flag
+    )
+    raw_hourly_signal = (
+        _score_nested_cfg(config, "hourly_signal", "spread_weight", 0.02) * spread_coef * spread
+        + _score_nested_cfg(config, "hourly_signal", "load_dev_weight", 0.01) * load_coef * load_dev
+        + _score_nested_cfg(config, "hourly_signal", "renewable_weight", 0.01) * renewable_coef * renewable_dev
+    )
+    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "spread_abs_weight", 0.005) * spread_coef * spread_abs * session_signal
+    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "renewable_abs_weight", 0.004) * renewable_coef * renewable_dev_abs * (
+        _score_nested_cfg(config, "session_weights", "renewable_valley_mix", 0.50) * valley_hour_flag
+        + _score_nested_cfg(config, "session_weights", "renewable_business_mix", 0.50) * business_hour_flag
+    )
     raw_hourly_signal = raw_hourly_signal * torch.where(
         settlement_effective_flag > 0.0,
         torch.ones_like(settlement_effective_flag),
@@ -278,7 +312,10 @@ def batch_score_particles(
     da_price = price_tensor[..., 0].view(1, 1, week_count, interval_count)
     id_price = price_tensor[..., 1].view(1, 1, week_count, interval_count)
     lt_interval_price = lt_price.view(1, 1, week_count, 1)
-    interval_cost = scheduled_interval * (0.6 * lt_interval_price + 0.4 * da_price)
+    interval_cost = scheduled_interval * (
+        _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price
+        + _score_cfg(config, "da_settlement_weight", 0.40) * da_price
+    )
     interval_cost = interval_cost + torch.abs(actual_interval - scheduled_interval) * id_price * _cfg(config, ["economics", "imbalance_penalty_multiplier"], 1.0)
     interval_cost = interval_cost * quarter_mask
 
@@ -301,9 +338,14 @@ def batch_score_particles(
     policy_projection_active = torch.maximum(policy_projection_active.expand(upper_count, lower_count, week_count), feasible_domain_triggered.expand(upper_count, lower_count, week_count))
     policy_violation_penalty = feasible_domain_clip_gap * _cfg(config, ["policy_projection", "violation_penalty_scale"], 1.0)
 
-    baseline_position = 0.55 * forecast_load.view(1, 1, week_count) * (1.0 - 0.05 * policy_projection_active)
+    baseline_position = _score_cfg(config, "baseline_position_ratio", 0.55) * forecast_load.view(1, 1, week_count) * (
+        1.0 - _score_cfg(config, "baseline_projection_penalty_scale", 0.05) * policy_projection_active
+    )
     baseline_interval = (baseline_position.unsqueeze(-1) / valid_intervals.unsqueeze(-1)) * quarter_mask
-    baseline_interval_cost = baseline_interval * (0.6 * lt_interval_price + 0.4 * da_price)
+    baseline_interval_cost = baseline_interval * (
+        _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price
+        + _score_cfg(config, "da_settlement_weight", 0.40) * da_price
+    )
     baseline_interval_cost = baseline_interval_cost + torch.abs(actual_interval - baseline_interval) * id_price
     baseline_procurement_cost = baseline_interval_cost.sum(dim=-1)
     profit = retail_revenue - procurement_cost_weekly - adjustment_cost - friction_cost

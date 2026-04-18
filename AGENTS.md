@@ -92,6 +92,7 @@
 - 最终代码应支持复现实验，而不是只输出一次性结果。
 - 根目录 `experiment_config.yaml` 为唯一人工修改入口，运行后必须输出参数快照、特征清单和滚动验证摘要。
 - 所有正式产物必须按 `outputs/<version>/<真实输出>` 结构写入，其中 `<version>` 取自 `project.version`；不得再直接写入 `outputs/logs`、`outputs/models` 等无版本目录。
+- `pytest` 缓存、临时目录和测试结果必须统一写入 `.cache/tests/pytest/`，不得散落到项目根目录；测试成功后应删除该目录，失败时才保留用于排查。
 
 ## 开发原则
 - 先保证制度一致性，再保证数值效果。

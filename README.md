@@ -1,6 +1,6 @@
 # elec
 
-面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前正式版本已按 `v0.43` 收口并增强为：
+面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前正式版本已按 `v0.44` 收口并增强为：
 
 - 上层周度 HPSO 搜索不设硬限的中长期合约调整量，并保留边际敞口带宽诊断字段
 - 下层小时级 HPSO 搜索不设硬限的现货合约修正量 `delta_q`
@@ -15,9 +15,9 @@
 
 项目根目录的 `experiment_config.yaml` 是当前唯一人工修改入口。训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程都从该文件读取参数；`configs/*.yaml` 仅保留为历史模板或参考，不再作为正式实验主入口。
 
-## `v0.43` 发布边界
+## `v0.44` 发布边界
 
-本版本在 `v0.4` 结构闭环基础上完成 `v0.43` 论文主版本收口，不改变正式策略边界：
+本版本在 `v0.4` 结构闭环基础上完成 `v0.44` 论文主版本收口，不改变正式策略边界：
 
 - 正式主算法名升级为 `HYBRID_PSO_V040`
 - `project.version`、运行日志、manifest 和模型元数据统一改为配置驱动
@@ -76,10 +76,26 @@ python -m src.scripts.diagnostics
 
 说明：
 
-- `<version>` 由 `experiment_config.yaml` 中的 `project.version` 自动决定，例如当前版本输出到 `outputs/v0.43/`。
+- `<version>` 由 `experiment_config.yaml` 中的 `project.version` 自动决定，例如当前版本输出到 `outputs/v0.44/`。
 - 图表不再直接输出图片，统一导出为与原图表同名的 CSV 文件。
 - 日志、摘要、回测报告和详细运行报告均为中文输出。
 - 中长期价格估算与 15 分钟代理结算口径会在日志和报告中明确标注。
 - 训练设备摘要会明确标注默认 `cpu`，以及 `mps` 是否作为可选路径启用。
 - 分析/搜索 worker-count 会在配置快照里保留，默认值为 `1`。
 - 运行后会额外输出 `release_manifest.json`、`run_manifest.json`、`artifact_index.md`、`feasible_domain_manifest.csv`、`parameter_layout_audit.md`、`state_schema_snapshot.md`、`tensor_bundle_audit.md`、`benchmark_comparison.csv`、`ablation_metrics.csv`、`robustness_metrics.csv`、`constraint_activation_report.md`、`train_config_snapshot.yaml`、`training_runtime_summary.json`、`feature_manifest.json`、`market_rule_constraints.md`、`rolling_validation_metrics.csv` 和 `vxx报告.md`。
+
+## 测试目录规范
+
+- `pytest` 缓存、临时目录和测试结果不得落在项目根目录。
+- 统一测试工作目录为 `.cache/tests/pytest/`。
+- 推荐统一通过下面的入口运行测试：
+
+```bash
+python -m src.scripts.run_pytest tests/test_hpso_param_config.py -q
+```
+
+- 该入口会将：
+  - cache 写到 `.cache/tests/pytest/cache`
+  - basetemp 写到 `.cache/tests/pytest/tmp`
+  - junit 结果写到 `.cache/tests/pytest/results/junit.xml`
+- 测试全部通过后会自动删除 `.cache/tests/pytest/`；失败时保留该目录便于排查。

@@ -88,6 +88,13 @@ def test_train_hybrid_pso_model_returns_upper_and_lower_best_particles() -> None
             "seed": 7,
             "upper": {"particles": 4, "iterations": 3, "dimension": 12},
             "lower": {"particles": 3, "iterations": 3, "dimension": 8},
+            "optimizer": {
+                "init_scale": 0.20,
+                "inertia": 0.70,
+                "cognitive": 1.40,
+                "social": 1.30,
+                "position_clip_abs": 0.80,
+            },
         },
     }
 
@@ -99,6 +106,11 @@ def test_train_hybrid_pso_model_returns_upper_and_lower_best_particles() -> None
     assert result.model.metadata["version"] == "v0.36"
     assert result.model.metadata["algorithm"] == "HYBRID_PSO_V036"
     assert result.training_trace.shape[0] == 3
+    assert result.runtime_profile["init_scale"] == 0.20
+    assert result.runtime_profile["inertia"] == 0.70
+    assert result.runtime_profile["cognitive"] == 1.40
+    assert result.runtime_profile["social"] == 1.30
+    assert result.runtime_profile["position_clip_abs"] == 0.80
 
 
 def test_hybrid_pso_model_roundtrip() -> None:

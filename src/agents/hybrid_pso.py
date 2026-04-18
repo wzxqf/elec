@@ -79,6 +79,17 @@ def _infer_release_version(config: dict[str, Any]) -> str:
     return "v0.36"
 
 
+def _resolve_optimizer(hybrid_cfg: dict[str, Any]) -> dict[str, float]:
+    optimizer = dict(hybrid_cfg.get("optimizer", {}))
+    return {
+        "init_scale": float(optimizer.get("init_scale", 0.10)),
+        "inertia": float(optimizer.get("inertia", 0.65)),
+        "cognitive": float(optimizer.get("cognitive", 1.35)),
+        "social": float(optimizer.get("social", 1.35)),
+        "position_clip_abs": float(optimizer.get("position_clip_abs", 1.0)),
+    }
+
+
 def train_hybrid_pso_model(
     tensor_bundle: TrainingTensorBundle,
     config: dict[str, Any],
@@ -100,11 +111,12 @@ def train_hybrid_pso_model(
     else:
         upper_dim = int(layout.upper.total_dimension)
         lower_dim = int(layout.lower.total_dimension)
+    optimizer = _resolve_optimizer(hybrid_cfg)
 
     generator = torch.Generator(device=device if device != "cpu" else "cpu")
     generator.manual_seed(seed)
-    upper = 0.1 * _randn(generator, (upper_particles, upper_dim), device)
-    lower = 0.1 * _randn(generator, (lower_particles, lower_dim), device)
+    upper = optimizer["init_scale"] * _randn(generator, (upper_particles, upper_dim), device)
+    lower = optimizer["init_scale"] * _randn(generator, (lower_particles, lower_dim), device)
     upper_velocity = torch.zeros_like(upper)
     lower_velocity = torch.zeros_like(lower)
     upper_best = upper.clone()
@@ -116,9 +128,6 @@ def train_hybrid_pso_model(
     global_lower_best = lower[0].clone()
 
     trace_rows: list[dict[str, Any]] = []
-    inertia = 0.65
-    cognitive = 1.35
-    social = 1.35
 
     for iteration in range(1, iterations + 1):
         scored = batch_score_particles(tensor_bundle, upper, lower, device=device, config=config, compiled_layout=compiled_layout)
@@ -166,17 +175,17 @@ def train_hybrid_pso_model(
         rand_lower_1 = torch.rand_like(lower)
         rand_lower_2 = torch.rand_like(lower)
         upper_velocity = (
-            inertia * upper_velocity
-            + cognitive * rand_upper_1 * (upper_best - upper)
-            + social * rand_upper_2 * (global_upper_best.unsqueeze(0) - upper)
+            optimizer["inertia"] * upper_velocity
+            + optimizer["cognitive"] * rand_upper_1 * (upper_best - upper)
+            + optimizer["social"] * rand_upper_2 * (global_upper_best.unsqueeze(0) - upper)
         )
         lower_velocity = (
-            inertia * lower_velocity
-            + cognitive * rand_lower_1 * (lower_best - lower)
-            + social * rand_lower_2 * (global_lower_best.unsqueeze(0) - lower)
+            optimizer["inertia"] * lower_velocity
+            + optimizer["cognitive"] * rand_lower_1 * (lower_best - lower)
+            + optimizer["social"] * rand_lower_2 * (global_lower_best.unsqueeze(0) - lower)
         )
-        upper = torch.clamp(upper + upper_velocity, -1.0, 1.0)
-        lower = torch.clamp(lower + lower_velocity, -1.0, 1.0)
+        upper = torch.clamp(upper + upper_velocity, -optimizer["position_clip_abs"], optimizer["position_clip_abs"])
+        lower = torch.clamp(lower + lower_velocity, -optimizer["position_clip_abs"], optimizer["position_clip_abs"])
 
     model = HybridPSOModel(
         upper_best=VectorList(global_upper_best.detach().cpu().tolist()),
@@ -200,6 +209,11 @@ def train_hybrid_pso_model(
             "lower_dim": lower_dim,
             "upper_dim_real": upper_dim,
             "lower_dim_real": lower_dim,
+            "init_scale": optimizer["init_scale"],
+            "inertia": optimizer["inertia"],
+            "cognitive": optimizer["cognitive"],
+            "social": optimizer["social"],
+            "position_clip_abs": optimizer["position_clip_abs"],
         },
         training_trace=pd.DataFrame(trace_rows),
     )

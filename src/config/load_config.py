@@ -23,6 +23,7 @@ REQUIRED_SECTIONS = [
     "rolling_retrain",
     "feature_selection",
     "reward",
+    "score_kernel",
     "training",
     "policy_regime",
     "reporting",
@@ -73,6 +74,55 @@ def _normalize_project_paths(
             outputs[key] = _resolve_project_path(project_root, value)
 
 
+def _normalize_hybrid_pso(hybrid_pso: dict[str, Any]) -> None:
+    optimizer = dict(hybrid_pso.get("optimizer", {}))
+    hybrid_pso["optimizer"] = {
+        "init_scale": float(optimizer.get("init_scale", 0.10)),
+        "inertia": float(optimizer.get("inertia", 0.65)),
+        "cognitive": float(optimizer.get("cognitive", 1.35)),
+        "social": float(optimizer.get("social", 1.35)),
+        "position_clip_abs": float(optimizer.get("position_clip_abs", 1.0)),
+    }
+
+
+def _normalize_score_kernel(score_kernel: dict[str, Any]) -> None:
+    hourly_signal = dict(score_kernel.get("hourly_signal", {}))
+    session_weights = dict(score_kernel.get("session_weights", {}))
+    hourly_limit = dict(score_kernel.get("hourly_limit", {}))
+    score_kernel.update(
+        {
+            "contract_adjustment_scale_ratio": float(score_kernel.get("contract_adjustment_scale_ratio", 0.30)),
+            "contract_adjustment_feature_scale": float(score_kernel.get("contract_adjustment_feature_scale", 0.15)),
+            "contract_adjustment_policy_scale": float(score_kernel.get("contract_adjustment_policy_scale", 0.05)),
+            "exposure_band_base_ratio": float(score_kernel.get("exposure_band_base_ratio", 0.20)),
+            "exposure_band_feature_scale": float(score_kernel.get("exposure_band_feature_scale", 0.10)),
+            "contract_position_base_ratio": float(score_kernel.get("contract_position_base_ratio", 0.60)),
+            "baseline_position_ratio": float(score_kernel.get("baseline_position_ratio", 0.55)),
+            "baseline_projection_penalty_scale": float(score_kernel.get("baseline_projection_penalty_scale", 0.05)),
+            "lt_settlement_weight": float(score_kernel.get("lt_settlement_weight", 0.60)),
+            "da_settlement_weight": float(score_kernel.get("da_settlement_weight", 0.40)),
+            "hourly_signal": {
+                "spread_weight": float(hourly_signal.get("spread_weight", 0.02)),
+                "load_dev_weight": float(hourly_signal.get("load_dev_weight", 0.01)),
+                "renewable_weight": float(hourly_signal.get("renewable_weight", 0.01)),
+                "spread_abs_weight": float(hourly_signal.get("spread_abs_weight", 0.005)),
+                "renewable_abs_weight": float(hourly_signal.get("renewable_abs_weight", 0.004)),
+            },
+            "session_weights": {
+                "business_hour": float(session_weights.get("business_hour", 0.50)),
+                "peak_hour": float(session_weights.get("peak_hour", 0.30)),
+                "valley_hour": float(session_weights.get("valley_hour", -0.20)),
+                "renewable_valley_mix": float(session_weights.get("renewable_valley_mix", 0.50)),
+                "renewable_business_mix": float(session_weights.get("renewable_business_mix", 0.50)),
+            },
+            "hourly_limit": {
+                "base_multiplier": float(hourly_limit.get("base_multiplier", 0.50)),
+                "shrink_multiplier": float(hourly_limit.get("shrink_multiplier", 0.50)),
+            },
+        }
+    )
+
+
 def load_runtime_config(project_root: str | Path, filename: str = "experiment_config.yaml") -> dict[str, Any]:
     project_root = Path(project_root).resolve()
     config_path = project_root / filename
@@ -91,6 +141,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     rolling_retrain = dict(_require_section(root_config, "rolling_retrain"))
     feature_selection = dict(_require_section(root_config, "feature_selection"))
     reward = dict(_require_section(root_config, "reward"))
+    score_kernel = dict(_require_section(root_config, "score_kernel"))
     training = dict(_require_section(root_config, "training"))
     policy_regime = dict(_require_section(root_config, "policy_regime"))
     reporting = dict(_require_section(root_config, "reporting"))
@@ -110,6 +161,8 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
     if algorithm in SUPPORTED_HYBRID_PSO_ALGORITHMS:
         _require_keys("training", training, ["algorithm", "seed", "device", "allow_cpu"])
         _require_keys("hybrid_pso", hybrid_pso, ["seed", "upper", "lower"])
+        _normalize_hybrid_pso(hybrid_pso)
+        _normalize_score_kernel(score_kernel)
     else:
         supported = " / ".join(sorted(SUPPORTED_HYBRID_PSO_ALGORITHMS))
         raise ValueError(f"不支持的 training.algorithm: {algorithm}。当前仅支持 {supported}。")
@@ -137,6 +190,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "rolling_retrain": rolling_retrain,
         "feature_selection": feature_selection,
         "reward": reward,
+        "score_kernel": score_kernel,
         "training": training,
         "policy_regime": policy_regime,
         "reporting": reporting,

@@ -1,5 +1,14 @@
 # 更新日志
 
+## v0.44
+
+- 正式版本号升级为 `v0.44`，根配置、README 当前版本说明、版本报告断言与发布测试同步切换到 `v0.44`。
+- `outputs/v0.4`、`v0.41`、`v0.42`、`v0.43` 现统一归档至 `已归档/outputs/`，避免旧正式产物继续与当前版本混放。
+- `experiment_config.yaml` 现新增 `hybrid_pso.optimizer` 与 `score_kernel` 正式参数节，训练器与 `score_kernel` 不再继续依赖 `v0.43` 时期的关键硬编码系数。
+- `src/config/load_config.py` 现正式归一化 HPSO 优化器参数与 `score_kernel` 参数，使运行时配置、主配置与模型实现保持一致。
+- 新增 `pytest.ini` 与 `src/scripts/run_pytest.py`，`pytest` 缓存、临时目录和结果现统一写入 `.cache/tests/pytest/`，并在成功后执行自动清理。
+- `README.md` 与 `AGENTS.md` 同步写入测试目录规范，后续测试缓存和结果不得再散落到项目根目录。
+
 ## v0.43
 
 - 正式版本号升级为 `v0.43`，根配置 `project.version`、README 当前版本说明和当前版本相关回归测试同步切换到 `v0.43`。

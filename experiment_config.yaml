@@ -1,5 +1,5 @@
 project:
-  version: v0.43
+  version: v0.44
   project_root: .
 
 data:
@@ -72,6 +72,33 @@ reward:
   lambda_trade: 0.10
   lambda_violate: 1.00
   robust_eps: 1.0e-6
+
+score_kernel:
+  contract_adjustment_scale_ratio: 0.30
+  contract_adjustment_feature_scale: 0.15
+  contract_adjustment_policy_scale: 0.05
+  exposure_band_base_ratio: 0.20
+  exposure_band_feature_scale: 0.10
+  contract_position_base_ratio: 0.60
+  baseline_position_ratio: 0.55
+  baseline_projection_penalty_scale: 0.05
+  lt_settlement_weight: 0.60
+  da_settlement_weight: 0.40
+  hourly_signal:
+    spread_weight: 0.02
+    load_dev_weight: 0.01
+    renewable_weight: 0.01
+    spread_abs_weight: 0.005
+    renewable_abs_weight: 0.004
+  session_weights:
+    business_hour: 0.50
+    peak_hour: 0.30
+    valley_hour: -0.20
+    renewable_valley_mix: 0.50
+    renewable_business_mix: 0.50
+  hourly_limit:
+    base_multiplier: 0.50
+    shrink_multiplier: 0.50
 
 training:
   algorithm: HYBRID_PSO_V040
@@ -328,6 +355,12 @@ search:
 
 hybrid_pso:
   seed: 42
+  optimizer:
+    init_scale: 0.10
+    inertia: 0.65
+    cognitive: 1.35
+    social: 1.35
+    position_clip_abs: 1.0
   upper:
     particles: 160
     iterations: 240

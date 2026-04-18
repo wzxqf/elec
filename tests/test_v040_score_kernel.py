@@ -158,3 +158,36 @@ def test_batch_score_particles_projects_actions_into_feasible_domain() -> None:
     assert result.feasible_domain_clip_gap[0, 0, 0] > 0.0
     assert result.weekly_policy_violation_penalty[0, 0, 0] > 0.0
 
+
+def test_batch_score_particles_consumes_score_kernel_coefficients_from_config() -> None:
+    bundle = _bundle()
+    config = _config()
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.50,
+        "exposure_band_base_ratio": 0.10,
+        "lt_settlement_weight": 0.70,
+        "da_settlement_weight": 0.30,
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.zeros((1, layout.lower.total_dimension), dtype=torch.float32)
+
+    result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert result.contract_position_mwh[0, 0, 0] == 500.0
+    assert result.exposure_band_mwh_raw[0, 0, 0] == 100.0
+    assert result.exposure_band_mwh[0, 0, 0] == 100.0
+
