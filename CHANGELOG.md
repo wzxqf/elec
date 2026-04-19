@@ -8,6 +8,7 @@
 - `src/config/load_config.py` 现正式归一化 HPSO 优化器参数与 `score_kernel` 参数，使运行时配置、主配置与模型实现保持一致。
 - 新增 `pytest.ini` 与 `src/scripts/run_pytest.py`，`pytest` 缓存、临时目录和结果现统一写入 `.cache/tests/pytest/`，并在成功后执行自动清理。
 - `README.md` 与 `AGENTS.md` 同步写入测试目录规范，后续测试缓存和结果不得再散落到项目根目录。
+- 新增根目录版本说明 `v0.44.md`，用于固定本版发布定位、改动边界、验证结果与发布状态。
 
 ## v0.43
 
