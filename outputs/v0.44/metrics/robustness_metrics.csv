@@ -1,0 +1,9 @@
+scenario_group,scenario_name,scenario_value,total_profit,mean_cvar99,robustness_rank
+policy_cutoff,policy_cutoff_2026-02-01,2026-02-01,1810774400.0,2942152.1785714286,3.0
+contract_ratio_shift,contract_ratio_shift_+0.00,0.0,1719835452.0,3139273.825,5.0
+forecast_error_scale,forecast_error_scale_0.80,0.8,1441267183.1999998,2511419.0599999996,5.0
+forecast_error_scale,forecast_error_scale_1.00,1.0,1719835452.0,3139273.825,5.0
+policy_cutoff,policy_cutoff_2026-01-01,2026-01-01,1719835452.0,3139273.825,5.0
+contract_ratio_shift,contract_ratio_shift_+0.10,0.1,1650193384.8000002,3296237.51625,7.0
+contract_ratio_shift,contract_ratio_shift_-0.10,-0.1,1650193384.8000002,3296237.51625,7.0
+forecast_error_scale,forecast_error_scale_1.20,1.2,1441267183.1999998,3767128.59,9.0
