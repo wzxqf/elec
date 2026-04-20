@@ -1,5 +1,5 @@
 project:
-  version: v0.44
+  version: v0.45
   project_root: .
 
 data:
@@ -374,3 +374,4 @@ policy_deep:
   llm_candidate_parser:
     enabled: false
     cache_only: true
+

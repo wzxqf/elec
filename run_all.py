@@ -3,7 +3,6 @@ from __future__ import annotations
 import argparse
 import os
 from pathlib import Path
-import re
 import subprocess
 import sys
 import time
@@ -11,6 +10,7 @@ from typing import Any
 import warnings
 
 from src.utils.runtime_status import DEFAULT_RUNTIME_STATUS, read_runtime_status
+from src.utils.versioning import parse_project_version
 
 
 try:
@@ -27,11 +27,17 @@ except ImportError:  # pragma: no cover - optional dependency
 
 ENV_NAME = "torch311"
 PANEL_REFRESH_SECONDS = 1.0
+DEFAULT_CONFIG_FILENAME = "experiment_config.yaml"
+CONFIG_ENV_VAR = "ELEC_CONFIG_PATH"
 
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run the full elec pipeline.")
     parser.add_argument("--dry-run", action="store_true", help="Print resolved command and exit.")
+    parser.add_argument(
+        "--config",
+        help="Optional experiment config path. Defaults to experiment_config.yaml at project root.",
+    )
     return parser.parse_args()
 
 
@@ -39,20 +45,11 @@ def resolve_project_root() -> Path:
     return Path(__file__).resolve().parent
 
 
-def parse_project_version(config_path: Path) -> str:
-    in_project = False
-    for line in config_path.read_text(encoding="utf-8").splitlines():
-        if re.match(r"^\s*#", line):
-            continue
-        if re.match(r"^project\s*:\s*$", line):
-            in_project = True
-            continue
-        if in_project and re.match(r"^\S", line):
-            break
-        match = re.match(r"^\s+version\s*:\s*(.+?)\s*(?:#.*)?$", line)
-        if in_project and match:
-            return match.group(1).strip().strip('"').strip("'")
-    raise RuntimeError(f"Unable to parse project.version from {config_path}")
+def resolve_config_path(project_root: Path, configured_path: str | None) -> Path:
+    candidate = Path(configured_path or DEFAULT_CONFIG_FILENAME).expanduser()
+    if not candidate.is_absolute():
+        candidate = project_root / candidate
+    return candidate.resolve()
 
 
 def add_candidate(candidates: list[Path], value: str | None) -> None:
@@ -247,7 +244,7 @@ class ResourceMonitor:
 def main() -> int:
     args = parse_args()
     project_root = resolve_project_root()
-    config_path = project_root / "experiment_config.yaml"
+    config_path = resolve_config_path(project_root, args.config)
     if not config_path.is_file():
         raise RuntimeError(f"Configuration file not found: {config_path}")
 
@@ -263,6 +260,7 @@ def main() -> int:
     run_cmd = [str(python_exe), "-m", "src.scripts.run_pipeline"]
 
     print(f"Project root: {project_root}")
+    print(f"Config path: {config_path}")
     print(f"Experiment version: {version}")
     print(f"Output dir: {output_dir}")
     print(f"Runtime status: {runtime_status_path}")
@@ -274,6 +272,7 @@ def main() -> int:
     env = os.environ.copy()
     env["MPLCONFIGDIR"] = str(mpl_config_dir)
     env["ELEC_RUNTIME_STATUS_PATH"] = str(runtime_status_path)
+    env[CONFIG_ENV_VAR] = str(config_path)
     with stdout_log_path.open("w", encoding="utf-8") as stdout_handle, stderr_log_path.open("w", encoding="utf-8") as stderr_handle:
         process = subprocess.Popen(run_cmd, cwd=project_root, env=env, stdout=stdout_handle, stderr=stderr_handle)
         monitor = ResourceMonitor(process.pid)

@@ -1,6 +1,6 @@
 # elec
 
-面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前正式版本已按 `v0.44` 收口并增强为：
+面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前正式版本已按 `v0.45` 收口并增强为：
 
 - 上层周度 HPSO 搜索不设硬限的中长期合约调整量，并保留边际敞口带宽诊断字段
 - 下层小时级 HPSO 搜索不设硬限的现货合约修正量 `delta_q`
@@ -13,11 +13,11 @@
 
 ## 配置入口
 
-项目根目录的 `experiment_config.yaml` 是当前唯一人工修改入口。训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程都从该文件读取参数；`configs/*.yaml` 仅保留为历史模板或参考，不再作为正式实验主入口。
+项目根目录的 `experiment_config.yaml` 仍是正式主线的默认入口。训练、验证、回测、敏感性分析、鲁棒性分析和搜索流程默认都从该文件读取参数；如需做不覆盖正式主线的参数试验，可显式传入 `--config configs/experiments/<name>.yaml` 运行独立测试配置。
 
-## `v0.44` 发布边界
+## `v0.45` 发布边界
 
-本版本在 `v0.4` 结构闭环基础上完成 `v0.44` 论文主版本收口，不改变正式策略边界：
+本版本在 `v0.4` 结构闭环基础上完成 `v0.45` 论文主版本收口，不改变正式策略边界：
 
 - 正式主算法名升级为 `HYBRID_PSO_V040`
 - `project.version`、运行日志、manifest 和模型元数据统一改为配置驱动
@@ -60,6 +60,7 @@ python -m src.scripts.diagnostics
 其中：
 
 - `python run_all.py` 为统一的一键全流程入口，会自动解析 `project.version`、选择 `torch311` 环境中的 Python，并执行训练、验证、回测与报告导出。
+- 如需运行独立测试配置，可使用 `python run_all.py --config configs/experiments/v0.45_param_opt_balanced.yaml`；这不会修改根配置，会按测试配置里的 `project.version` 单独写入 `outputs/<version>/`。
 - `bash run_all.sh` 现在只是对 `run_all.py` 的薄封装，方便类 Unix 环境调用。
 - 如需仅检查命令与输出目录而不真正执行，可运行 `python run_all.py --dry-run`。
 - Windows 不再维护 `run_all.ps1` 或 `run_all.bat`，避免多入口漂移和 `cmd.exe`/PowerShell 钩子带来的额外故障面。
@@ -76,7 +77,7 @@ python -m src.scripts.diagnostics
 
 说明：
 
-- `<version>` 由 `experiment_config.yaml` 中的 `project.version` 自动决定，例如当前版本输出到 `outputs/v0.44/`。
+- `<version>` 由当前运行配置中的 `project.version` 自动决定；默认正式入口输出到 `outputs/v0.45/`，实验配置会写入各自独立版本目录。
 - 图表不再直接输出图片，统一导出为与原图表同名的 CSV 文件。
 - 日志、摘要、回测报告和详细运行报告均为中文输出。
 - 中长期价格估算与 15 分钟代理结算口径会在日志和报告中明确标注。
@@ -88,10 +89,13 @@ python -m src.scripts.diagnostics
 
 - `pytest` 缓存、临时目录和测试结果不得落在项目根目录。
 - 统一测试工作目录为 `.cache/tests/pytest/`。
+- 凡是当前版本仍有效、并保留在 `tests/` 主目录参与默认 `pytest` 收集的测试脚本，一律命名为 `test_<currentversion>_<purpose>.py`。
+- 文件名中的 `<currentversion>` 由 `project.version` 统一派生，规则为“去掉非字母数字字符后的版本标识”；例如 `v0.45 -> v045`。
+- `tests/` 主目录只保留当前版本有效测试脚本，不放置 `.md`、`.txt`、`.rst` 等说明文档；归档说明统一放入 `已归档/tests/`。
 - 推荐统一通过下面的入口运行测试：
 
 ```bash
-python -m src.scripts.run_pytest tests/test_hpso_param_config.py -q
+python -m src.scripts.run_pytest tests/test_<normalized_project_version>_hpso_param_config.py -q
 ```
 
 - 该入口会将：
@@ -99,3 +103,5 @@ python -m src.scripts.run_pytest tests/test_hpso_param_config.py -q
   - basetemp 写到 `.cache/tests/pytest/tmp`
   - junit 结果写到 `.cache/tests/pytest/results/junit.xml`
 - 测试全部通过后会自动删除 `.cache/tests/pytest/`；失败时保留该目录便于排查。
+
+

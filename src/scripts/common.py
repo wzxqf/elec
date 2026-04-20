@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Any
 
@@ -36,8 +37,22 @@ from src.utils.logger import configure_logging
 from src.utils.seeds import set_global_seed
 
 
-def load_project_config(project_root: str | Path) -> dict[str, Any]:
-    return load_runtime_config(project_root)
+DEFAULT_CONFIG_FILENAME = "experiment_config.yaml"
+CONFIG_ENV_VAR = "ELEC_CONFIG_PATH"
+
+
+def resolve_project_config_path(project_root: str | Path, config_path: str | Path | None = None) -> Path:
+    root = Path(project_root).resolve()
+    reference = config_path or os.environ.get(CONFIG_ENV_VAR) or DEFAULT_CONFIG_FILENAME
+    candidate = Path(reference).expanduser()
+    if not candidate.is_absolute():
+        candidate = root / candidate
+    return candidate.resolve()
+
+
+def load_project_config(project_root: str | Path, config_path: str | Path | None = None) -> dict[str, Any]:
+    resolved_config_path = resolve_project_config_path(project_root, config_path=config_path)
+    return load_runtime_config(project_root, filename=str(resolved_config_path))
 
 
 def _build_feature_manifest(
@@ -130,8 +145,12 @@ def subset_bundle_for_weeks(bundle: dict[str, Any], weeks: list[pd.Timestamp]) -
     return subset
 
 
-def prepare_project_context(project_root: str | Path, logger_name: str = "pipeline") -> dict[str, Any]:
-    config = load_project_config(project_root)
+def prepare_project_context(
+    project_root: str | Path,
+    logger_name: str = "pipeline",
+    config_path: str | Path | None = None,
+) -> dict[str, Any]:
+    config = load_project_config(project_root, config_path=config_path)
     output_paths = resolve_output_paths(config)
     logger = configure_logging(output_paths["logs"], name=logger_name)
     set_global_seed(int(config["seed"]))

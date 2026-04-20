@@ -1,5 +1,14 @@
 # 更新日志
 
+## v0.45
+
+- 根配置 `experiment_config.yaml` 已切换到 `project.version: v0.45`，README 当前版本说明、默认正式输出目录示例和当前版本测试文件名前缀同步升档到 `v0.45 / v045`。
+- 新增 `src/utils/versioning.py`，统一收敛 `project.version` 解析、测试文件名前缀派生和 `vxx报告.md` 文件名生成；`run_all.py`、主测试集命名约束、`run_pytest` 入口测试与版本报告测试不再写死 `v044`。
+- 当前主测试集已整体从 `tests/test_v044_*.py` 升到 `tests/test_v045_*.py`，仓库内活动引用同步更新；`tests/` 主目录继续只保留当前版本有效脚本，不混入说明文档。
+- 参数试验配置已升档为 `configs/experiments/v0.45_param_opt_balanced.yaml` 与 `configs/experiments/v0.45_param_opt_explore.yaml`，其 `project.version` 分别改为 `v0.45-param-opt-balanced` 与 `v0.45-param-opt-explore`。
+- 新增 `tests/test_v045_versioning.py`，回归校验“从根配置读取当前版本”“由 `project.version` 派生当前测试文件名”“由版本号派生正式版本报告文件名”。
+- 新增根目录版本说明 `v0.45.md`，用于记录本轮版本升档、测试命名收口和后续推送前的验证口径。
+
 ## v0.44
 
 - 正式版本号升级为 `v0.44`，根配置、README 当前版本说明、版本报告断言与发布测试同步切换到 `v0.44`。
@@ -18,8 +27,8 @@
 - `src/config/load_config.py` 新增项目路径归一化逻辑：配置文件允许写相对路径，运行时统一按项目根解析为绝对路径，不改变后续数据层、训练层和回测层的消费接口。
 - `src/utils/io.py` 与 `src/data/loader.py` 现正式支持以项目根为基准解析输出目录和 `total.csv` 候选路径，使入口脚本、上下文构建和数据定位不再依赖硬编码绝对路径。
 - `src/policy/policy_parser.py`、`src/policy_deep/document_reader.py`、`src/policy_deep/regime_builder.py` 与 `src/utils/experiment_manifest.py` 现统一把 `source_file`、`config_path`、`output_root` 等对外产物字段收敛为项目相对路径，避免新的 CSV / JSON / Markdown 结果继续泄露本地绝对目录。
-- 新增 `tests/test_relative_project_paths.py`，回归校验“相对路径配置可被正确解析”“`prepare_project_context()` 导出的清单、规则表、状态轨迹和 manifest 不再写出项目根绝对路径”。
-- 同步更新 `tests/test_run_all_progress.py` 与 `tests/test_v041_reporting_contracts.py` 的当前版本断言，保证统一入口、版本报告命名和 manifest 索引在 `v0.43` 下保持一致。
+- 新增 `tests/test_v045_relative_project_paths.py`，回归校验“相对路径配置可被正确解析”“`prepare_project_context()` 导出的清单、规则表、状态轨迹和 manifest 不再写出项目根绝对路径”。
+- 同步更新 `tests/test_v045_run_all_progress.py` 与 `tests/test_v045_reporting_contracts.py` 的当前版本断言，保证统一入口、版本报告命名和 manifest 索引在 `v0.43` 下保持一致。
 
 ## v0.4
 
@@ -71,7 +80,7 @@
 - 新增市场规则约束归集模块 `src/policy/market_constraints.py`，将中长期结算口径、24 时段合约曲线、96 点现货结算、零售侧单一售电公司、辅助服务边界、新能源机制电价、2026 年中长期价格联动和计量可追踪性归结为可查阅约束。
 - 新增 `market_rule_constraints.md` 与 `market_rule_constraints.csv` 输出，运行后写入 `outputs/v0.31/reports/` 和 `outputs/v0.31/metrics/`，用于查阅“市场规则 -> 模型层 -> 字段/函数”的映射关系。
 - 修正周度制度状态判定口径：当前制度状态改为按 `week_start` 生效，避免 2026-02-01 价格机制提前进入 2026-01-26 周的当前状态；前瞻制度状态继续保留切换倒计时。
-- 新增 `tests/test_market_constraints.py`，回归校验 2026-01-01 新能源机制电价执行期、2026-02-01 中长期 40%/60% 价格联动和报告内容。
+- 新增 `tests/test_v045_market_constraints.py`，回归校验 2026-01-01 新能源机制电价执行期、2026-02-01 中长期 40%/60% 价格联动和报告内容。
 - 根配置升级为 `project.version: v0.31`，正式产物写入 `outputs/v0.31/<真实输出>`。
 
 ## v0.3
@@ -101,7 +110,7 @@
 - 新增根目录一键全流程脚本 `run_all.sh`，固定通过 `mamba run -n elec_env python -m src.scripts.run_pipeline` 启动训练、验证、回测与报告导出。
 - 脚本增加最小运行保护：校验 `experiment_config.yaml` 与 `mamba` 是否存在，并在启动前打印项目根目录、实验版本和输出目录。
 - 新增 `--dry-run` 模式，便于只检查本次版本号、结果目录和真实执行命令而不实际启动流水线。
-- 补充 `tests/test_run_all_script.py`，回归校验根目录脚本存在且固定绑定 `elec_env` 主入口。
+- 补充 `tests/test_v045_run_all_script.py`，回归校验根目录脚本存在且固定绑定 `elec_env` 主入口。
 - README 同步补充根目录一键入口说明，明确 `run_all.sh` 为当前推荐的正式启动方式。
 
 ## v0.23
@@ -157,3 +166,4 @@
 - 初始交付版本。
 - 完成真实 `total.csv` 数据清洗、月度 PPO 环境、小时级规则对冲、15 分钟代理结算回测。
 - 输出训练日志、模型、图表、回测指标、敏感性分析、鲁棒性分析与参数搜索结果。
+
