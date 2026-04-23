@@ -1,6 +1,0 @@
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 已加载数据文件: D:\elec\total.csv
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 训练算法: HYBRID_PSO_V040
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 政策来源文件数: 18
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 政策候选规则数: 34
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 政策正式规则数: 34
-2026-04-20 16:29:07 | INFO | elec.test_param_opt_balanced | 滚动重训窗口数: 10

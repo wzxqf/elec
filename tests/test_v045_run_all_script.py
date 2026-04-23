@@ -36,22 +36,9 @@ class RunAllScriptTest(unittest.TestCase):
         )
 
         self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn(f"Config path: {(PROJECT_ROOT / 'experiment_config.yaml').resolve()}", result.stdout)
         self.assertIn(f"Experiment version: {_expected_version()}", result.stdout)
-        self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
-
-    def test_python_dry_run_accepts_explicit_experiment_config(self) -> None:
-        config_path = PROJECT_ROOT / "configs" / "experiments" / "v0.45_param_opt_balanced.yaml"
-        result = subprocess.run(
-            [sys.executable, str(PYTHON_SCRIPT_PATH), "--dry-run", "--config", str(config_path.relative_to(PROJECT_ROOT))],
-            cwd=PROJECT_ROOT,
-            check=False,
-            capture_output=True,
-            text=True,
-        )
-
-        self.assertEqual(result.returncode, 0, msg=result.stderr)
-        self.assertIn(f"Config path: {config_path.resolve()}", result.stdout)
-        self.assertIn("Experiment version: v0.45-param-opt-balanced", result.stdout)
+        self.assertIn(f"Output dir: {(PROJECT_ROOT / 'outputs' / _expected_version()).resolve()}", result.stdout)
         self.assertIn(" -m src.scripts.run_pipeline", result.stdout)
 
     def test_shell_wrapper_delegates_to_python_entrypoint(self) -> None:

@@ -8,9 +8,6 @@ scikit-learn
 matplotlib
 pyyaml
 tqdm
-tensorboard
-gymnasium
-stable-baselines3
 torch==2.9.0
 openpyxl
 numba

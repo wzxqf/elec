@@ -7,9 +7,6 @@ from src.utils.io import load_yaml
 
 
 SUPPORTED_HYBRID_PSO_ALGORITHMS = {
-    "HYBRID_PSO_V033",
-    "HYBRID_PSO_V036",
-    "HYBRID_PSO_V038",
     "HYBRID_PSO_V040",
 }
 

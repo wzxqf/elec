@@ -1,11 +1,11 @@
 # agents.md
 
-## v0.33 策略层说明
+## v0.45 策略层说明
 
-当前项目的“agent”不再指 RL 智能体，而是：
+当前项目中的 `agent` 指 `HYBRID_PSO_V040` 的双层粒子角色：
 
-- 上层混合粒子群：搜索周度底仓残差、边际敞口带宽、合约曲线参数
-- 下层混合粒子群：搜索小时级现货修正响应参数
+- 上层粒子：搜索周度合约调整量、合约曲线参数和边际敞口带宽
+- 下层粒子：搜索小时级现货修正响应参数
 
 二者共同依赖：
 
@@ -13,13 +13,26 @@
 - `src/training/score_kernel.py`
 - `src/agents/hybrid_pso.py`
 
-## 动作语义
+## 参数语义
 
-- 上层输出：周度锁定比例倾向和边际敞口带宽
-- 下层输出：小时级修正响应强度
+上层主输出：
 
-## 不再使用的旧组件
+- `contract_adjustment_mwh_raw`
+- `contract_adjustment_mwh_exec`
+- `contract_position_mwh`
+- `exposure_band_mwh`
+- `contract_curve_h1` 至 `contract_curve_h24`
 
-- 旧强化学习训练栈
-- 旧环境封装层
-- 旧单次训练后整段静态推断链
+下层主输出：
+
+- `spot_hedge_mwh`
+- `spot_hedge_limit_mwh`
+- `spread_response`
+- `load_deviation_response`
+- `renewable_disturbance_response`
+
+## 协同方式
+
+- 上层先确定周度头寸与可承受边际敞口
+- 下层在该边界内执行小时级现货修正
+- 周度、小时级和 15 分钟结算结果统一由物化与报告链输出

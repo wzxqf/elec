@@ -123,28 +123,36 @@ parameter_compiler:
           - forward_mechanism_execution_days
           - forward_ancillary_coupling_days
           - forward_info_forecast_boundary_days
+      # 正式参数：v0.45 balanced
+      # explore 备选（未升格正式入口）：size = 24
       contract_curve_latent:
-        size: 12
+        size: 20
+      # 正式参数：v0.45 balanced
+      # explore 备选（未升格正式入口）：size = 10
       action_head:
-        size: 6
+        size: 8
   lower:
     hourly_feature_groups:
       spread_response:
         columns:
           - price_spread
-        response_size: 8
+        # explore 备选（未升格正式入口）：response_size = 16
+        response_size: 12
       load_deviation_response:
         columns:
           - load_dev
-        response_size: 8
+        # explore 备选（未升格正式入口）：response_size = 16
+        response_size: 12
       renewable_response:
         columns:
           - renewable_dev
-        response_size: 8
+        # explore 备选（未升格正式入口）：response_size = 16
+        response_size: 12
       policy_shrink_response:
         columns:
           - ancillary_freq_reserve_tight
-        response_size: 8
+        # explore 备选（未升格正式入口）：response_size = 16
+        response_size: 12
 
 policy_projection:
   mode: policy_only
@@ -356,19 +364,27 @@ search:
 hybrid_pso:
   seed: 42
   optimizer:
-    init_scale: 0.10
-    inertia: 0.65
-    cognitive: 1.35
-    social: 1.35
-    position_clip_abs: 1.0
+    # 正式参数：v0.45 balanced
+    # explore 备选（未升格正式入口）：init_scale = 0.14
+    init_scale: 0.12
+    # explore 备选（未升格正式入口）：inertia = 0.72
+    inertia: 0.68
+    # explore 备选（未升格正式入口）：cognitive = 1.20
+    cognitive: 1.30
+    # explore 备选（未升格正式入口）：social = 1.60
+    social: 1.45
+    # explore 备选（未升格正式入口）：position_clip_abs = 1.35
+    position_clip_abs: 1.25
   upper:
-    particles: 160
-    iterations: 240
-    dimension: 140
+    # explore 备选（未升格正式入口）：particles = 224, iterations = 360, dimension = 192
+    particles: 192
+    iterations: 320
+    dimension: 186
   lower:
-    particles: 128
-    iterations: 240
-    dimension: 32
+    # explore 备选（未升格正式入口）：particles = 192, iterations = 360, dimension = 64
+    particles: 160
+    iterations: 320
+    dimension: 48
 
 policy_deep:
   llm_candidate_parser:

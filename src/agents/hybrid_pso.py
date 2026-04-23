@@ -70,13 +70,13 @@ def _infer_release_version(config: dict[str, Any]) -> str:
     if project_version:
         return str(project_version)
 
-    algorithm = str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V036")).upper()
+    algorithm = str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V040")).upper()
     match = re.search(r"_V(\d+)$", algorithm)
     if match:
         normalized = match.group(1).lstrip("0") or "0"
         normalized = normalized.rstrip("0") or "0"
         return f"v0.{normalized}"
-    return "v0.36"
+    return "v0.45"
 
 
 def _resolve_optimizer(hybrid_cfg: dict[str, Any]) -> dict[str, float]:
@@ -193,7 +193,7 @@ def train_hybrid_pso_model(
         best_score=global_best_score,
         metadata={
             "version": _infer_release_version(config),
-            "algorithm": str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V036")),
+            "algorithm": str(config.get("training", {}).get("algorithm", "HYBRID_PSO_V040")),
             "score_kernel_device": device,
         },
     )
