@@ -326,3 +326,34 @@ def test_reward_uses_best_profit_from_baseline_position_family() -> None:
 
     assert result.weekly_profit_baseline[0, 0, 0] >= result.weekly_retail_revenue[0, 0, 0] - result.weekly_procurement_cost[0, 0, 0]
 
+
+def test_baseline_position_family_broadcasts_across_particle_pairs() -> None:
+    bundle = _bundle()
+    config = _config()
+    config["reward"]["baseline_position_ratios"] = [0.50, 0.55, 0.60]
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.10,
+        "baseline_projection_penalty_scale": 0.00,
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((2, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.zeros((3, layout.lower.total_dimension), dtype=torch.float32)
+
+    result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert result.weekly_profit_baseline.shape == (2, 3, 1)
+

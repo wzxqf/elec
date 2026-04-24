@@ -368,7 +368,7 @@ def batch_score_particles(
         _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price.view(1, 1, 1, week_count, 1)
         + _score_cfg(config, "da_settlement_weight", 0.40) * da_price.view(1, 1, 1, week_count, interval_count)
     )
-    baseline_actual_interval = actual_interval.view(1, upper_count, lower_count, week_count, interval_count)
+    baseline_actual_interval = actual_interval.unsqueeze(0)
     baseline_interval_cost = baseline_interval_cost + torch.abs(baseline_actual_interval - baseline_interval) * id_price.view(1, 1, 1, week_count, interval_count)
     baseline_procurement_candidates = baseline_interval_cost.sum(dim=-1)
     baseline_procurement_cost = baseline_procurement_candidates.min(dim=0).values
