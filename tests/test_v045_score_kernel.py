@@ -289,3 +289,40 @@ def test_hourly_no_trade_gate_suppresses_small_signals() -> None:
 
     assert torch.count_nonzero(result.spot_hedge_mwh.abs() > 1.0e-6).item() == 0
 
+
+def test_reward_uses_best_profit_from_baseline_position_family() -> None:
+    bundle = _bundle()
+    config = _config()
+    config["reward"]["baseline_position_ratios"] = [0.50, 0.55, 0.60]
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.00,
+        "baseline_projection_penalty_scale": 0.00,
+        "lt_settlement_weight": 0.60,
+        "da_settlement_weight": 0.40,
+        "hourly_limit": {
+            "base_multiplier": 0.00,
+            "shrink_multiplier": 0.00,
+        },
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.zeros((1, layout.lower.total_dimension), dtype=torch.float32)
+
+    result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert result.weekly_profit_baseline[0, 0, 0] >= result.weekly_retail_revenue[0, 0, 0] - result.weekly_procurement_cost[0, 0, 0]
+

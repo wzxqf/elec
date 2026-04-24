@@ -66,6 +66,10 @@ rolling_retrain:
 
 reward:
   baseline_strategy: dynamic_lock_only
+  baseline_position_ratios:
+    - 0.50
+    - 0.55
+    - 0.60
   cvar_alpha: 0.99
   lambda_tail: 0.65
   lambda_hedge: 0.18
@@ -74,6 +78,7 @@ reward:
   robust_eps: 1.0e-6
 
 score_kernel:
+  # spot_hedge_mwh 是带符号小时级净修正量；摩擦成本按绝对成交量计量。
   contract_adjustment_scale_ratio: 0.30
   contract_adjustment_feature_scale: 0.15
   contract_adjustment_policy_scale: 0.05

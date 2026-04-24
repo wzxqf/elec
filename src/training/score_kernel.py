@@ -347,17 +347,31 @@ def batch_score_particles(
     policy_projection_active = torch.maximum(policy_projection_active.expand(upper_count, lower_count, week_count), feasible_domain_triggered.expand(upper_count, lower_count, week_count))
     policy_violation_penalty = feasible_domain_clip_gap * _cfg(config, ["policy_projection", "violation_penalty_scale"], 1.0)
 
-    baseline_position = _score_cfg(config, "baseline_position_ratio", 0.55) * forecast_load.view(1, 1, week_count) * (
-        1.0 - _score_cfg(config, "baseline_projection_penalty_scale", 0.05) * policy_projection_active
-    )
-    baseline_interval = (baseline_position.unsqueeze(-1) / valid_intervals.unsqueeze(-1)) * quarter_mask
-    baseline_interval_cost = baseline_interval * (
-        _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price
-        + _score_cfg(config, "da_settlement_weight", 0.40) * da_price
-    )
-    baseline_interval_cost = baseline_interval_cost + torch.abs(actual_interval - baseline_interval) * id_price
-    baseline_procurement_cost = baseline_interval_cost.sum(dim=-1)
     profit = retail_revenue - procurement_cost_weekly - adjustment_cost - friction_cost
+    reward_cfg = config.get("reward", {}) if isinstance(config, dict) else {}
+    baseline_ratios = reward_cfg.get("baseline_position_ratios")
+    if not baseline_ratios:
+        baseline_ratios = [_score_cfg(config, "baseline_position_ratio", 0.55)]
+    baseline_ratio_tensor = torch.as_tensor(
+        [float(value) for value in baseline_ratios],
+        dtype=torch.float32,
+        device=score_device,
+    ).view(-1, 1, 1, 1)
+    baseline_projection_multiplier = 1.0 - _score_cfg(config, "baseline_projection_penalty_scale", 0.05) * policy_projection_active
+    baseline_positions = (
+        baseline_ratio_tensor
+        * forecast_load.view(1, 1, 1, week_count)
+        * baseline_projection_multiplier.unsqueeze(0)
+    )
+    baseline_interval = (baseline_positions.unsqueeze(-1) / valid_intervals.view(1, 1, 1, week_count, 1)) * quarter_mask.view(1, 1, 1, week_count, interval_count)
+    baseline_interval_cost = baseline_interval * (
+        _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price.view(1, 1, 1, week_count, 1)
+        + _score_cfg(config, "da_settlement_weight", 0.40) * da_price.view(1, 1, 1, week_count, interval_count)
+    )
+    baseline_actual_interval = actual_interval.view(1, upper_count, lower_count, week_count, interval_count)
+    baseline_interval_cost = baseline_interval_cost + torch.abs(baseline_actual_interval - baseline_interval) * id_price.view(1, 1, 1, week_count, interval_count)
+    baseline_procurement_candidates = baseline_interval_cost.sum(dim=-1)
+    baseline_procurement_cost = baseline_procurement_candidates.min(dim=0).values
     profit_baseline = retail_revenue - baseline_procurement_cost
     excess_profit = profit - profit_baseline
     hedge_error = imbalance_energy / actual_load.view(1, 1, week_count).clamp_min(1.0)
