@@ -287,7 +287,16 @@ def batch_score_particles(
         torch.ones_like(settlement_effective_flag),
         torch.zeros_like(settlement_effective_flag),
     )
-    raw_spot_hedge_mwh = torch.tanh(raw_hourly_signal) * raw_spot_hedge_limit_mwh * hour_mask
+    gate_cfg = config.get("score_kernel", {}).get("hourly_gate", {}) if isinstance(config, dict) else {}
+    if bool(gate_cfg.get("enabled", False)):
+        signal_deadband = float(gate_cfg.get("signal_deadband", 0.0))
+        gate_temperature = max(float(gate_cfg.get("temperature", 0.05)), 1.0e-6)
+        signal_edge = raw_hourly_signal.abs()
+        soft_gate = torch.sigmoid((signal_edge - signal_deadband) / gate_temperature)
+        hard_gate = torch.where(signal_edge >= signal_deadband, soft_gate, torch.zeros_like(soft_gate))
+    else:
+        hard_gate = torch.ones_like(raw_hourly_signal)
+    raw_spot_hedge_mwh = hard_gate * torch.tanh(raw_hourly_signal) * raw_spot_hedge_limit_mwh * hour_mask
     spot_hedge_mwh, hourly_projection_gap = project_hourly_hedge_tensor(
         raw_spot_hedge_mwh,
         projected_exposure_band_mwh=exposure_band_mwh,

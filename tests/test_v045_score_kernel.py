@@ -244,3 +244,48 @@ def test_signed_spot_hedge_reduces_scheduled_energy_when_negative() -> None:
     assert negative.weekly_hedge_error[0, 0, 0] < positive.weekly_hedge_error[0, 0, 0]
     assert negative.weekly_procurement_cost[0, 0, 0] < positive.weekly_procurement_cost[0, 0, 0]
 
+
+def test_hourly_no_trade_gate_suppresses_small_signals() -> None:
+    bundle = _bundle()
+    config = _config()
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.20,
+        "hourly_signal": {
+            "spread_weight": 0.001,
+            "load_dev_weight": 0.000,
+            "renewable_weight": 0.000,
+            "spread_abs_weight": 0.000,
+            "renewable_abs_weight": 0.000,
+        },
+        "hourly_limit": {
+            "base_multiplier": 1.00,
+            "shrink_multiplier": 0.00,
+        },
+        "hourly_gate": {
+            "enabled": True,
+            "signal_deadband": 0.10,
+            "temperature": 0.02,
+        },
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.ones((1, layout.lower.total_dimension), dtype=torch.float32)
+
+    result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert torch.count_nonzero(result.spot_hedge_mwh.abs() > 1.0e-6).item() == 0
+

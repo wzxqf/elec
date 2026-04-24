@@ -99,6 +99,10 @@ score_kernel:
   hourly_limit:
     base_multiplier: 0.50
     shrink_multiplier: 0.50
+  hourly_gate:
+    enabled: true
+    signal_deadband: 0.12
+    temperature: 0.04
 
 training:
   algorithm: HYBRID_PSO_V040
