@@ -238,7 +238,10 @@ def materialize_particle_pair(
                 }
             )
         valid_intervals = max(int(quarter_mask[week_pos].sum()), 1)
-        scheduled_15m = float((contract_position[week_pos] + abs(spot_hedge[week_pos]).sum()) / valid_intervals)
+        spot_hedge_net = float(spot_hedge[week_pos].sum())
+        spot_hedge_abs = float(abs(spot_hedge[week_pos]).sum())
+        scheduled_energy = max(float(contract_position[week_pos]) + spot_hedge_net, 0.0)
+        scheduled_15m = scheduled_energy / valid_intervals
         actual_15m = float(actual_load[week_pos] / valid_intervals)
         for interval_index in range(len(quarter_mask[week_pos])):
             if not bool(quarter_mask[week_pos, interval_index]):
@@ -254,7 +257,8 @@ def materialize_particle_pair(
                     "actual_need_15m": actual_15m,
                     "procurement_cost_15m": interval_cost,
                     "contract_position_mwh": float(contract_position[week_pos]),
-                    "spot_hedge_energy_15m": float(abs(spot_hedge[week_pos]).sum() / valid_intervals),
+                    "spot_hedge_energy_15m": spot_hedge_net / valid_intervals,
+                    "spot_hedge_abs_energy_15m": spot_hedge_abs / valid_intervals,
                     "strategy": strategy_name,
                 }
             )

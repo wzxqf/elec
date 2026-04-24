@@ -45,9 +45,10 @@ def _evaluate_strategy(
             hedge_hourly = hedge_hourly * hour_mask[week_pos]
         else:
             hedge_hourly = torch.zeros_like(hour_mask[week_pos])
-        spot_total = float(torch.abs(hedge_hourly).sum().item())
+        spot_net = float(hedge_hourly.sum().item())
+        spot_abs = float(torch.abs(hedge_hourly).sum().item())
 
-        scheduled_15m = (contract_position + spot_total) / valid_intervals
+        scheduled_15m = max(contract_position + spot_net, 0.0) / valid_intervals
         actual_15m = float(actual[week_pos].item()) / valid_intervals
         da_price = quarter[week_pos, :, 0]
         id_price = quarter[week_pos, :, 1]
@@ -62,7 +63,7 @@ def _evaluate_strategy(
         cvar = float(tail.mean().item()) if tail.numel() > 0 else float(interval_cost.max().item())
         procurement_cost = float(interval_cost.sum().item())
         retail_revenue = float(actual[week_pos].item()) * retail_tariff
-        friction_cost = spot_total * friction_unit
+        friction_cost = spot_abs * friction_unit
         profit = retail_revenue - procurement_cost - friction_cost
         procurement_costs.append(procurement_cost)
         profits.append(profit)

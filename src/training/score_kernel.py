@@ -301,13 +301,13 @@ def batch_score_particles(
     avg_da_price = torch.nan_to_num(price_tensor[..., 0].mean(dim=1), nan=0.0).view(1, 1, week_count)
     avg_id_price = torch.nan_to_num(price_tensor[..., 1].mean(dim=1), nan=0.0).view(1, 1, week_count)
     valid_intervals = quarter_mask.sum(dim=-1).clamp_min(1.0)
-    spot_energy_total = (spot_hedge_mwh.abs() * hour_mask).sum(dim=-1)
-    scheduled_energy = contract_position_mwh + spot_energy_total
+    spot_energy_net = (spot_hedge_mwh * hour_mask).sum(dim=-1)
+    spot_energy_abs = (spot_hedge_mwh.abs() * hour_mask).sum(dim=-1)
+    scheduled_energy_raw = contract_position_mwh + spot_energy_net
+    scheduled_energy = torch.clamp_min(scheduled_energy_raw, 0.0)
     imbalance_energy = torch.abs(actual_load.view(1, 1, week_count) - scheduled_energy)
 
-    per_interval_contract = contract_position_mwh.unsqueeze(-1) / valid_intervals.unsqueeze(-1)
-    per_interval_spot = spot_energy_total.unsqueeze(-1) / valid_intervals.unsqueeze(-1)
-    scheduled_interval = (per_interval_contract + per_interval_spot) * quarter_mask
+    scheduled_interval = (scheduled_energy.unsqueeze(-1) / valid_intervals.unsqueeze(-1)) * quarter_mask
     actual_interval = (actual_load.view(1, 1, week_count, 1) / valid_intervals.unsqueeze(-1)) * quarter_mask
     da_price = price_tensor[..., 0].view(1, 1, week_count, interval_count)
     id_price = price_tensor[..., 1].view(1, 1, week_count, interval_count)
@@ -327,7 +327,7 @@ def batch_score_particles(
     procurement_cost_weekly = interval_cost.sum(dim=-1)
     retail_revenue = actual_load.view(1, 1, week_count) * _cfg(config, ["economics", "retail_tariff_yuan_per_mwh"], 430.0)
     adjustment_cost = torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec) * _cfg(config, ["economics", "adjustment_cost_yuan_per_mwh"], 0.6)
-    friction_cost = spot_hedge_mwh.abs().sum(dim=-1) * _cfg(config, ["economics", "friction_cost_yuan_per_mwh"], 1.2)
+    friction_cost = spot_energy_abs * _cfg(config, ["economics", "friction_cost_yuan_per_mwh"], 1.2)
     imbalance_cost = imbalance_energy * avg_id_price
     feasible_domain_clip_gap = (
         torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec)
