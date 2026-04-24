@@ -191,3 +191,56 @@ def test_batch_score_particles_consumes_score_kernel_coefficients_from_config() 
     assert result.exposure_band_mwh_raw[0, 0, 0] == 100.0
     assert result.exposure_band_mwh[0, 0, 0] == 100.0
 
+
+def test_signed_spot_hedge_reduces_scheduled_energy_when_negative() -> None:
+    bundle = _bundle()
+    config = _config()
+    bundle["weekly_metadata"]["actual_weekly_net_demand_mwh"] = [500.0]
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.25,
+        "hourly_signal": {
+            "spread_weight": 0.20,
+            "load_dev_weight": 0.00,
+            "renewable_weight": 0.00,
+            "spread_abs_weight": 0.00,
+            "renewable_abs_weight": 0.00,
+        },
+        "hourly_limit": {
+            "base_multiplier": 1.00,
+            "shrink_multiplier": 0.00,
+        },
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower_positive = torch.full((1, layout.lower.total_dimension), 5.0, dtype=torch.float32)
+    lower_negative = torch.full((1, layout.lower.total_dimension), -5.0, dtype=torch.float32)
+
+    positive = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower_positive,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+    negative = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower_negative,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert positive.spot_hedge_mwh[0, 0, 0].sum() > 0.0
+    assert negative.spot_hedge_mwh[0, 0, 0].sum() < 0.0
+    assert negative.weekly_hedge_error[0, 0, 0] < positive.weekly_hedge_error[0, 0, 0]
+    assert negative.weekly_procurement_cost[0, 0, 0] < positive.weekly_procurement_cost[0, 0, 0]
+
