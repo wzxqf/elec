@@ -1,7 +1,7 @@
 > version: v0.45
-> experiment_id: v0.45-666870e5
-> config_hash: 666870e5f5fce151b5e6a8ba43a8f5fce8fdc439c8c23a7155691ed6e82340ef
-> run_timestamp: 2026-04-23T17:39:11+08:00
+> experiment_id: v0.45-e4f66602
+> config_hash: e4f666026cf6639105a65d36808440d9da9966b5def2d278316ff1da496bff38
+> run_timestamp: 2026-04-24T10:29:39+08:00
 > device: cuda
 > data_range: 2025-11-01 00:00:00 -> 2026-03-20 23:45:00
 
@@ -20,7 +20,7 @@
 - 下层真实维度: 48
 - compiled_layout_hash: 6172d87bd691410d9b9e18e8e6aca0635d1bf8bdbcb2bab5b9e301910d769dab
 - 迭代轮数: 320
-- 最优目标值: -284135008.0000
+- 最优目标值: -447674752.0000
 - 模型路径: models/hybrid_pso_model.json
 - 训练轨迹: metrics/hybrid_pso_training_trace.csv
 - 参数布局摘要: reports/parameter_layout_summary.md

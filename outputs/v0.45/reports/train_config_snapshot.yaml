@@ -60,6 +60,10 @@ rolling_retrain:
   step_weeks: 1
 reward:
   baseline_strategy: dynamic_lock_only
+  baseline_position_ratios:
+  - 0.5
+  - 0.55
+  - 0.6
   cvar_alpha: 0.99
   lambda_tail: 0.65
   lambda_hedge: 0.18
@@ -92,6 +96,10 @@ score_kernel:
   hourly_limit:
     base_multiplier: 0.5
     shrink_multiplier: 0.5
+  hourly_gate:
+    enabled: true
+    signal_deadband: 0.12
+    temperature: 0.04
 training:
   algorithm: HYBRID_PSO_V040
   seed: 42

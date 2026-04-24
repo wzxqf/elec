@@ -1,6 +1,6 @@
-2026-04-23 17:39:11 | INFO | elec.pipeline | 已加载数据文件: D:\elec\total.csv
-2026-04-23 17:39:11 | INFO | elec.pipeline | 训练算法: HYBRID_PSO_V040
-2026-04-23 17:39:11 | INFO | elec.pipeline | 政策来源文件数: 18
-2026-04-23 17:39:11 | INFO | elec.pipeline | 政策候选规则数: 34
-2026-04-23 17:39:11 | INFO | elec.pipeline | 政策正式规则数: 34
-2026-04-23 17:39:11 | INFO | elec.pipeline | 滚动重训窗口数: 10
+2026-04-24 10:29:39 | INFO | elec.pipeline | 已加载数据文件: D:\elec\.worktrees\codex-v045-spot-hedge-profit\total.csv
+2026-04-24 10:29:39 | INFO | elec.pipeline | 训练算法: HYBRID_PSO_V040
+2026-04-24 10:29:39 | INFO | elec.pipeline | 政策来源文件数: 18
+2026-04-24 10:29:39 | INFO | elec.pipeline | 政策候选规则数: 34
+2026-04-24 10:29:39 | INFO | elec.pipeline | 政策正式规则数: 34
+2026-04-24 10:29:39 | INFO | elec.pipeline | 滚动重训窗口数: 10

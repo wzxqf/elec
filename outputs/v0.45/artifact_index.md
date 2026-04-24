@@ -1,8 +1,8 @@
 # Artifact Index
 
 - version: v0.45
-- experiment_id: v0.45-666870e5
-- config_hash: 666870e5f5fce151b5e6a8ba43a8f5fce8fdc439c8c23a7155691ed6e82340ef
+- experiment_id: v0.45-e4f66602
+- config_hash: e4f666026cf6639105a65d36808440d9da9966b5def2d278316ff1da496bff38
 
 - ablation_metrics_path: metrics/ablation_metrics.csv
 - ablation_summary_path: reports/ablation_summary.md
