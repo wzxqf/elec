@@ -168,6 +168,8 @@ def test_run_pipeline_emits_current_integrated_version_report(monkeypatch) -> No
     assert version_report.exists()
     report_text = version_report.read_text(encoding="utf-8")
     assert "数学模型与公式" in report_text
+    assert "带符号净修正量" in report_text
+    assert "q_spot_net" in report_text
     assert "模型运行参数设置" in report_text
     assert "模型运行效果" in report_text
     assert "实现效果" in report_text

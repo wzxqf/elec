@@ -2,6 +2,9 @@
 
 ## v0.45
 
+- 修正小时级现货修正的结算语义：`spot_hedge_mwh` 以带符号净修正量进入计划电量，交易摩擦仍按绝对成交量计量。
+- 新增小时级 no-trade gate，在信号未覆盖交易摩擦与预测不确定性前抑制现货修正。
+- 训练奖励的强基准从单一 `dynamic_lock_only` 扩展为 `[0.50, 0.55, 0.60]` 合约比例基准族，避免模型只跑赢弱于当前持出集最优的基准。
 - 活跃说明文档已按当前实现重写，当前正式文档体系仅保留 `README.md`、`v0.45.md`、`docs/ARCHITECTURE.md`、`docs/CONSTRAINTS.md`、`docs/STATE_SCHEMA.md`、`docs/agents.md` 与 `docs/v0.45_architecture_implementation.md`。
 - 新增 `docs/v0.45_architecture_implementation.md`，系统说明真实运行链、模块职责、参数布局、评分机理、回测流程与正式产物。
 - `README.md`、`CHANGELOG.md`、`v0.45.md` 和当前架构文档已统一到 `v0.45 + HYBRID_PSO_V040 + outputs/v0.45/` 口径，不再把过渡期参数试验作为活跃主线表述。
