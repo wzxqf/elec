@@ -39,6 +39,12 @@ from src.utils.seeds import set_global_seed
 
 DEFAULT_CONFIG_FILENAME = "experiment_config.yaml"
 CONFIG_ENV_VAR = "ELEC_CONFIG_PATH"
+REALIZED_WEEKLY_AGENT_EXCLUDE_COLUMNS = {
+    "actual_weekly_net_demand_mwh",
+    "da_id_cross_corr_w",
+    "extreme_price_spike_flag_w",
+    "extreme_event_flag_w",
+}
 
 
 def resolve_project_config_path(project_root: str | Path, config_path: str | Path | None = None) -> Path:
@@ -74,9 +80,15 @@ def _build_feature_manifest(
             continue
         numeric = pd.api.types.is_numeric_dtype(weekly_features[column])
         source = base_rows.get(column, {}).get("source", "政策状态" if column in policy_columns else "周度聚合")
-        selected = bool(numeric and column not in exclude_set and (column in include_set or column not in policy_columns))
+        realized_weekly = column in REALIZED_WEEKLY_AGENT_EXCLUDE_COLUMNS
+        selected = bool(
+            numeric
+            and not realized_weekly
+            and column not in exclude_set
+            and (column in include_set or column not in policy_columns)
+        )
         selected_for_policy_head = bool(numeric and column in policy_head_set)
-        report_only = bool(column in report_only_set or (numeric and not selected and not selected_for_policy_head))
+        report_only = bool(realized_weekly or column in report_only_set or (numeric and not selected and not selected_for_policy_head))
         rows.append(
             {
                 "column": column,

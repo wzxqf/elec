@@ -4,6 +4,9 @@ __pycache__/
 .worktrees/
 .DS_Store
 .idea/
+.env
+.env.*
+!.env.example
 docs/gamma_algorithm_implementation_ppt.md
 docs/gamma_codex_project_improvement_01_10.md
 docs/gamma_codex_project_improvement_11_20.md

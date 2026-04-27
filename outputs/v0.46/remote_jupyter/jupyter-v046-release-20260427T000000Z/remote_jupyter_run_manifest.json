@@ -1,0 +1,36 @@
+{
+  "run_id": "jupyter-v046-release-20260427T000000Z",
+  "version": "v0.46",
+  "project_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project",
+  "output_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project/outputs/v0.46",
+  "pytest_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project/.cache/tests/pytest",
+  "commands": [
+    {
+      "name": "pipeline",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "run_all.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 846.5081312656403
+    },
+    {
+      "name": "pytest",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "-m",
+        "src.scripts.run_pytest",
+        "tests",
+        "-q"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 20.14228367805481
+    }
+  ],
+  "remote_env": "torch311",
+  "remote_python": [
+    "/research/miniforge3/envs/torch311/bin/python"
+  ],
+  "returncode": 0,
+  "artifact_path": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/artifacts.zip"
+}

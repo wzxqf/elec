@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-## v0.45 当前架构索引
+## v0.46 当前架构索引
 
 当前正式架构固定为：
 
@@ -56,10 +56,11 @@
 
 ## 正式入口与详细文档
 
-- 根入口：`python run_all.py`
+- 正式远程验证入口：`python run_remote_jupyter.py`
+- 服务器内部根入口：`python run_all.py`
 - 流水线入口：`python -m src.scripts.run_pipeline`
 - 训练入口：`python -m src.scripts.train`
 - 评估入口：`python -m src.scripts.evaluate`
 - 回测入口：`python -m src.scripts.backtest`
 
-详细架构、实现机理、参数布局和报告链路见 `docs/v0.45_architecture_implementation.md`。
+详细架构、实现机理、参数布局和报告链路见 `docs/v0.46_architecture_implementation.md`。

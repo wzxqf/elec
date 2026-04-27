@@ -1,0 +1,67 @@
+{
+  "jupyter_url": "http://10.26.27.72:9007/",
+  "kernel": "python3",
+  "source_archive": {
+    "archive_path": "D:\\elec\\.cache\\remote_jupyter\\v0.46\\jupyter-v046-release-20260427T000000Z\\source.zip",
+    "file_count": 2293,
+    "byte_count": 120884626,
+    "include_outputs": false
+  },
+  "remote_manifest": {
+    "run_id": "jupyter-v046-release-20260427T000000Z",
+    "version": "v0.46",
+    "project_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project",
+    "output_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project/outputs/v0.46",
+    "pytest_dir": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/project/.cache/tests/pytest",
+    "commands": [
+      {
+        "name": "pipeline",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "run_all.py"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 846.5081312656403
+      },
+      {
+        "name": "pytest",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "-m",
+          "src.scripts.run_pytest",
+          "tests",
+          "-q"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 20.14228367805481
+      }
+    ],
+    "remote_env": "torch311",
+    "remote_python": [
+      "/research/miniforge3/envs/torch311/bin/python"
+    ],
+    "returncode": 0,
+    "artifact_path": "elec_remote_runs/v0.46/jupyter-v046-release-20260427T000000Z/artifacts.zip"
+  },
+  "local_output_sync": {
+    "source_output_dir": "D:\\elec\\outputs\\v0.46\\remote_jupyter\\jupyter-v046-release-20260427T000000Z\\outputs\\v0.46",
+    "target_output_dir": "D:\\elec\\outputs\\v0.46",
+    "preserved_names": [
+      "remote_jupyter"
+    ],
+    "removed_names": [
+      "logs"
+    ],
+    "synced_names": [
+      "artifact_index.md",
+      "logs",
+      "metrics",
+      "models",
+      "policy_cache",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_files": 69
+  }
+}

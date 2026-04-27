@@ -12,3 +12,5 @@ torch==2.9.0
 openpyxl
 numba
 joblib
+pytest
+websocket-client

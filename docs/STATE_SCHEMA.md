@@ -1,8 +1,8 @@
 # STATE_SCHEMA
 
-## v0.45 Scope
+## v0.46 Scope
 
-`v0.45` 的状态输入按四层组织：
+`v0.46` 的状态输入按四层组织：
 
 - `Weekly`：周度价格、负荷、偏差、波动、营业时段统计和周度元数据
 - `Policy`：当前制度状态与四组前瞻制度状态
@@ -11,7 +11,7 @@
 
 ## Runtime Artifacts
 
-每次运行正式流水线后，会在 `outputs/v0.45/` 下生成：
+每次运行正式流水线后，会在 `outputs/v0.46/` 下生成：
 
 - `reports/state_schema_snapshot.md`
 - `reports/tensor_bundle_audit.md`

@@ -17,9 +17,14 @@ CORE_HOURLY_FEATURE_COLUMNS = [
 
 EXTENDED_HOURLY_FEATURE_COLUMNS = [
     "price_spread_abs",
+    "price_spread_lag1",
+    "price_spread_abs_lag1",
     "load_dev_abs",
+    "load_dev_lag1",
     "load_dev_sign",
     "renewable_dev_abs",
+    "renewable_dev_lag1",
+    "renewable_dev_abs_lag1",
     "renewable_dev_sign",
     "business_hour_flag",
     "peak_hour_flag",
@@ -35,6 +40,14 @@ EXTENDED_HOURLY_FEATURE_COLUMNS = [
 HOURLY_FEATURE_COLUMNS = CORE_HOURLY_FEATURE_COLUMNS + EXTENDED_HOURLY_FEATURE_COLUMNS
 
 QUARTER_FEATURE_COLUMNS = ["全网统一出清价格_日前", "全网统一出清价格_日内"]
+
+LAGGED_HOURLY_FEATURE_SOURCES = {
+    "price_spread_lag1": "price_spread",
+    "price_spread_abs_lag1": "price_spread_abs",
+    "load_dev_lag1": "load_dev",
+    "renewable_dev_lag1": "renewable_dev",
+    "renewable_dev_abs_lag1": "renewable_dev_abs",
+}
 
 
 @dataclass(frozen=True)
@@ -67,6 +80,25 @@ def _resolve_device(device: str) -> str:
     if requested.startswith("cuda") and not torch.cuda.is_available():
         return "cpu"
     return requested
+
+
+def _ensure_hourly_lag_features(hourly: pd.DataFrame) -> pd.DataFrame:
+    frame = hourly.copy()
+    if frame.empty or "week_start" not in frame.columns:
+        return frame
+    frame["week_start"] = pd.to_datetime(frame["week_start"])
+    sort_columns = ["week_start"]
+    if "hour_index" in frame.columns:
+        sort_columns.append("hour_index")
+    elif "hour_index_in_week" in frame.columns:
+        sort_columns.append("hour_index_in_week")
+    elif "hour" in frame.columns:
+        sort_columns.append("hour")
+    frame = frame.sort_values(sort_columns).reset_index(drop=True)
+    for lag_column, source_column in LAGGED_HOURLY_FEATURE_SOURCES.items():
+        if lag_column not in frame.columns and source_column in frame.columns:
+            frame[lag_column] = frame.groupby("week_start")[source_column].shift(1).fillna(0.0)
+    return frame
 
 
 def _frame_by_week(frame: pd.DataFrame, week_index: pd.Index, columns: list[str], index_column: str) -> tuple[torch.Tensor, torch.Tensor]:
@@ -110,7 +142,7 @@ def compile_training_tensor_bundle(bundle: dict[str, Any], device: str = "cpu") 
     weekly_features = bundle["weekly_features"].copy()
     weekly_metadata = bundle["weekly_metadata"].copy()
     policy_state_trace = bundle["policy_state_trace"].copy()
-    hourly = bundle["hourly"].copy()
+    hourly = _ensure_hourly_lag_features(bundle["hourly"].copy())
     quarter = bundle["quarter"].copy()
 
     hourly_feature_columns = list(CORE_HOURLY_FEATURE_COLUMNS)

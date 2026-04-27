@@ -76,7 +76,7 @@ def _infer_release_version(config: dict[str, Any]) -> str:
         normalized = match.group(1).lstrip("0") or "0"
         normalized = normalized.rstrip("0") or "0"
         return f"v0.{normalized}"
-    return "v0.45"
+    return "v0.46"
 
 
 def _resolve_optimizer(hybrid_cfg: dict[str, Any]) -> dict[str, float]:

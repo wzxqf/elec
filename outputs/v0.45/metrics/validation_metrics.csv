@@ -1,2 +1,0 @@
-strategy,total_procurement_cost,total_profit,weekly_cost_volatility,cvar99,hedge_error,avg_adjustment_mwh,mean_reward,max_drawdown,feasible_domain_trigger_weeks
-hybrid_pso_validation,5027653376.0,967224224.0,150910628.38361582,2836032.1875,0.5547611266374588,961.7050141834077,15126290.75,0.0,4

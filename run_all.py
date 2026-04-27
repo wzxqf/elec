@@ -60,6 +60,14 @@ def add_candidate(candidates: list[Path], value: str | None) -> None:
         candidates.append(path)
 
 
+def add_env_python_candidates(candidates: list[Path], env_path: str | Path | None) -> None:
+    if not env_path:
+        return
+    path = Path(env_path).expanduser()
+    for relative in ("bin/python", "python.exe"):
+        add_candidate(candidates, str(path / relative))
+
+
 def resolve_python_executable() -> Path:
     candidates: list[Path] = []
     current = Path(sys.executable).resolve()
@@ -68,31 +76,46 @@ def resolve_python_executable() -> Path:
 
     conda_prefix = os.environ.get("CONDA_PREFIX")
     if conda_prefix and Path(conda_prefix).name.lower() == ENV_NAME.lower():
-        add_candidate(candidates, str(Path(conda_prefix) / "python.exe"))
+        add_env_python_candidates(candidates, conda_prefix)
 
     mamba_root = os.environ.get("MAMBA_ROOT_PREFIX")
     if mamba_root:
-        add_candidate(candidates, str(Path(mamba_root) / "envs" / ENV_NAME / "python.exe"))
+        add_env_python_candidates(candidates, Path(mamba_root) / "envs" / ENV_NAME)
 
     conda_exe = os.environ.get("CONDA_EXE")
     if conda_exe:
         conda_root = Path(conda_exe).resolve().parents[1]
-        add_candidate(candidates, str(conda_root / "envs" / ENV_NAME / "python.exe"))
+        add_env_python_candidates(candidates, conda_root / "envs" / ENV_NAME)
 
     mamba_exe = os.environ.get("MAMBA_EXE")
     if mamba_exe:
         mamba_root_dir = Path(mamba_exe).resolve().parents[2]
-        add_candidate(candidates, str(mamba_root_dir / "envs" / ENV_NAME / "python.exe"))
+        add_env_python_candidates(candidates, mamba_root_dir / "envs" / ENV_NAME)
 
-    add_candidate(candidates, fr"D:\miniforge\envs\{ENV_NAME}\python.exe")
-    add_candidate(candidates, str(Path.home() / "miniforge3" / "envs" / ENV_NAME / "python.exe"))
-    add_candidate(candidates, str(Path.home() / "mambaforge" / "envs" / ENV_NAME / "python.exe"))
+    home = Path.home()
+    for env_path in (
+        Path(fr"D:\miniforge\envs\{ENV_NAME}"),
+        Path(fr"D:\miniforge3\envs\{ENV_NAME}"),
+        Path("/research/miniforge3") / "envs" / ENV_NAME,
+        Path("/research/miniforge") / "envs" / ENV_NAME,
+        Path("/opt/conda") / "envs" / ENV_NAME,
+        Path("/opt/miniconda") / "envs" / ENV_NAME,
+        Path("/opt/miniconda3") / "envs" / ENV_NAME,
+        Path("/opt/miniforge") / "envs" / ENV_NAME,
+        Path("/opt/miniforge3") / "envs" / ENV_NAME,
+        Path("/usr/local/conda") / "envs" / ENV_NAME,
+        Path("/usr/local/miniconda") / "envs" / ENV_NAME,
+        home / ".conda" / "envs" / ENV_NAME,
+        home / "miniforge3" / "envs" / ENV_NAME,
+        home / "mambaforge" / "envs" / ENV_NAME,
+    ):
+        add_env_python_candidates(candidates, env_path)
 
     for candidate in candidates:
         if candidate.is_file():
             return candidate
     raise RuntimeError(
-        f"Unable to find python.exe for environment '{ENV_NAME}'. Activate it first, or install it under a standard Miniforge/Mambaforge envs directory."
+        f"Unable to find Python for environment '{ENV_NAME}'. Activate it first, or install it under a standard Miniforge/Mambaforge envs directory."
     )
 
 

@@ -250,11 +250,11 @@ def batch_score_particles(
             return torch.full((1, 1, week_count, hour_count), float(default), dtype=torch.float32, device=score_device)
         return hourly_tensor[..., column_idx].view(1, 1, week_count, hour_count)
 
-    spread = _hourly_feature("price_spread")
-    spread_abs = _hourly_feature("price_spread_abs")
-    load_dev = _hourly_feature("load_dev")
-    renewable_dev = _hourly_feature("renewable_dev")
-    renewable_dev_abs = _hourly_feature("renewable_dev_abs")
+    spread = _hourly_feature("price_spread_lag1")
+    spread_abs = _hourly_feature("price_spread_abs_lag1")
+    load_dev = _hourly_feature("load_dev_lag1")
+    renewable_dev = _hourly_feature("renewable_dev_lag1")
+    renewable_dev_abs = _hourly_feature("renewable_dev_abs_lag1")
     business_hour_flag = _hourly_feature("business_hour_flag")
     peak_hour_flag = _hourly_feature("peak_hour_flag")
     valley_hour_flag = _hourly_feature("valley_hour_flag")
@@ -312,11 +312,23 @@ def batch_score_particles(
     valid_intervals = quarter_mask.sum(dim=-1).clamp_min(1.0)
     spot_energy_net = (spot_hedge_mwh * hour_mask).sum(dim=-1)
     spot_energy_abs = (spot_hedge_mwh.abs() * hour_mask).sum(dim=-1)
-    scheduled_energy_raw = contract_position_mwh + spot_energy_net
-    scheduled_energy = torch.clamp_min(scheduled_energy_raw, 0.0)
+    hour_slot_index = torch.arange(hour_count, device=score_device, dtype=torch.long) % 24
+    contract_hour_weight = contract_curve[..., hour_slot_index] * hour_mask
+    contract_hour_weight = contract_hour_weight / contract_hour_weight.sum(dim=-1, keepdim=True).clamp_min(1.0e-6)
+    contract_hourly = contract_position_mwh.unsqueeze(-1) * contract_hour_weight
+    interval_hour_index = torch.div(
+        torch.arange(interval_count, device=score_device, dtype=torch.long) * max(hour_count, 1),
+        max(interval_count, 1),
+        rounding_mode="floor",
+    ).clamp(max=max(hour_count - 1, 0))
+    intervals_per_hour = torch.bincount(interval_hour_index, minlength=hour_count).to(score_device, dtype=torch.float32).clamp_min(1.0)
+    interval_hour_counts = intervals_per_hour.index_select(0, interval_hour_index)
+    contract_interval = contract_hourly[..., interval_hour_index] / interval_hour_counts
+    spot_interval = spot_hedge_mwh[..., interval_hour_index] / interval_hour_counts
+    scheduled_interval = torch.clamp_min(contract_interval + spot_interval, 0.0) * quarter_mask
+    scheduled_energy = scheduled_interval.sum(dim=-1)
     imbalance_energy = torch.abs(actual_load.view(1, 1, week_count) - scheduled_energy)
 
-    scheduled_interval = (scheduled_energy.unsqueeze(-1) / valid_intervals.unsqueeze(-1)) * quarter_mask
     actual_interval = (actual_load.view(1, 1, week_count, 1) / valid_intervals.unsqueeze(-1)) * quarter_mask
     da_price = price_tensor[..., 0].view(1, 1, week_count, interval_count)
     id_price = price_tensor[..., 1].view(1, 1, week_count, interval_count)

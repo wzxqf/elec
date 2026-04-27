@@ -1,5 +1,5 @@
 project:
-  version: v0.45
+  version: v0.46
   project_root: .
 
 data:
@@ -132,11 +132,11 @@ parameter_compiler:
           - forward_mechanism_execution_days
           - forward_ancillary_coupling_days
           - forward_info_forecast_boundary_days
-      # 正式参数：v0.45 balanced
+      # 正式参数：v0.46 balanced
       # explore 备选（未升格正式入口）：size = 24
       contract_curve_latent:
         size: 20
-      # 正式参数：v0.45 balanced
+      # 正式参数：v0.46 balanced
       # explore 备选（未升格正式入口）：size = 10
       action_head:
         size: 8
@@ -373,7 +373,7 @@ search:
 hybrid_pso:
   seed: 42
   optimizer:
-    # 正式参数：v0.45 balanced
+    # 正式参数：v0.46 balanced
     # explore 备选（未升格正式入口）：init_scale = 0.14
     init_scale: 0.12
     # explore 备选（未升格正式入口）：inertia = 0.72

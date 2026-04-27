@@ -1,8 +1,8 @@
 # CONSTRAINTS.md
 
-## v0.45 生效约束
+## v0.46 生效约束
 
-本文件只保留当前版本有效约束，所有条目均服务于 `v0.45 + HYBRID_PSO_V040 + outputs/v0.45/` 的正式实现。
+本文件只保留当前版本有效约束，所有条目均服务于 `v0.46 + HYBRID_PSO_V040 + outputs/v0.46/` 的正式实现。
 
 ## 研究对象边界
 
@@ -71,4 +71,4 @@
 - `train_config_snapshot.yaml`
 - `feature_manifest.csv`
 - `feasible_domain_manifest.csv`
-- `v0.45报告.md`
+- `v0.46报告.md`

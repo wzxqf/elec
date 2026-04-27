@@ -86,6 +86,10 @@ def aggregate_hourly(frame_15m: pd.DataFrame) -> pd.DataFrame:
     hourly["hour_index_in_week"] = (
         ((hourly["hour"] - hourly["week_start"]) / pd.Timedelta(hours=1)).astype(int)
     )
+    hourly = hourly.sort_values(["week_start", "hour_index_in_week"]).reset_index(drop=True)
+    for column in ["price_spread", "load_dev", "renewable_dev", "price_spread_abs", "renewable_dev_abs"]:
+        if column in hourly.columns:
+            hourly[f"{column}_lag1"] = hourly.groupby("week_start")[column].shift(1).fillna(0.0)
     return hourly
 
 

@@ -1,7 +1,19 @@
 # 更新日志
 
+## v0.46
+
+- 将当前正式版本固化为 `project.version: v0.46`，正式输出目录切换为 `outputs/v0.46/`，活跃测试命名同步迁移为 `test_v046_<purpose>.py`。
+- 继承 `v0.45` 已验证的 `HYBRID_PSO_V040` 主线与 balanced 参数口径，不改变论文模型边界、制度约束和强基准奖励结构。
+- 根目录 `run_remote_jupyter.py` 作为正式验证入口继续负责上传、远程运行 pipeline/pytest、拉回服务器产物，并在完整远程运行成功后覆盖本地 `outputs/v0.46/` 正式结果区。
+- `v0.45` 当前说明、架构说明和正式产物转入归档区，根目录和活跃文档只保留 `v0.46` 作为当前口径。
+- 发布流程同步清理已合并的 `codex-v045-spot-hedge-profit` worktree 与本地分支，减少历史迭代残留。
+
 ## v0.45
 
+- 新增根目录 Jupyter 远程验证入口 `run_remote_jupyter.py`：本地打包上传当前工作区，在服务器 Jupyter kernel 内解析 `ELEC_REMOTE_ENV=torch311` 的 Python 后依次运行 `run_all.py` 与 `src.scripts.run_pytest`，再把服务器产物拉回 `outputs/v0.45/remote_jupyter/<run_id>/`；实测服务器 kernel spec 为 `python3`，项目解释器路径为 `/research/miniforge3/envs/torch311/bin/python`，通过 `--probe` 核对项目运行 Python 路径。
+- 修复远程 Jupyter 复验兼容性：源码包保留 `已归档/outputs/` 下的空目录契约，`run_all.py` 同时支持 Windows `python.exe` 与 Linux `bin/python` 形式的 `torch311` 环境解析。
+- 完整远程 pipeline 返回码为 0 后，默认使用拉回的服务器 `outputs/<version>` 覆盖本地正式结果区；`outputs/<version>/remote_jupyter/` 保留每次远程运行审计记录，`--skip-pipeline` 不触发覆盖，调试时可用 `--no-sync-local-output` 禁止覆盖。
+- 正式测试口径改为远程 Jupyter 执行，本地不再直接运行版本迭代后的 pytest；Jupyter 密码或 token 仅允许通过环境变量提供，并通过 `.gitignore` 排除本地 `.env` 凭据文件。
 - 修正小时级现货修正的结算语义：`spot_hedge_mwh` 以带符号净修正量进入计划电量，交易摩擦仍按绝对成交量计量。
 - 新增小时级 no-trade gate，在信号未覆盖交易摩擦与预测不确定性前抑制现货修正。
 - 训练奖励的强基准从单一 `dynamic_lock_only` 扩展为 `[0.50, 0.55, 0.60]` 合约比例基准族，避免模型只跑赢弱于当前持出集最优的基准。
