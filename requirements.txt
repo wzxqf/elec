@@ -13,4 +13,5 @@ openpyxl
 numba
 joblib
 pytest
+playwright==1.59.0
 websocket-client
