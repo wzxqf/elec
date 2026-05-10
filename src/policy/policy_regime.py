@@ -77,6 +77,7 @@ def _as_timestamp(value: Any) -> pd.Timestamp | None:
 
 def _build_forward_state(
     week_start: pd.Timestamp,
+    active_until: pd.Timestamp,
     rule_table: pd.DataFrame,
     countdown_cap_days: int,
     forward_window_days: int,
@@ -88,7 +89,7 @@ def _build_forward_state(
         ["effective_start", "rule_type", "state_name"],
     ].copy()
     subset["effective_start"] = subset["effective_start"].apply(pd.Timestamp)
-    subset = subset.loc[subset["effective_start"] > week_start].sort_values("effective_start").drop_duplicates()
+    subset = subset.loc[subset["effective_start"] > active_until].sort_values("effective_start").drop_duplicates()
 
     if subset.empty:
         return {
@@ -135,11 +136,12 @@ def build_policy_state_trace(
 
     for _, meta in weekly_metadata.sort_values("week_start").iterrows():
         week_start = pd.Timestamp(meta["week_start"])
-        week_end = pd.Timestamp(meta["week_end"])
-        state = {"week_start": week_start}
+        week_end = pd.Timestamp(meta.get("week_end", week_start + pd.Timedelta(days=6, hours=23, minutes=45)))
+        state = {"week_start": week_start, "week_end": week_end}
         state.update(DEFAULT_POLICY_STATE)
 
-        active_mask = ordered_rules["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min) <= week_start
+        effective_start_series = ordered_rules["effective_start"].apply(_as_timestamp).fillna(pd.Timestamp.min)
+        active_mask = effective_start_series <= week_start
         if end_series is not None:
             active_mask &= end_series.isna() | (end_series >= week_start)
         active_rules = ordered_rules.loc[active_mask].copy()
@@ -173,6 +175,7 @@ def build_policy_state_trace(
             state.update(
                 _build_forward_state(
                     week_start=week_start,
+                    active_until=week_start,
                     rule_table=ordered_rules,
                     countdown_cap_days=countdown_cap_days,
                     forward_window_days=forward_window_days,

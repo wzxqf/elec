@@ -28,9 +28,11 @@ def _evaluate_strategy(
     quarter_mask = tensor_bundle.quarter_valid_mask.detach().cpu().float()
     hourly = _sanitized_cpu_tensor(tensor_bundle.hourly_tensor)
     hour_mask = tensor_bundle.hourly_valid_mask.detach().cpu().float()
+    quarter_lookup = {name: idx for idx, name in enumerate(tensor_bundle.quarter_feature_columns)}
 
     retail_tariff = float(economics.get("retail_tariff_yuan_per_mwh", 430.0))
     friction_unit = float(economics.get("friction_cost_yuan_per_mwh", 1.2))
+    imbalance_multiplier = float(economics.get("imbalance_penalty_multiplier", 1.0))
     profits: list[float] = []
     procurement_costs: list[float] = []
     cvars: list[float] = []
@@ -49,20 +51,27 @@ def _evaluate_strategy(
         spot_abs = float(torch.abs(hedge_hourly).sum().item())
 
         scheduled_15m = max(contract_position + spot_net, 0.0) / valid_intervals
-        actual_15m = float(actual[week_pos].item()) / valid_intervals
-        da_price = quarter[week_pos, :, 0]
-        id_price = quarter[week_pos, :, 1]
+        da_index = quarter_lookup.get("全网统一出清价格_日前", 0)
+        id_index = quarter_lookup.get("全网统一出清价格_日内", 1 if quarter.shape[-1] > 1 else 0)
+        actual_index = quarter_lookup.get("net_load_id_mwh")
+        da_price = quarter[week_pos, :, da_index]
+        id_price = quarter[week_pos, :, id_index]
         valid_mask = quarter_mask[week_pos]
         scheduled_interval = scheduled_15m * valid_mask
-        actual_interval = actual_15m * valid_mask
+        if actual_index is not None and actual_index < quarter.shape[-1]:
+            actual_interval = torch.clamp_min(quarter[week_pos, :, actual_index], 0.0) * valid_mask
+            if float(actual_interval.sum().item()) <= 0.0:
+                actual_interval = (float(actual[week_pos].item()) / valid_intervals) * valid_mask
+        else:
+            actual_interval = (float(actual[week_pos].item()) / valid_intervals) * valid_mask
         interval_cost = scheduled_interval * (0.6 * float(lt_price[week_pos].item()) + 0.4 * da_price)
-        interval_cost = interval_cost + torch.abs(actual_interval - scheduled_interval) * id_price
+        interval_cost = interval_cost + torch.abs(actual_interval - scheduled_interval) * id_price * imbalance_multiplier
         interval_cost = interval_cost * valid_mask
         threshold = torch.quantile(interval_cost, q=0.99)
         tail = interval_cost[interval_cost >= threshold]
         cvar = float(tail.mean().item()) if tail.numel() > 0 else float(interval_cost.max().item())
         procurement_cost = float(interval_cost.sum().item())
-        retail_revenue = float(actual[week_pos].item()) * retail_tariff
+        retail_revenue = float(actual_interval.sum().item()) * retail_tariff
         friction_cost = spot_abs * friction_unit
         profit = retail_revenue - procurement_cost - friction_cost
         procurement_costs.append(procurement_cost)

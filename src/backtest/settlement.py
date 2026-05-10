@@ -90,7 +90,7 @@ def settle_week(
     spot_energy_15m = q_spot * 0.25
     scheduled_energy_15m = lt_energy_15m + spot_energy_15m
     imbalance_energy_15m = np.abs(actual_need_15m - scheduled_energy_15m)
-    penalty_multiplier = float(config["cost"]["imbalance_penalty_multiplier"])
+    penalty_multiplier = float(config.get("economics", config.get("cost", {})).get("imbalance_penalty_multiplier", 1.0))
     lt_cost_15m = lt_energy_15m * settlement_context["lt_price_w"]
     spot_cost_15m = spot_energy_15m * da_price
     imbalance_cost_15m = imbalance_energy_15m * id_price * penalty_multiplier

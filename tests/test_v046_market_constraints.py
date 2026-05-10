@@ -35,6 +35,10 @@ class MarketRuleConstraintsTest(unittest.TestCase):
         self.assertIn("40%", linkage["market_rule"])
         self.assertIn("60%", linkage["market_rule"])
 
+        by_id = self.constraints.set_index("constraint_id")
+        self.assertGreater(int(by_id.loc["lt_24_period_contract_curve", "source_file_count"]), 0)
+        self.assertGreater(int(by_id.loc["retail_single_supplier_package", "source_file_count"]), 0)
+
     def test_policy_alignment_keeps_effective_dates_from_leaking_forward(self) -> None:
         weekly_metadata = pd.DataFrame(
             {
@@ -56,6 +60,7 @@ class MarketRuleConstraintsTest(unittest.TestCase):
         self.assertEqual(float(by_week.loc[pd.Timestamp("2025-12-22"), "renewable_mechanism_active"]), 0.0)
         self.assertEqual(float(by_week.loc[pd.Timestamp("2026-01-05"), "renewable_mechanism_active"]), 1.0)
         self.assertEqual(float(by_week.loc[pd.Timestamp("2026-01-26"), "lt_price_linked_active"]), 0.0)
+        self.assertEqual(float(by_week.loc[pd.Timestamp("2026-01-26"), "forward_price_linkage_in_window"]), 1.0)
         self.assertEqual(float(by_week.loc[pd.Timestamp("2026-02-02"), "lt_price_linked_active"]), 1.0)
 
     def test_markdown_report_is_human_readable_and_source_backed(self) -> None:

@@ -54,6 +54,8 @@ def compile_feasible_domain(
     weekly["week_start"] = pd.to_datetime(weekly["week_start"])
     policy = policy_state_trace.copy()
     policy["week_start"] = pd.to_datetime(policy["week_start"])
+    policy_columns = [column for column in policy.columns if column != "week_start"]
+    weekly = weekly.drop(columns=[column for column in policy_columns if column in weekly.columns], errors="ignore")
     merged = weekly.merge(policy, on="week_start", how="left").fillna(0.0)
 
     weekly_rows: list[dict[str, Any]] = []

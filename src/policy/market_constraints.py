@@ -206,6 +206,10 @@ def validate_market_rule_alignment(
     if not policy_trace.empty:
         trace = policy_trace.copy()
         trace["week_start"] = pd.to_datetime(trace["week_start"])
+        if "week_end" in trace.columns:
+            trace["week_end"] = pd.to_datetime(trace["week_end"])
+        else:
+            trace["week_end"] = trace["week_start"]
         before_renewable = trace.loc[trace["week_start"] < pd.Timestamp("2026-01-01"), "renewable_mechanism_active"]
         if not before_renewable.empty and (pd.to_numeric(before_renewable, errors="coerce").fillna(0.0) > 0.0).any():
             violations.append("renewable_mechanism_active 被提前应用到 2026-01-01 之前。")

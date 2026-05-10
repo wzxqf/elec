@@ -46,11 +46,21 @@ class RunAllScriptTest(unittest.TestCase):
 
     def test_shell_wrapper_delegates_to_python_entrypoint(self) -> None:
         self.assertTrue(SCRIPT_PATH.exists(), "run_all.sh should exist at project root")
-        if shutil.which("bash") is None:
+        bash_path = shutil.which("bash")
+        if bash_path is None:
             self.skipTest("bash is not available in this environment")
+        bash_probe = subprocess.run(
+            [bash_path, "-lc", "exit 0"],
+            cwd=PROJECT_ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        if bash_probe.returncode != 0:
+            self.skipTest("bash is installed but cannot start in this environment")
 
         result = subprocess.run(
-            ["bash", str(SCRIPT_PATH), "--dry-run"],
+            [bash_path, str(SCRIPT_PATH), "--dry-run"],
             cwd=PROJECT_ROOT,
             check=False,
             capture_output=True,

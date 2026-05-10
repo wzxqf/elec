@@ -39,7 +39,7 @@ EXTENDED_HOURLY_FEATURE_COLUMNS = [
 
 HOURLY_FEATURE_COLUMNS = CORE_HOURLY_FEATURE_COLUMNS + EXTENDED_HOURLY_FEATURE_COLUMNS
 
-QUARTER_FEATURE_COLUMNS = ["全网统一出清价格_日前", "全网统一出清价格_日内"]
+QUARTER_FEATURE_COLUMNS = ["全网统一出清价格_日前", "全网统一出清价格_日内", "net_load_da_mwh", "net_load_id_mwh"]
 
 LAGGED_HOURLY_FEATURE_SOURCES = {
     "price_spread_lag1": "price_spread",
@@ -144,6 +144,9 @@ def compile_training_tensor_bundle(bundle: dict[str, Any], device: str = "cpu") 
     policy_state_trace = bundle["policy_state_trace"].copy()
     hourly = _ensure_hourly_lag_features(bundle["hourly"].copy())
     quarter = bundle["quarter"].copy()
+    for column in QUARTER_FEATURE_COLUMNS:
+        if column not in quarter.columns:
+            quarter[column] = 0.0
 
     hourly_feature_columns = list(CORE_HOURLY_FEATURE_COLUMNS)
     hourly_feature_columns.extend([column for column in EXTENDED_HOURLY_FEATURE_COLUMNS if column in hourly.columns])

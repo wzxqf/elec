@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from typing import Any
 
 import torch
@@ -307,9 +308,19 @@ def batch_score_particles(
     valid_hours = hour_mask.sum(dim=-1).clamp_min(1.0)
     spot_hedge_limit_mwh = (exposure_band_mwh.unsqueeze(-1) / valid_hours.unsqueeze(-1)) * hourly_share_cap
 
-    avg_da_price = torch.nan_to_num(price_tensor[..., 0].mean(dim=1), nan=0.0).view(1, 1, week_count)
-    avg_id_price = torch.nan_to_num(price_tensor[..., 1].mean(dim=1), nan=0.0).view(1, 1, week_count)
     valid_intervals = quarter_mask.sum(dim=-1).clamp_min(1.0)
+    quarter_feature_lookup = {name: idx for idx, name in enumerate(tensor_bundle.quarter_feature_columns)}
+
+    def _quarter_feature(column: str, default: float = 0.0) -> torch.Tensor:
+        column_idx = quarter_feature_lookup.get(column)
+        if column_idx is None or column_idx >= price_tensor.shape[-1]:
+            return torch.full((1, 1, week_count, interval_count), float(default), dtype=torch.float32, device=score_device)
+        return price_tensor[..., column_idx].view(1, 1, week_count, interval_count)
+
+    da_price = _quarter_feature("全网统一出清价格_日前")
+    id_price = _quarter_feature("全网统一出清价格_日内")
+    avg_da_price = (da_price * quarter_mask).sum(dim=-1) / valid_intervals
+    avg_id_price = (id_price * quarter_mask).sum(dim=-1) / valid_intervals
     spot_energy_net = (spot_hedge_mwh * hour_mask).sum(dim=-1)
     spot_energy_abs = (spot_hedge_mwh.abs() * hour_mask).sum(dim=-1)
     hour_slot_index = torch.arange(hour_count, device=score_device, dtype=torch.long) % 24
@@ -327,26 +338,37 @@ def batch_score_particles(
     spot_interval = spot_hedge_mwh[..., interval_hour_index] / interval_hour_counts
     scheduled_interval = torch.clamp_min(contract_interval + spot_interval, 0.0) * quarter_mask
     scheduled_energy = scheduled_interval.sum(dim=-1)
-    imbalance_energy = torch.abs(actual_load.view(1, 1, week_count) - scheduled_energy)
+    actual_interval_candidate = torch.clamp_min(_quarter_feature("net_load_id_mwh"), 0.0) * quarter_mask
+    actual_interval_sum = actual_interval_candidate.sum(dim=-1)
+    uniform_actual_interval = (actual_load.view(1, 1, week_count, 1) / valid_intervals.unsqueeze(-1)) * quarter_mask
+    actual_interval = torch.where(
+        actual_interval_sum.unsqueeze(-1) > 0.0,
+        actual_interval_candidate,
+        uniform_actual_interval,
+    )
+    actual_load_settlement = actual_interval.sum(dim=-1)
+    imbalance_energy = torch.abs(actual_load_settlement - scheduled_energy)
 
-    actual_interval = (actual_load.view(1, 1, week_count, 1) / valid_intervals.unsqueeze(-1)) * quarter_mask
-    da_price = price_tensor[..., 0].view(1, 1, week_count, interval_count)
-    id_price = price_tensor[..., 1].view(1, 1, week_count, interval_count)
     lt_interval_price = lt_price.view(1, 1, week_count, 1)
     interval_cost = scheduled_interval * (
         _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price
         + _score_cfg(config, "da_settlement_weight", 0.40) * da_price
     )
-    interval_cost = interval_cost + torch.abs(actual_interval - scheduled_interval) * id_price * _cfg(config, ["economics", "imbalance_penalty_multiplier"], 1.0)
+    imbalance_penalty_multiplier = _cfg(config, ["economics", "imbalance_penalty_multiplier"], 1.0)
+    interval_cost = interval_cost + torch.abs(actual_interval - scheduled_interval) * id_price * imbalance_penalty_multiplier
     interval_cost = interval_cost * quarter_mask
 
-    interval_threshold = torch.quantile(interval_cost, q=_cfg(config, ["reward", "cvar_alpha"], 0.99), dim=-1, keepdim=True)
-    interval_tail = torch.where(interval_cost >= interval_threshold, interval_cost, torch.zeros_like(interval_cost))
-    interval_tail_count = torch.clamp((interval_cost >= interval_threshold).sum(dim=-1), min=1)
-    cvar99 = interval_tail.sum(dim=-1) / interval_tail_count
+    cvar_alpha = _cfg(config, ["reward", "cvar_alpha"], 0.99)
+    tail_count = torch.ceil(valid_intervals * max(1.0 - cvar_alpha, 1.0e-6)).clamp_min(1.0).to(torch.long)
+    topk_count = min(interval_count, max(1, int(math.ceil(float(valid_intervals.max().item()) * max(1.0 - cvar_alpha, 1.0e-6)))))
+    masked_interval_cost = torch.where(quarter_mask > 0.0, interval_cost, torch.full_like(interval_cost, float("-inf")))
+    tail_values, _ = torch.topk(masked_interval_cost, k=topk_count, dim=-1)
+    tail_rank = torch.arange(topk_count, device=score_device, dtype=torch.long).view(1, 1, 1, topk_count)
+    tail_mask = tail_rank < tail_count.unsqueeze(-1)
+    cvar99 = torch.where(tail_mask, tail_values, torch.zeros_like(tail_values)).sum(dim=-1) / tail_count.to(torch.float32)
 
     procurement_cost_weekly = interval_cost.sum(dim=-1)
-    retail_revenue = actual_load.view(1, 1, week_count) * _cfg(config, ["economics", "retail_tariff_yuan_per_mwh"], 430.0)
+    retail_revenue = actual_load_settlement * _cfg(config, ["economics", "retail_tariff_yuan_per_mwh"], 430.0)
     adjustment_cost = torch.abs(contract_adjustment_mwh_raw - contract_adjustment_mwh_exec) * _cfg(config, ["economics", "adjustment_cost_yuan_per_mwh"], 0.6)
     friction_cost = spot_energy_abs * _cfg(config, ["economics", "friction_cost_yuan_per_mwh"], 1.2)
     imbalance_cost = imbalance_energy * avg_id_price
@@ -364,29 +386,27 @@ def batch_score_particles(
     baseline_ratios = reward_cfg.get("baseline_position_ratios")
     if not baseline_ratios:
         baseline_ratios = [_score_cfg(config, "baseline_position_ratio", 0.55)]
-    baseline_ratio_tensor = torch.as_tensor(
-        [float(value) for value in baseline_ratios],
-        dtype=torch.float32,
-        device=score_device,
-    ).view(-1, 1, 1, 1)
     baseline_projection_multiplier = 1.0 - _score_cfg(config, "baseline_projection_penalty_scale", 0.05) * policy_projection_active
-    baseline_positions = (
-        baseline_ratio_tensor
-        * forecast_load.view(1, 1, 1, week_count)
-        * baseline_projection_multiplier.unsqueeze(0)
-    )
-    baseline_interval = (baseline_positions.unsqueeze(-1) / valid_intervals.view(1, 1, 1, week_count, 1)) * quarter_mask.view(1, 1, 1, week_count, interval_count)
-    baseline_interval_cost = baseline_interval * (
-        _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price.view(1, 1, 1, week_count, 1)
-        + _score_cfg(config, "da_settlement_weight", 0.40) * da_price.view(1, 1, 1, week_count, interval_count)
-    )
-    baseline_actual_interval = actual_interval.unsqueeze(0)
-    baseline_interval_cost = baseline_interval_cost + torch.abs(baseline_actual_interval - baseline_interval) * id_price.view(1, 1, 1, week_count, interval_count)
-    baseline_procurement_candidates = baseline_interval_cost.sum(dim=-1)
-    baseline_procurement_cost = baseline_procurement_candidates.min(dim=0).values
+    baseline_procurement_cost: torch.Tensor | None = None
+    for baseline_ratio in baseline_ratios:
+        baseline_positions = (
+            float(baseline_ratio)
+            * forecast_load.view(1, 1, week_count)
+            * baseline_projection_multiplier
+        )
+        baseline_interval = (baseline_positions.unsqueeze(-1) / valid_intervals.view(1, 1, week_count, 1)) * quarter_mask
+        baseline_interval_cost = baseline_interval * (
+            _score_cfg(config, "lt_settlement_weight", 0.60) * lt_interval_price
+            + _score_cfg(config, "da_settlement_weight", 0.40) * da_price
+        )
+        baseline_interval_cost = baseline_interval_cost + torch.abs(actual_interval - baseline_interval) * id_price * imbalance_penalty_multiplier
+        candidate_cost = baseline_interval_cost.sum(dim=-1)
+        baseline_procurement_cost = candidate_cost if baseline_procurement_cost is None else torch.minimum(baseline_procurement_cost, candidate_cost)
+    if baseline_procurement_cost is None:
+        baseline_procurement_cost = torch.zeros_like(procurement_cost_weekly)
     profit_baseline = retail_revenue - baseline_procurement_cost
     excess_profit = profit - profit_baseline
-    hedge_error = imbalance_energy / actual_load.view(1, 1, week_count).clamp_min(1.0)
+    hedge_error = imbalance_energy / actual_load_settlement.clamp_min(1.0)
     reward = (
         excess_profit
         - _cfg(config, ["reward", "lambda_tail"], 0.65) * cvar99

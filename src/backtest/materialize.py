@@ -167,6 +167,7 @@ def materialize_particle_pair(
     price_tensor = tensor_bundle.quarter_price_tensor.detach().cpu().numpy()
     hour_mask = tensor_bundle.hourly_valid_mask.detach().cpu().numpy()
     quarter_mask = tensor_bundle.quarter_valid_mask.detach().cpu().numpy()
+    quarter_feature_lookup = {name: idx for idx, name in enumerate(tensor_bundle.quarter_feature_columns)}
     week_index = tensor_bundle.week_index
     score_cfg = config.get("score_kernel", {}) if isinstance(config, dict) else {}
     economics_cfg = config.get("economics", {}) if isinstance(config, dict) else {}
@@ -186,8 +187,15 @@ def materialize_particle_pair(
             exec_exposure_band=float(exposure_band[week_pos]),
             bound_reason_code=bound_reason_code,
         )
+        base_lock_ratio = float(score_cfg.get("contract_position_base_ratio", 0.60))
+        forecast_weekly_load = max(float(forecast_load[week_pos]), 1.0)
+        delta_lock_ratio = float(contract_adjustment_exec[week_pos]) / forecast_weekly_load
+        lock_ratio_final = float(contract_position[week_pos]) / forecast_weekly_load
         weekly_row = {
             "week_start": pd.Timestamp(week_start),
+            "lock_ratio_base": base_lock_ratio,
+            "delta_lock_ratio": delta_lock_ratio,
+            "lock_ratio_final": lock_ratio_final,
             "contract_adjustment_mwh_raw": float(contract_adjustment_raw[week_pos]),
             "contract_adjustment_mwh_exec": float(contract_adjustment_exec[week_pos]),
             "exposure_band_mwh_raw": float(exposure_band_raw[week_pos]),
@@ -213,8 +221,7 @@ def materialize_particle_pair(
             "strategy": strategy_name,
             **projection_detail,
         }
-        forecast_weekly_load = max(float(forecast_load[week_pos]), 1.0)
-        lock_ratio_proxy = float(contract_position[week_pos]) / forecast_weekly_load
+        lock_ratio_proxy = lock_ratio_final
         valid_hour_mask = hour_mask[week_pos].astype(bool)
         if valid_hour_mask.any():
             load_shape = _aggregate_hourly_profile_to_24(hourly_tensor[week_pos, valid_hour_mask, 0])
@@ -265,7 +272,13 @@ def materialize_particle_pair(
         spot_hourly = spot_hedge[week_pos] * valid_hour_mask_float
         spot_hedge_net = float(spot_hourly.sum())
         spot_hedge_abs = float(np.abs(spot_hourly).sum())
-        actual_15m = float(actual_load[week_pos] / valid_intervals)
+        actual_column_index = quarter_feature_lookup.get("net_load_id_mwh")
+        if actual_column_index is not None and actual_column_index < price_tensor.shape[-1]:
+            actual_interval_values = np.clip(price_tensor[week_pos, :, actual_column_index].astype(float), 0.0, None) * quarter_mask[week_pos]
+            if float(actual_interval_values.sum()) <= 0.0:
+                actual_interval_values = (float(actual_load[week_pos]) / valid_intervals) * quarter_mask[week_pos]
+        else:
+            actual_interval_values = (float(actual_load[week_pos]) / valid_intervals) * quarter_mask[week_pos]
         for interval_index in range(len(quarter_mask[week_pos])):
             if not bool(quarter_mask[week_pos, interval_index]):
                 continue
@@ -279,6 +292,7 @@ def materialize_particle_pair(
             interval_cost = scheduled_15m * (
                 lt_settlement_weight * float(lt_price[week_pos]) + da_settlement_weight * da_price_15m
             )
+            actual_15m = float(actual_interval_values[interval_index])
             interval_cost += abs(actual_15m - scheduled_15m) * id_price_15m * imbalance_multiplier
             settlement_rows.append(
                 {

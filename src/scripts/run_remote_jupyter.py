@@ -711,10 +711,27 @@ def remove_existing_path(path: Path) -> None:
     normalize_tree_attributes(path)
     if path.is_dir():
         def _retry_remove(function: Any, failing_path: str, _: Any) -> None:
-            os.chmod(failing_path, stat.S_IWRITE)
+            for _attempt in range(5):
+                try:
+                    os.chmod(failing_path, stat.S_IWRITE | stat.S_IREAD)
+                except OSError:
+                    pass
+                try:
+                    function(failing_path)
+                    return
+                except PermissionError:
+                    time.sleep(0.05)
             function(failing_path)
 
-        shutil.rmtree(path, onerror=_retry_remove)
+        for attempt in range(5):
+            normalize_tree_attributes(path)
+            try:
+                shutil.rmtree(path, onerror=_retry_remove)
+                return
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(0.05)
     else:
         path.chmod(0o777)
         path.unlink()

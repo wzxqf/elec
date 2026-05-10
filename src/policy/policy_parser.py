@@ -265,6 +265,40 @@ def parse_policy_environment(policy_dir: str | Path, project_root: str | Path | 
                 note="中长期仅作结算依据，现货承担全电量集中竞价下的边际风险。",
             )
 
+        if "电力中长期实施细则" in path.name or "电力中长期交易实施细则" in path.name:
+            base_effective = effective_start or publish_time
+            _add_rule(
+                rule_rows,
+                policy_name=policy_name,
+                publish_time=publish_time,
+                effective_start=base_effective,
+                effective_end=None,
+                rule_type="contract_time_granularity",
+                scope=scope,
+                state_group="contract_time_granularity",
+                state_name="lt_contract_24_period_curve",
+                state_value=1.0,
+                source_file=source_file,
+                note="中长期交易按每日24个时段组织，周度底仓需分解为24小时合约曲线。",
+            )
+
+        if "零售市场交易规则" in path.name:
+            base_effective = effective_start or publish_time
+            _add_rule(
+                rule_rows,
+                policy_name=policy_name,
+                publish_time=publish_time,
+                effective_start=base_effective,
+                effective_end=None,
+                rule_type="retail_revenue_boundary",
+                scope=scope,
+                state_group="retail_revenue_boundary",
+                state_name="retail_single_supplier_package",
+                state_value=1.0,
+                source_file=source_file,
+                note="零售用户合同周期内单一售电公司与单一套餐，零售侧电价作为收益端边界。",
+            )
+
         if any(keyword in path.name for keyword in ["辅助服务市场建设", "调频辅助服务市场交易实施细则", "辅助服务市场交易规则"]):
             base_effective = effective_start or publish_time
             text = extracted_text or ""

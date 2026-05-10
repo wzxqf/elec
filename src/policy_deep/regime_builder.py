@@ -37,6 +37,7 @@ def build_policy_deep_context(
         candidate_rules,
         enabled=bool(llm_cfg.get("enabled", False)),
         cache_directory=Path(config["outputs"]["root"]) / str(config["project"]["version"]) / "policy_cache",
+        cache_only=bool(llm_cfg.get("cache_only", False)),
     )
     reviewed_rules, rule_table = review_candidate_rules(llm_candidates)
     if not rule_table.empty and "source_file" in document_result.parsed_rules.columns:
