@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-## v0.46 当前架构索引
+## v0.47 当前架构索引
 
 当前正式架构固定为：
 
@@ -63,4 +63,4 @@
 - 评估入口：`python -m src.scripts.evaluate`
 - 回测入口：`python -m src.scripts.backtest`
 
-详细架构、实现机理、参数布局和报告链路见 `docs/v0.46_architecture_implementation.md`。
+详细架构、实现机理、参数布局和报告链路见 `docs/v0.47_architecture_implementation.md`。

@@ -1,6 +1,0 @@
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 已加载数据文件: /research/elec_remote_runs/v0.46/jupyter-20260510T085108Z/project/total.csv
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 训练算法: HYBRID_PSO_V040
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 政策来源文件数: 18
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 政策候选规则数: 36
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 政策正式规则数: 36
-2026-05-10 08:57:52 | INFO | elec.test_prepare_context_state_schema | 滚动重训窗口数: 10
