@@ -17,7 +17,7 @@ CORE_MARKET_CONSTRAINTS: list[dict[str, Any]] = [
         "constraint_type": "结算口径硬约束",
         "model_layer": "上层周度中长期底仓 + 15分钟结算",
         "model_mapping": "lt_settlement_base, spot_marginal_exposure, lt_spot_coupling_state, q_lt_hourly, lt_energy_15m",
-        "implementation": "周度动作只形成结算底仓 q_lt；现货采购与偏差结算在 settle_week 中按 15 分钟轨迹计算，不把中长期合约作为物理调度计划。",
+        "implementation": "周度动作只形成结算底仓 q_lt；正式主路径由 score_kernel.py 与 materialize.py 按 15 分钟轨迹计算现货采购和偏差结算，不把中长期合约作为物理调度计划。",
     },
     {
         "constraint_id": "lt_24_period_contract_curve",
@@ -42,7 +42,7 @@ CORE_MARKET_CONSTRAINTS: list[dict[str, Any]] = [
         "source_keyword": "现货市场交易实施细则",
         "constraint_type": "结算时间粒度硬约束",
         "model_layer": "15分钟代理结算回测",
-        "model_mapping": "settlement_interval_hours=0.25, settle_week, procurement_cost_15m, imbalance_energy_15m",
+        "model_mapping": "settlement_interval_hours=0.25, batch_score_particles, materialize_particle_pair, procurement_cost_15m, imbalance_energy_15m",
         "implementation": "小时级现货修正只作为内部决策近似；正式成本、波动率、CVaR 和套保误差均基于15分钟结算轨迹汇总。",
     },
     {
@@ -94,8 +94,8 @@ CORE_MARKET_CONSTRAINTS: list[dict[str, Any]] = [
         "source_keyword": "完善2026年度电力中长期交易价格机制",
         "constraint_type": "制度时点硬约束",
         "model_layer": "中长期价格代理与15分钟结算",
-        "model_mapping": "lt_price_linked_active, fixed_price_ratio_max, linked_price_ratio_min, resolve_settlement_context",
-        "implementation": "2026-02 前使用上一自然周日前均价代理；2026-02 起 resolve_settlement_context 才按40%日前固定价和60%日内联动价代理中长期价格。",
+        "model_mapping": "lt_price_linked_active, fixed_price_ratio_max, linked_price_ratio_min, lt_price_w_effective, batch_score_particles",
+        "implementation": "2026-02 前使用上一自然周日前均价代理；2026-02 起 prepare_project_context 生成 lt_price_w_effective，并由 TrainingTensorBundle 接入 score_kernel 与 materialize 的主评分/结算路径。",
     },
     {
         "constraint_id": "metering_data_traceability",
@@ -294,8 +294,9 @@ def build_market_rule_constraints_markdown(
             "",
             "- 政策解析: `src/policy/policy_parser.py` 生成结构化规则表。",
             "- 制度状态: `src/policy/policy_regime.py` 生成周度当前状态和四组前瞻状态。",
-            "- 价格口径: `src/backtest/settlement.py` 根据 `lt_price_linked_active` 切换中长期价格代理。",
+            "- 价格口径: `src/scripts/common.py` 生成 `lt_price_w_effective`，`src/training/tensor_bundle.py` 将其编译为 `lt_weekly_price`。",
             "- 下层边际空间: `src/training/score_kernel.py` 与 `src/backtest/materialize.py` 输出参数化电量决策、政策投影结果和 15 分钟结算指标。",
+            "- 旧式接口: `src/backtest/settlement.py::settle_week()` 仅作为参考实现保留，不是当前全流程主路径。",
             "- 输出位置: `outputs/<version>/reports/market_rule_constraints.md`。",
             "",
         ]

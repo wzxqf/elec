@@ -99,10 +99,11 @@
 - 每次修改核心逻辑时，同步更新参数说明与实验配置说明。
 - 最终代码应支持复现实验，而不是只输出一次性结果。
 - 根目录 `experiment_config.yaml` 为唯一人工修改入口，运行后必须输出参数快照、特征清单和滚动验证摘要。
+- 每次完整运行 `src.scripts.run_pipeline` 后，`outputs/<version>/reports/` 只保留两份面向入口的正式报告：`<version>_human_report.md` 面向人工阅读，`<version>_ai_structured_report.json` 面向 AI 深度复核；两份报告路径必须进入 `release_manifest.json`、`run_manifest.json`、`artifact_index.md`。
 - 所有正式产物必须按 `outputs/<version>/<真实输出>` 结构写入，其中 `<version>` 取自 `project.version`；不得再直接写入 `outputs/logs`、`outputs/models` 等无版本目录。
 - 版本迭代后的正式验证不再在本地直接运行测试，必须通过根目录 `run_remote_jupyter.py` 上传至 Jupyter 运行全流程和 pytest，再从服务器拉取测试数据与产物；当前服务器的 kernel spec 实测为 `python3`，项目运行解释器需通过 `ELEC_REMOTE_ENV=torch311` 解析，并用 `--probe` 确认远程 Python 路径；当前实测环境路径为 `/research/miniforge3/envs/torch311/bin/python`，如自动发现失败则用 `--remote-python` 指定。
-- Jupyter 地址、密码或 token 只能通过本机环境变量提供，禁止写入仓库文件、配置文件、日志样例或版本文档。
-- 远程拉回数据默认写入 `outputs/<version>/remote_jupyter/<run_id>/`，不得覆盖本地已有 `outputs/<version>/logs`、`metrics`、`reports`、`models` 正式目录。
+- Jupyter 远程验证地址允许在项目文档中记录为 `http://10.26.27.72:9007/`；Jupyter 密码或 token 只能通过本机环境变量提供，禁止写入仓库文件、配置文件、日志样例、版本文档或运行产物。
+- 远程拉回数据默认写入 `outputs/<version>/raw/remote_jupyter/<run_id>/`；完整远程 pipeline 返回码为 0 后可以同步覆盖本地正式 `outputs/<version>` 结果区，但必须保留 `raw/remote_jupyter/` 审计记录。
 - `pytest` 缓存、临时目录和测试结果必须统一写入 `.cache/tests/pytest/`，不得散落到项目根目录；测试成功后应删除该目录，失败时才保留用于排查。
 - 凡是当前版本仍有效、并保留在 `tests/` 主目录参与默认 `pytest` 收集的测试脚本，统一命名为 `test_<currentversion>_<purpose>.py`；其中 `<currentversion>` 由 `project.version` 去除非字母数字字符后统一派生。
 - `tests/` 主目录不得混入 `.md`、`.txt`、`.rst` 等说明文档；历史测试与说明统一归档到 `已归档/tests/`。

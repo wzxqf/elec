@@ -184,10 +184,8 @@ def compile_training_tensor_bundle(bundle: dict[str, Any], device: str = "cpu") 
         metadata_frame["actual_weekly_net_demand_mwh"].to_numpy(dtype="float32"),
         dtype=torch.float32,
     )
-    lt_weekly_price = torch.tensor(
-        metadata_frame.get("lt_price_w", pd.Series(0.0, index=metadata_frame.index)).fillna(0.0).to_numpy(dtype="float32"),
-        dtype=torch.float32,
-    )
+    lt_price_series = metadata_frame.get("lt_price_w_effective", metadata_frame.get("lt_price_w", pd.Series(0.0, index=metadata_frame.index)))
+    lt_weekly_price = torch.tensor(lt_price_series.fillna(0.0).to_numpy(dtype="float32"), dtype=torch.float32)
     hourly_tensor, hourly_valid_mask = _frame_by_week(
         hourly,
         week_index,

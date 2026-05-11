@@ -11,6 +11,7 @@ import os
 from pathlib import Path, PurePosixPath
 import shutil
 import stat
+import sys
 import time
 from typing import Any
 from urllib.error import HTTPError
@@ -40,6 +41,12 @@ EXCLUDED_DIRECTORY_NAMES = {
     ".worktrees",
     "__pycache__",
 }
+
+
+def _print_remote_text(text: str, end: str = "") -> None:
+    encoding = sys.stdout.encoding or "utf-8"
+    safe_text = text.encode(encoding, errors="replace").decode(encoding, errors="replace")
+    print(safe_text, end=end, flush=True)
 EXCLUDED_FILE_NAMES = {
     ".env",
     ".env.local",
@@ -130,7 +137,7 @@ def default_run_id() -> str:
 
 
 def default_download_dir(project_root: Path, version: str, run_id: str) -> Path:
-    return project_root / "outputs" / version / "remote_jupyter" / run_id
+    return project_root / "outputs" / version / "raw" / "remote_jupyter" / run_id
 
 
 def should_exclude_from_archive(relative_path: PurePosixPath, is_dir: bool, include_outputs: bool) -> bool:
@@ -138,6 +145,8 @@ def should_exclude_from_archive(relative_path: PurePosixPath, is_dir: bool, incl
     if parts & EXCLUDED_DIRECTORY_NAMES:
         return True
     if not include_outputs and relative_path.parts and relative_path.parts[0] == "outputs":
+        return True
+    if not include_outputs and len(relative_path.parts) >= 2 and relative_path.parts[:2] == ("已归档", "outputs") and not is_dir:
         return True
     name = relative_path.name
     if name in EXCLUDED_FILE_NAMES:
@@ -588,11 +597,11 @@ class JupyterClient:
                 content = payload.get("content", {})
                 if channel == "iopub" and msg_type == "stream":
                     text = str(content.get("text", ""))
-                    print(text, end="", flush=True)
+                    _print_remote_text(text)
                     output_parts.append(text)
                 elif channel == "iopub" and msg_type == "error":
                     traceback = "\n".join(content.get("traceback", []))
-                    print(traceback, flush=True)
+                    _print_remote_text(traceback, end="\n")
                     output_parts.append(traceback)
                 elif channel == "shell" and msg_type == "execute_reply":
                     status = str(content.get("status", "unknown"))
@@ -741,7 +750,7 @@ def sync_pulled_outputs_to_local(
     download_dir: Path,
     project_root: Path,
     version: str,
-    preserve_names: tuple[str, ...] = ("remote_jupyter",),
+    preserve_names: tuple[str, ...] = (),
 ) -> dict[str, Any]:
     source_output_dir = (download_dir / "outputs" / version).resolve()
     project_root = project_root.resolve()
@@ -752,12 +761,29 @@ def sync_pulled_outputs_to_local(
         raise RuntimeError("Refusing to sync remote outputs onto the same directory.")
     if project_root != target_output_dir and project_root not in target_output_dir.parents:
         raise RuntimeError(f"Refusing to sync outside project root: {target_output_dir}")
+    preserve_relative_paths = (Path("raw") / "remote_jupyter",)
+    temp_preserve_root = project_root / ".cache" / "remote_jupyter_sync_preserve" / uuid.uuid4().hex
+    source_copy_dir: Path | None = None
     if target_output_dir in source_output_dir.parents:
         relative_source = source_output_dir.relative_to(target_output_dir)
-        if not relative_source.parts or relative_source.parts[0] not in preserve_names:
+        source_in_preserved_nested = any(relative_source.parts[: len(relative.parts)] == relative.parts for relative in preserve_relative_paths)
+        if not relative_source.parts or (relative_source.parts[0] not in preserve_names and not source_in_preserved_nested):
             raise RuntimeError(f"Pulled output directory is inside a replaceable local output path: {source_output_dir}")
+        source_copy_dir = temp_preserve_root / "source_output"
+        shutil.copytree(source_output_dir, source_copy_dir)
+        source_output_dir = source_copy_dir
 
     target_output_dir.mkdir(parents=True, exist_ok=True)
+    preserved_relative_names: list[str] = []
+    for relative in preserve_relative_paths:
+        candidate = target_output_dir / relative
+        if not candidate.exists():
+            continue
+        preserved_copy = temp_preserve_root / "preserve" / relative
+        preserved_copy.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(candidate, preserved_copy)
+        preserved_relative_names.append(relative.as_posix())
+
     removed_names: list[str] = []
     for child in sorted(target_output_dir.iterdir(), key=lambda item: item.name):
         if child.name in preserve_names:
@@ -781,10 +807,20 @@ def sync_pulled_outputs_to_local(
         synced_files += count_files(destination)
         synced_names.append(child.name)
 
+    for relative in preserve_relative_paths:
+        preserved_copy = temp_preserve_root / "preserve" / relative
+        if preserved_copy.exists():
+            destination = target_output_dir / relative
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copytree(preserved_copy, destination, dirs_exist_ok=True)
+
+    if temp_preserve_root.exists():
+        remove_existing_path(temp_preserve_root)
+
     return {
         "source_output_dir": str(source_output_dir),
         "target_output_dir": str(target_output_dir),
-        "preserved_names": list(preserve_names),
+        "preserved_names": list(preserve_names) + preserved_relative_names,
         "removed_names": removed_names,
         "synced_names": synced_names,
         "synced_files": synced_files,

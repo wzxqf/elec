@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -9,39 +8,7 @@ from src.agents.hybrid_pso import load_hybrid_pso_model
 from src.backtest.materialize import materialize_particle_pair
 from src.scripts.common import prepare_project_context, subset_bundle_for_weeks
 from src.scripts.train import run_train
-from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
-from src.utils.io import save_markdown
 from src.utils.logger import configure_logging
-
-
-def build_validation_summary(
-    context: dict[str, Any],
-    validation: dict[str, Any],
-    model_path: Path,
-    policy_metrics: pd.DataFrame | None = None,
-) -> str:
-    metrics = validation["metrics"]
-    output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
-    policy_metrics = policy_metrics if policy_metrics is not None else pd.DataFrame()
-    mean_adjusted = float(policy_metrics.get("policy_risk_adjusted_excess_return_w", pd.Series(dtype="float64")).mean() or 0.0)
-    mean_penalty = float(policy_metrics.get("policy_risk_penalty_w", pd.Series(dtype="float64")).mean() or 0.0)
-    return "\n".join(
-        [
-            "# 验证摘要",
-            "",
-            f"- 模型路径: {relativize_path(model_path, output_root)}",
-            f"- 验证周范围: {context['split'].val[0]} 至 {context['split'].val[-1]}",
-            f"- 主算法: {context['config']['training']['algorithm']}",
-            f"- 累计采购成本: {metrics['total_procurement_cost']:.2f}",
-            f"- 累计经济收益: {metrics['total_profit']:.2f}",
-            f"- 周度成本波动率: {metrics['weekly_cost_volatility']:.2f}",
-            f"- CVaR99: {metrics['cvar99']:.2f}",
-            f"- 套保误差: {metrics['hedge_error']:.4f}",
-            f"- 政策风险惩罚均值: {mean_penalty:.4f}",
-            f"- 政策风险调整后超额收益均值: {mean_adjusted:.4f}",
-            "",
-        ]
-    )
 
 
 def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
@@ -78,21 +45,6 @@ def run_evaluate(context: dict[str, Any], model=None) -> dict[str, Any]:
     contract_value_weekly.to_csv(context["output_paths"]["metrics"] / "contract_value_weekly.csv", index=False)
     risk_factor_manifest.to_csv(context["output_paths"]["metrics"] / "risk_factor_manifest.csv", index=False)
     policy_risk_metrics.to_csv(context["output_paths"]["metrics"] / "policy_risk_adjusted_metrics.csv", index=False)
-    run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
-    save_markdown(
-        prepend_report_header(
-            build_validation_summary(
-                context,
-                {
-                    "metrics": validation.metrics,
-                },
-                model_path,
-                policy_risk_metrics,
-            ),
-            run_metadata,
-        ),
-        context["output_paths"]["reports"] / "validation_summary.md",
-    )
     logger.info("验证模块执行完成。")
     return {
         "weekly_results": validation.weekly_results,

@@ -1,8 +1,0 @@
-{
-  "upper_dim_config": 186,
-  "upper_dim_real": 182,
-  "lower_dim_config": 48,
-  "lower_dim_real": 48,
-  "compiled_layout_hash": "3fd44b987bd81b06e30baf54bf11feec29d301fadae96f296e04b439c4b3bdaa",
-  "score_kernel_device": "cuda"
-}

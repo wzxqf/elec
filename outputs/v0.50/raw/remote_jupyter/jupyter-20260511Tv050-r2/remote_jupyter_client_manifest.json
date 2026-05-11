@@ -1,0 +1,64 @@
+{
+  "jupyter_url": "http://10.26.27.72:9007/",
+  "kernel": "python3",
+  "source_archive": {
+    "archive_path": "D:\\elec\\.cache\\remote_jupyter\\v0.50\\jupyter-20260511Tv050-r2\\source.zip",
+    "file_count": 1525,
+    "byte_count": 152259742,
+    "include_outputs": false
+  },
+  "remote_manifest": {
+    "run_id": "jupyter-20260511Tv050-r2",
+    "version": "v0.50",
+    "project_dir": "elec_remote_runs/v0.50/jupyter-20260511Tv050-r2/project",
+    "output_dir": "elec_remote_runs/v0.50/jupyter-20260511Tv050-r2/project/outputs/v0.50",
+    "pytest_dir": "elec_remote_runs/v0.50/jupyter-20260511Tv050-r2/project/.cache/tests/pytest",
+    "commands": [
+      {
+        "name": "pipeline",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "run_all.py"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 799.7910685539246
+      },
+      {
+        "name": "pytest",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "-m",
+          "src.scripts.run_pytest",
+          "tests",
+          "-q"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 25.64974856376648
+      }
+    ],
+    "remote_env": "torch311",
+    "remote_python": [
+      "/research/miniforge3/envs/torch311/bin/python"
+    ],
+    "returncode": 0,
+    "artifact_path": "elec_remote_runs/v0.50/jupyter-20260511Tv050-r2/artifacts.zip"
+  },
+  "local_output_sync": {
+    "source_output_dir": "D:\\elec\\.cache\\remote_jupyter_sync_preserve\\b28131a5acac47b99a0a9275b951309c\\source_output",
+    "target_output_dir": "D:\\elec\\outputs\\v0.50",
+    "preserved_names": [
+      "raw/remote_jupyter"
+    ],
+    "removed_names": [
+      "raw"
+    ],
+    "synced_names": [
+      "artifact_index.md",
+      "raw",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_files": 46
+  }
+}

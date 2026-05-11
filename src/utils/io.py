@@ -53,13 +53,16 @@ def resolve_output_paths(config: dict[str, Any]) -> dict[str, Path]:
 
     if "root" in outputs_config:
         version_root = _resolve_project_path(outputs_config["root"], project_root) / version
+        raw_root = version_root / "raw"
         outputs = {
             "root": version_root,
-            "logs": version_root / "logs",
-            "models": version_root / "models",
-            "metrics": version_root / "metrics",
-            "figures": version_root / "figures",
             "reports": version_root / "reports",
+            "raw": raw_root,
+            "metadata": raw_root / "metadata",
+            "logs": raw_root / "logs",
+            "models": raw_root / "models",
+            "metrics": raw_root / "metrics",
+            "figures": raw_root / "figures",
         }
     else:
         outputs = {key: _resolve_project_path(value, project_root) for key, value in outputs_config.items()}

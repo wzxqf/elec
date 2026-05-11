@@ -49,10 +49,12 @@ def run_diagnostics(context: dict[str, Any]) -> dict[str, Any]:
         _frame_to_markdown(weekly_features.head(5)),
         "",
     ]
-    save_markdown("\n".join(lines), context["output_paths"]["reports"] / "diagnostics_report.md")
+    diagnostics_path = context["output_paths"]["metadata"] / "diagnostics_report.md"
+    save_markdown("\n".join(lines), diagnostics_path)
     return {
         "weekly_metadata": weekly_metadata,
         "weekly_features": weekly_features,
+        "diagnostics_report_path": diagnostics_path,
     }
 
 

@@ -43,5 +43,9 @@ def build_test_filename(purpose: str, version: str) -> str:
     return f"{build_test_prefix(version)}{normalized_purpose}.py"
 
 
-def build_version_report_filename(version: str) -> str:
-    return f"{version}报告.md"
+def build_human_report_filename(version: str) -> str:
+    return f"{version}_human_report.md"
+
+
+def build_ai_structured_report_filename(version: str) -> str:
+    return f"{version}_ai_structured_report.json"

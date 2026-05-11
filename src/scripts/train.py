@@ -2,9 +2,8 @@ from pathlib import Path
 from typing import Any
 
 from src.agents.hybrid_pso import save_hybrid_pso_model, train_hybrid_pso_model
-from src.scripts.common import prepare_project_context, split_to_dict, subset_bundle_for_weeks
-from src.utils.experiment_manifest import fallback_run_metadata, prepend_report_header, relativize_path
-from src.utils.io import save_json, save_markdown
+from src.scripts.common import prepare_project_context, subset_bundle_for_weeks
+from src.utils.io import save_json
 from src.utils.logger import configure_logging
 from src.utils.runtime_status import (
     RuntimeStatusTracker,
@@ -17,40 +16,6 @@ from src.utils.runtime_status import (
 
 TRAIN_TOTAL_PROGRESS_START = 0.05
 TRAIN_TOTAL_PROGRESS_END = 0.33
-
-
-def build_train_summary(context: dict[str, Any], training: dict[str, Any]) -> str:
-    split = split_to_dict(context["split"])
-    runtime = training["runtime_profile"]
-    output_root = context["output_paths"].get("root", context["output_paths"]["reports"].parent)
-    upper_cfg_dim = int(context["config"].get("hybrid_pso", {}).get("upper", {}).get("dimension", runtime.get("upper_dim", 0)))
-    lower_cfg_dim = int(context["config"].get("hybrid_pso", {}).get("lower", {}).get("dimension", runtime.get("lower_dim", 0)))
-    compiled_layout_hash = context.get("run_metadata", {}).get("compiled_layout_hash", "n/a")
-    return "\n".join(
-        [
-            "# 训练摘要",
-            "",
-            f"- 版本: {context['config']['version']}",
-            f"- 算法: {context['config']['training']['algorithm']}",
-            f"- 训练周: {', '.join(split['train'])}",
-            f"- 验证周: {', '.join(split['val'])}",
-            f"- 设备: {runtime['score_kernel_device']}",
-            f"- 上层粒子数: {runtime['upper_particles']}",
-            f"- 下层粒子数: {runtime['lower_particles']}",
-            f"- 上层配置维度: {upper_cfg_dim}",
-            f"- 下层配置维度: {lower_cfg_dim}",
-            f"- 上层真实维度: {runtime.get('upper_dim_real', runtime.get('upper_dim', 'n/a'))}",
-            f"- 下层真实维度: {runtime.get('lower_dim_real', runtime.get('lower_dim', 'n/a'))}",
-            f"- compiled_layout_hash: {compiled_layout_hash}",
-            f"- 迭代轮数: {runtime['iterations']}",
-            f"- 最优目标值: {training['model'].best_score:.4f}",
-            f"- 模型路径: {relativize_path(context['output_paths']['models'] / 'hybrid_pso_model.json', output_root)}",
-            f"- 训练轨迹: {relativize_path(context['output_paths']['metrics'] / 'hybrid_pso_training_trace.csv', output_root)}",
-            f"- 参数布局摘要: {relativize_path(context['output_paths']['reports'] / 'parameter_layout_summary.md', output_root)}",
-            f"- 参数布局审计: {relativize_path(context['output_paths']['reports'] / 'parameter_layout_audit.md', output_root)}",
-            "",
-        ]
-    )
 
 
 def run_train(context: dict[str, Any]) -> dict[str, Any]:
@@ -101,19 +66,7 @@ def run_train(context: dict[str, Any]) -> dict[str, Any]:
             "compiled_layout_hash": context.get("run_metadata", {}).get("compiled_layout_hash", "n/a"),
             "score_kernel_device": training_result.runtime_profile["score_kernel_device"],
         },
-        context["output_paths"]["reports"] / "training_runtime_summary.json",
-    )
-    summary = build_train_summary(
-        context,
-        {
-            "model": training_result.model,
-            "runtime_profile": training_result.runtime_profile,
-        },
-    )
-    run_metadata = context.get("run_metadata", fallback_run_metadata(context["config"]))
-    save_markdown(
-        prepend_report_header(summary, run_metadata, device=training_result.runtime_profile["score_kernel_device"]),
-        context["output_paths"]["reports"] / "train_summary.md",
+        context["output_paths"]["metadata"] / "training_runtime_summary.json",
     )
     status_tracker.update(
         stage="训练",

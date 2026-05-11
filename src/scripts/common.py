@@ -1,35 +1,34 @@
 import os
 from pathlib import Path
+import shutil
+import stat
+import time
 from typing import Any
 
 import numpy as np
 import pandas as pd
 
-from src.analysis.state_audit import build_state_schema_markdown, build_tensor_bundle_audit_markdown
 from src.backtest.rolling_pipeline import build_rolling_retrain_plan
-from src.analysis.model_layout_reporting import build_parameter_layout_markdown, build_parameter_layout_payload
+from src.analysis.model_layout_reporting import build_parameter_layout_payload
 from src.config.load_config import load_runtime_config
 from src.data.loader import load_raw_total_csv, locate_total_csv
-from src.data.preprocess import build_data_quality_markdown, clean_total_data
+from src.data.preprocess import clean_total_data
 from src.data.scenario_generator import WeekSplit, build_week_split
 from src.data.weekly_builder import build_weekly_bundle
 from src.model_layout.compiler import compile_parameter_layout
 from src.policy.feasible_domain import compile_feasible_domain
 from src.policy.market_constraints import (
     build_market_rule_constraints,
-    build_market_rule_constraints_markdown,
     validate_market_rule_alignment,
 )
 from src.policy_deep.regime_builder import build_policy_deep_context
 from src.training.tensor_bundle import compile_training_tensor_bundle
 from src.utils.experiment_manifest import (
     build_artifact_index_markdown,
-    build_feasible_domain_summary,
-    build_parameter_layout_audit_markdown,
     build_release_manifest,
     build_run_manifest,
     build_run_metadata,
-    prepend_report_header,
+    filter_existing_key_outputs,
     relativize_path,
 )
 from src.utils.io import dump_yaml, resolve_output_paths, save_json, save_markdown
@@ -45,6 +44,34 @@ REALIZED_WEEKLY_AGENT_EXCLUDE_COLUMNS = {
     "extreme_price_spike_flag_w",
     "extreme_event_flag_w",
 }
+
+
+def _remove_output_path(path: Path) -> None:
+    def _retry_remove(function, failing_path, _exc_info):
+        try:
+            Path(failing_path).chmod(stat.S_IWRITE)
+        except OSError:
+            pass
+        function(failing_path)
+
+    for attempt in range(5):
+        try:
+            if path.is_dir():
+                shutil.rmtree(path, onerror=_retry_remove)
+            else:
+                path.chmod(stat.S_IWRITE)
+                path.unlink()
+            return
+        except PermissionError:
+            if attempt == 4:
+                raise
+            time.sleep(0.05)
+
+
+def _clear_reports_dir(reports_dir: Path) -> None:
+    reports_dir.mkdir(parents=True, exist_ok=True)
+    for child in list(reports_dir.iterdir()):
+        _remove_output_path(child)
 
 
 def resolve_project_config_path(project_root: str | Path, config_path: str | Path | None = None) -> Path:
@@ -123,17 +150,28 @@ def _align_lt_price_metadata(weekly_metadata: pd.DataFrame) -> pd.DataFrame:
     metadata = weekly_metadata.copy()
     linked_active = pd.to_numeric(metadata.get("lt_price_linked_active", pd.Series(0.0, index=metadata.index)), errors="coerce").fillna(0.0)
     lt_price_w = pd.to_numeric(metadata.get("lt_price_w", pd.Series(np.nan, index=metadata.index)), errors="coerce")
+    da_price_mean = pd.to_numeric(metadata.get("da_price_mean", pd.Series(np.nan, index=metadata.index)), errors="coerce")
+    id_price_mean = pd.to_numeric(metadata.get("id_price_mean", pd.Series(np.nan, index=metadata.index)), errors="coerce")
     fixed_ratio_raw = pd.to_numeric(metadata.get("fixed_price_ratio_max", pd.Series(0.4, index=metadata.index)), errors="coerce").fillna(0.4)
     linked_ratio_raw = pd.to_numeric(metadata.get("linked_price_ratio_min", pd.Series(0.6, index=metadata.index)), errors="coerce").fillna(0.6)
     total_ratio = (fixed_ratio_raw + linked_ratio_raw).replace(0.0, 1.0)
+    fixed_ratio = fixed_ratio_raw / total_ratio
+    linked_ratio = linked_ratio_raw / total_ratio
+    linked_price = fixed_ratio * da_price_mean + linked_ratio * id_price_mean.fillna(da_price_mean)
+    linked_mask = linked_active >= 0.5
+    effective_price = lt_price_w.copy()
+    effective_price.loc[linked_mask & linked_price.notna()] = linked_price.loc[linked_mask & linked_price.notna()]
 
+    metadata["lt_price_w_prev_week_da_proxy"] = lt_price_w
+    metadata["lt_price_w_effective"] = effective_price
+    metadata["lt_price_w"] = effective_price
     metadata["lt_price_source"] = np.where(
-        lt_price_w.notna(),
-        np.where(linked_active >= 0.5, "linked_mix_40da_60id", "prev_week_da_proxy"),
+        effective_price.notna(),
+        np.where(linked_mask & linked_price.notna(), "linked_mix_40da_60id", "prev_week_da_proxy"),
         metadata.get("lt_price_source", pd.Series("warmup_unavailable", index=metadata.index)),
     )
-    metadata["lt_price_fixed_ratio"] = np.where(lt_price_w.notna(), np.where(linked_active >= 0.5, fixed_ratio_raw / total_ratio, 1.0), 0.0)
-    metadata["lt_price_linked_ratio"] = np.where(lt_price_w.notna(), np.where(linked_active >= 0.5, linked_ratio_raw / total_ratio, 0.0), 0.0)
+    metadata["lt_price_fixed_ratio"] = np.where(effective_price.notna(), np.where(linked_mask, fixed_ratio, 1.0), 0.0)
+    metadata["lt_price_linked_ratio"] = np.where(effective_price.notna(), np.where(linked_mask, linked_ratio, 0.0), 0.0)
     return metadata
 
 
@@ -164,6 +202,7 @@ def prepare_project_context(
 ) -> dict[str, Any]:
     config = load_project_config(project_root, config_path=config_path)
     output_paths = resolve_output_paths(config)
+    _clear_reports_dir(output_paths["reports"])
     logger = configure_logging(output_paths["logs"], name=logger_name)
     set_global_seed(int(config["seed"]))
 
@@ -175,8 +214,6 @@ def prepare_project_context(
         sample_end=config["sample_end"],
         expected_freq_minutes=int(config["expected_frequency_minutes"]),
     )
-    data_quality_markdown = build_data_quality_markdown(report)
-
     bundle = build_weekly_bundle(cleaned, config)
     policy_deep = build_policy_deep_context(
         policy_directory=config["policy_directory"],
@@ -194,10 +231,10 @@ def prepare_project_context(
         how="left",
     )
     bundle["weekly_features"] = bundle["weekly_features"].drop(
-        columns=["lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"],
+        columns=["lt_price_w", "lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"],
         errors="ignore",
     ).merge(
-        bundle["weekly_metadata"][["week_start", "lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"]],
+        bundle["weekly_metadata"][["week_start", "lt_price_w", "lt_price_source", "lt_price_fixed_ratio", "lt_price_linked_ratio"]],
         on="week_start",
         how="left",
     )
@@ -241,70 +278,27 @@ def prepare_project_context(
     policy_deep.failures.to_csv(output_paths["metrics"] / "policy_parse_failures.csv", index=False)
     market_constraints.to_csv(output_paths["metrics"] / "market_rule_constraints.csv", index=False)
     feasible_domain.weekly_bounds.to_csv(output_paths["metrics"] / "feasible_domain_manifest.csv", index=False)
-    market_rule_constraints_markdown = build_market_rule_constraints_markdown(
-        config=config,
-        constraints=market_constraints,
-        rule_table=policy_deep.rule_table,
-        violations=market_constraint_violations,
-    )
-    feasible_domain_summary_markdown = build_feasible_domain_summary(feasible_domain)
     bundle["weekly_metadata"].to_csv(output_paths["metrics"] / "weekly_metadata.csv", index=False)
     bundle["weekly_features"].to_csv(output_paths["metrics"] / "weekly_features.csv", index=False)
     feature_manifest.to_csv(output_paths["metrics"] / "feature_manifest.csv", index=False)
-    save_json(
-        {
-            "version": config["version"],
-            "agent_feature_columns": agent_feature_columns,
-            "manifest": feature_manifest.to_dict(orient="records"),
-        },
-        output_paths["reports"] / "feature_manifest.json",
-    )
     layout_payload = build_parameter_layout_payload(compiled_parameter_layout)
-    save_json(layout_payload, output_paths["reports"] / "compiled_parameter_layout.json")
+    save_json(layout_payload, output_paths["metadata"] / "compiled_parameter_layout.json")
     run_metadata = build_run_metadata(
         config=config,
         output_root=output_paths["root"],
         compiled_layout_payload=layout_payload,
         constraints=market_constraints,
     )
-    state_schema_markdown = build_state_schema_markdown(bundle, bundle["tensor_bundle"])
-    tensor_bundle_audit_markdown = build_tensor_bundle_audit_markdown(bundle, bundle["tensor_bundle"])
-    save_markdown(prepend_report_header(data_quality_markdown, run_metadata), output_paths["reports"] / "data_quality_report.md")
-    save_markdown(
-        prepend_report_header(market_rule_constraints_markdown, run_metadata),
-        output_paths["reports"] / "market_rule_constraints.md",
-    )
-    save_markdown(
-        prepend_report_header(feasible_domain_summary_markdown, run_metadata),
-        output_paths["reports"] / "policy_feasible_domain_summary.md",
-    )
-    save_markdown(
-        prepend_report_header(build_parameter_layout_markdown(compiled_parameter_layout), run_metadata),
-        output_paths["reports"] / "parameter_layout_summary.md",
-    )
-    save_markdown(
-        prepend_report_header(build_parameter_layout_audit_markdown(compiled_parameter_layout), run_metadata),
-        output_paths["reports"] / "parameter_layout_audit.md",
-    )
-    save_markdown(
-        prepend_report_header(state_schema_markdown, run_metadata),
-        output_paths["reports"] / "state_schema_snapshot.md",
-    )
-    save_markdown(
-        prepend_report_header(tensor_bundle_audit_markdown, run_metadata),
-        output_paths["reports"] / "tensor_bundle_audit.md",
-    )
-    dump_yaml(config["raw_experiment_config"], output_paths["reports"] / "train_config_snapshot.yaml")
+    dump_yaml(config["raw_experiment_config"], output_paths["metadata"] / "train_config_snapshot.yaml")
     key_outputs = {
-        "compiled_layout_path": relativize_path(output_paths["reports"] / "compiled_parameter_layout.json", output_paths["root"]),
-        "parameter_layout_audit_path": relativize_path(output_paths["reports"] / "parameter_layout_audit.md", output_paths["root"]),
-        "state_schema_snapshot_path": relativize_path(output_paths["reports"] / "state_schema_snapshot.md", output_paths["root"]),
-        "tensor_bundle_audit_path": relativize_path(output_paths["reports"] / "tensor_bundle_audit.md", output_paths["root"]),
+        "compiled_layout_path": relativize_path(output_paths["metadata"] / "compiled_parameter_layout.json", output_paths["root"]),
+        "train_config_snapshot_path": relativize_path(output_paths["metadata"] / "train_config_snapshot.yaml", output_paths["root"]),
         "feasible_domain_manifest_path": relativize_path(output_paths["metrics"] / "feasible_domain_manifest.csv", output_paths["root"]),
         "policy_rule_table_path": relativize_path(output_paths["metrics"] / "policy_rule_table.csv", output_paths["root"]),
         "policy_state_trace_path": relativize_path(output_paths["metrics"] / "policy_state_trace.csv", output_paths["root"]),
-        "feature_manifest_path": relativize_path(output_paths["reports"] / "feature_manifest.json", output_paths["root"]),
+        "feature_manifest_path": relativize_path(output_paths["metrics"] / "feature_manifest.csv", output_paths["root"]),
     }
+    key_outputs = filter_existing_key_outputs(output_paths["root"], key_outputs)
     save_json(build_release_manifest(run_metadata, config, key_outputs), output_paths["root"] / "release_manifest.json")
     save_json(build_run_manifest(run_metadata, config, key_outputs), output_paths["root"] / "run_manifest.json")
     save_markdown(build_artifact_index_markdown(run_metadata, key_outputs), output_paths["root"] / "artifact_index.md")

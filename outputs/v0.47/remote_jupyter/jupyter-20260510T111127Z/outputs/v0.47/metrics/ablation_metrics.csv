@@ -1,5 +1,0 @@
-variant_name,total_procurement_cost,total_profit,weekly_cost_volatility,cvar99,hedge_error,avg_adjustment_mwh,mean_reward,max_drawdown,feasible_domain_trigger_weeks
-full_model,14593810560.0,1053366718.0,0.0,4776809.3,0.57525714635849,0.0,-53152657.9,0.0,10
-no_parameter_layout_enhancement,14854706048.0,792471217.5,0.0,4465553.275,0.5752571582794189,0.0,-79039889.3,0.0,10
-no_policy_projection,13581516288.0,2068174336.0,0.0,4293417.425,0.7011373341083527,0.0,49242456.8,0.0,0
-no_state_enhancement,14593810560.0,1053366718.0,0.0,4776809.3,0.57525714635849,0.0,-53152657.9,0.0,10

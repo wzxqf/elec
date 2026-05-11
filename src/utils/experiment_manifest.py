@@ -81,7 +81,7 @@ def build_feasible_domain_summary(domain: Any) -> str:
             f"- projection_clip_mean: {projection_clip_mean:.4f}",
             f"- projection_clip_max: {projection_clip_max:.4f}",
             f"- 结算模式: {', '.join(settlement_modes) if settlement_modes else '无'}",
-            "- runtime_projection_reference: reports/constraint_activation_report.md, metrics/ablation_metrics.csv",
+            "- runtime_projection_reference: raw/metrics/rolling_weekly_results.csv, raw/metrics/ablation_metrics.csv",
             "- note: 本摘要仅统计编译期静态边界，不统计运行时投影/裁剪触发次数。",
             "",
         ]
@@ -166,6 +166,42 @@ def build_artifact_index_markdown(run_metadata: dict[str, Any], key_outputs: dic
         lines.append(f"- {label}: {path}")
     lines.append("")
     return "\n".join(lines)
+
+
+def load_existing_key_outputs(output_root: str | Path) -> dict[str, str]:
+    root = Path(output_root)
+    for manifest_name in ["release_manifest.json", "run_manifest.json"]:
+        manifest_path = root / manifest_name
+        if not manifest_path.exists():
+            continue
+        try:
+            payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            continue
+        key_outputs = payload.get("key_outputs", {})
+        if isinstance(key_outputs, dict):
+            return {str(key): str(value) for key, value in key_outputs.items()}
+    return {}
+
+
+def filter_existing_key_outputs(output_root: str | Path, key_outputs: dict[str, str]) -> dict[str, str]:
+    root = Path(output_root)
+    filtered: dict[str, str] = {}
+    for label, path in key_outputs.items():
+        if not path:
+            continue
+        candidate = Path(path)
+        resolved = candidate if candidate.is_absolute() else root / candidate
+        if resolved.exists():
+            filtered[str(label)] = str(path)
+    return filtered
+
+
+def merge_key_outputs_preserving_existing(output_root: str | Path, key_outputs: dict[str, str]) -> dict[str, str]:
+    existing_outputs = filter_existing_key_outputs(output_root, load_existing_key_outputs(output_root))
+    current_outputs = filter_existing_key_outputs(output_root, key_outputs)
+    merged = {**existing_outputs, **current_outputs}
+    return {key: merged[key] for key in sorted(merged)}
 
 
 def relativize_path(path: str | Path, output_root: str | Path) -> str:

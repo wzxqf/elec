@@ -1,6 +1,6 @@
 # ARCHITECTURE.md
 
-## v0.47 当前架构索引
+## v0.50 当前架构索引
 
 当前正式架构固定为：
 
@@ -30,9 +30,10 @@
 3. 读取市场数据与政策目录
 4. 构造制度状态和前瞻制度状态
 5. 编译可行域并生成张量包
-6. 运行 `HYBRID_PSO_V040`
-7. 物化周度、小时级和 15 分钟结果
-8. 输出报告、指标、模型与清单
+6. 生成 `lt_price_w_effective` 并编译为 `lt_weekly_price`
+7. 运行 `HYBRID_PSO_V040`
+8. 物化周度、小时级和 15 分钟结果
+9. 输出报告、指标、模型与清单
 
 ## 正式输出字段
 
@@ -63,4 +64,4 @@
 - 评估入口：`python -m src.scripts.evaluate`
 - 回测入口：`python -m src.scripts.backtest`
 
-详细架构、实现机理、参数布局和报告链路见 `docs/v0.47_architecture_implementation.md`。
+详细架构、实现机理、参数布局和报告链路见 `docs/v0.50_architecture_implementation.md`。

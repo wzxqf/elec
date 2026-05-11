@@ -1,11 +1,36 @@
 # 更新日志
 
+## v0.50
+
+- 将当前正式版本号更新为 `project.version: v0.50`，正式输出目录切换为 `outputs/v0.50/`，活跃测试命名同步迁移为 `test_v050_<purpose>.py`。
+- 沿用 `HYBRID_PSO_V040` 主线和湖南售电公司研究边界，不引入新的市场主体、旧式月度决策或独立下层智能体训练。
+- 正式报告链收口为两份入口文件：`reports/v0.50_human_report.md` 面向人工阅读，`reports/v0.50_ai_structured_report.json` 面向 AI 深度复核。
+- CSV、模型、日志、配置快照、参数布局和远程拉回记录继续按 `raw/metrics`、`raw/models`、`raw/logs`、`raw/metadata`、`raw/remote_jupyter/<run_id>` 分类保存。
+- `v0.50.md`、`docs/v0.50_architecture_implementation.md` 和 `docs/v0.50_algorithm_implementation_logic.md` 作为当前活跃说明，README、约束、状态 Schema 和策略层文档同步更新到 `v0.50` 口径。
+- 远程正式验证仍通过根目录 `run_remote_jupyter.py` / `run_remote_jupyter.ps1` 执行完整 pipeline 与 pytest，Jupyter 密码或 token 仅从本机环境变量读取。
+
+## v0.48
+
+- 将当前正式版本号更新为 `project.version: v0.48`，正式输出目录切换为 `outputs/v0.48/`，活跃测试命名同步迁移为 `test_v048_<purpose>.py`。
+- 继承 `v0.47` 审计修复后的制度价格与远程 Jupyter 验证口径，不改变 `HYBRID_PSO_V040` 主线。
+- 新增 `v0.48.md` 与 `docs/v0.48_architecture_implementation.md` 作为当前活跃说明，`v0.47` 说明、架构说明、算法实现说明和正式产物转入归档区。
+- 文档统一到 `v0.48 + HYBRID_PSO_V040 + outputs/v0.48/` 口径，保留 Jupyter 地址说明且不写入密码或 token。
+- 版本迭代后的正式验证继续以根目录 `run_remote_jupyter.py` / `run_remote_jupyter.ps1` 为入口，远程执行完整 pipeline 和 pytest 后拉回 `outputs/v0.48/raw/remote_jupyter/<run_id>/`。
+- 抛弃旧式分散报告逻辑：`reports/` 只保留 `v0.48_human_report.md` 和 `v0.48_ai_structured_report.json`，CSV、模型、日志、配置快照和参数布局统一归入 `raw/` 分类目录，远程拉回记录迁移到 `raw/remote_jupyter/<run_id>/`。
+
 ## v0.47
 
 - 将当前正式版本号更新为 `project.version: v0.47`，正式输出目录切换为 `outputs/v0.47/`，活跃测试命名同步迁移为 `test_v047_<purpose>.py`。
 - 继承 `v0.46` 审计修复后的制度时点、可行域合并、15 分钟实际负荷基准结算和远程验证口径，不改变 `HYBRID_PSO_V040` 主线与论文模型边界。
 - 新增 `v0.47.md` 与 `docs/v0.47_architecture_implementation.md` 作为当前活跃说明，`v0.46` 说明和架构文档转入归档区。
 - 删除本轮审计过程中失败或中间状态的远程 Jupyter 产物，只保留成功验证记录和历史发布产物。
+- 调整远程验证文档限制：项目文档允许记录 Jupyter 地址 `http://10.26.27.72:9007/`；密码或 token 仍只允许通过本机环境变量提供，禁止写入仓库文件、配置文件、日志样例、版本文档或运行产物。
+- 修复 2026-02 后中长期联动价格口径：`lt_price_w_effective` 进入评分张量、物化回测和基准策略，`lt_price_w_prev_week_da_proxy` 保留为审计字段。
+- 补全 `artifact_index.md`、`release_manifest.json`、`run_manifest.json` 的全流程产物索引，覆盖模型、训练、验证、滚动回测、基准、消融、稳健性和版本总报告。
+- 新增 `reports/gpt_deep_research_run_detail.md`，每次完整 pipeline 运行后记录项目实现链路、配置口径、正式验证/测试结果、滚动窗口、基准、消融、稳健性和关键产物路径，并纳入三份 manifest。
+- 明确滚动外推窗口、正式验证集和正式测试集的报告口径，稳健性改为滚动测试窗口情景结算重跑。
+- 将上层配置维度统一到当前编译真实维度 `182`，并把文档中的主路径统一为 `score_kernel.py -> materialize.py`。
+- 新增 PowerShell 远程验证一键入口 `run_remote_jupyter.ps1`：自动解析本机 `torch311` Python，补齐非敏感 Jupyter 默认参数，默认先 `--probe` 再执行完整远程 pipeline 和 pytest；Jupyter 密码或 token 仍只从环境变量读取。
 
 ## v0.46
 

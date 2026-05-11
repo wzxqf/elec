@@ -55,13 +55,23 @@ def build_excess_return_validation_summary(policy_metrics: pd.DataFrame, rolling
     mean_penalty = float(policy_metrics.get("policy_risk_penalty_w", pd.Series(dtype="float64")).mean() or 0.0)
     mean_adjusted = float(policy_metrics.get("policy_risk_adjusted_excess_return_w", pd.Series(dtype="float64")).mean() or 0.0)
     mean_excess = float(policy_metrics.get("excess_profit_w", pd.Series(dtype="float64")).mean() or 0.0)
+    persistent_count = 0
+    rolling_window_count = 0
     if not rolling_metrics.empty and "active_excess_return_persistent" in rolling_metrics.columns:
-        persistent = bool(rolling_metrics["active_excess_return_persistent"].astype(bool).any())
+        persistent_flags = rolling_metrics["active_excess_return_persistent"].astype(bool)
+        persistent_count = int(persistent_flags.sum())
+        rolling_window_count = int(len(persistent_flags))
         avg_sharpe = float(rolling_metrics.get("window_policy_risk_adjusted_sharpe", pd.Series(dtype="float64")).mean() or 0.0)
     else:
-        persistent = mean_adjusted > 0.0
+        persistent_count = int(mean_adjusted > 0.0)
+        rolling_window_count = 1
         avg_sharpe = 0.0
-    conclusion = "持续跑赢 dynamic_lock_only" if persistent else "未持续跑赢 dynamic_lock_only"
+    if persistent_count == rolling_window_count and rolling_window_count > 0:
+        conclusion = "全部滚动窗口跑赢 dynamic_lock_only"
+    elif persistent_count > 0:
+        conclusion = "部分滚动窗口跑赢 dynamic_lock_only"
+    else:
+        conclusion = "未在滚动窗口持续跑赢 dynamic_lock_only"
     return "\n".join(
         [
             "# 超额收益验证摘要",
@@ -70,6 +80,7 @@ def build_excess_return_validation_summary(policy_metrics: pd.DataFrame, rolling
             f"- 周度政策风险惩罚均值: {mean_penalty:.4f}",
             f"- 周度政策风险调整后超额收益均值: {mean_adjusted:.4f}",
             f"- 政策风险调整后夏普: {avg_sharpe:.4f}",
+            f"- 跑赢窗口数: {persistent_count}/{rolling_window_count}",
             f"- 结论: {conclusion}",
             "",
         ]

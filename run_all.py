@@ -274,12 +274,13 @@ def main() -> int:
     version = parse_project_version(config_path)
     python_exe = resolve_python_executable()
     output_dir = project_root / "outputs" / version
+    raw_log_dir = output_dir / "raw" / "logs"
     mpl_config_dir = project_root / ".cache" / "matplotlib"
     mpl_config_dir.mkdir(parents=True, exist_ok=True)
-    (output_dir / "logs").mkdir(parents=True, exist_ok=True)
-    runtime_status_path = output_dir / "logs" / "runtime_status.json"
-    stdout_log_path = output_dir / "logs" / "runner_stdout.log"
-    stderr_log_path = output_dir / "logs" / "runner_stderr.log"
+    raw_log_dir.mkdir(parents=True, exist_ok=True)
+    runtime_status_path = raw_log_dir / "runtime_status.json"
+    stdout_log_path = raw_log_dir / "runner_stdout.log"
+    stderr_log_path = raw_log_dir / "runner_stderr.log"
     run_cmd = [str(python_exe), "-m", "src.scripts.run_pipeline"]
 
     print(f"Project root: {project_root}")

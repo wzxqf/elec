@@ -85,7 +85,13 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
             sharpe_warning = "ok"
         sharpe = 0.0 if guard_triggered else adjusted_mean / adjusted_std
         active_positive = adjusted_mean > 0.0
-        active_persistent = active_positive and win_rate >= 0.5 and (stable_window or sharpe > 0.0)
+        active_persistent = (not guard_triggered) and active_positive and win_rate >= 0.5 and sharpe > 0.0
+        if guard_triggered:
+            conclusion = "窗口样本不足或波动率过低，保留附录口径"
+        elif active_persistent:
+            conclusion = "该窗口跑赢 dynamic_lock_only"
+        else:
+            conclusion = "该窗口未跑赢 dynamic_lock_only"
         rows.append(
             {
                 "window_name": window_name,
@@ -108,7 +114,7 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
                 "active_excess_return_positive": active_positive,
                 "active_excess_return_persistent": active_persistent,
                 "dynamic_lock_only_outperformed": float(excess.mean()) > 0.0,
-                "excess_return_conclusion": "持续跑赢 dynamic_lock_only" if active_persistent else "未持续跑赢 dynamic_lock_only",
+                "excess_return_conclusion": conclusion,
             }
         )
     return pd.DataFrame(rows)

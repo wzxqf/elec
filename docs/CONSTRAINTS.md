@@ -1,8 +1,8 @@
 # CONSTRAINTS.md
 
-## v0.47 生效约束
+## v0.50 生效约束
 
-本文件只保留当前版本有效约束，所有条目均服务于 `v0.47 + HYBRID_PSO_V040 + outputs/v0.47/` 的正式实现。
+本文件只保留当前版本有效约束，所有条目均服务于 `v0.50 + HYBRID_PSO_V040 + outputs/v0.50/` 的正式实现。
 
 ## 研究对象边界
 
@@ -37,6 +37,7 @@
 
 - 中长期合约仅用于结算与风险管理，不作为物理执行计划
 - 中长期交易口径按 24 小时曲线处理
+- 2026-02 起中长期价格口径使用 `lt_price_w_effective`，按 40% 日前均价与 60% 日内均价生成并进入主评分张量
 - 日前现货可在训练时聚合到小时，但回测结算必须兼容 96 个 15 分钟时段
 - 零售电价机制作为收益端约束，不作为自由动作变量
 
@@ -44,8 +45,9 @@
 
 - 训练、验证、回测和滚动再训练必须显式分离
 - 主回测必须采用滚动窗或扩展窗再训练
-- 报告阶段才允许物化可解释表格与审计文件
-- 运行后必须输出参数快照、特征清单和滚动验证摘要
+- 报告阶段只生成最终人工报告和 AI 结构化报告
+- 运行后必须输出参数快照、特征清单和滚动验证数据
+- 每次完整 pipeline 运行后必须输出 `reports/v0.50_human_report.md` 与 `reports/v0.50_ai_structured_report.json`，供人工阅读和 AI 深度复核
 
 ## 收益、风险与基准边界
 
@@ -58,17 +60,21 @@
 
 正式产物统一写入 `outputs/<version>/...`，其中 `<version>` 取自 `project.version`。正式目录至少包含：
 
-- `logs/`
-- `models/`
-- `metrics/`
 - `reports/`
+- `raw/`
 
 关键文件至少包含：
 
 - `release_manifest.json`
 - `run_manifest.json`
 - `artifact_index.md`
-- `train_config_snapshot.yaml`
-- `feature_manifest.csv`
-- `feasible_domain_manifest.csv`
-- `v0.47报告.md`
+- `reports/v0.50_human_report.md`
+- `reports/v0.50_ai_structured_report.json`
+- `raw/metadata/train_config_snapshot.yaml`
+- `raw/metadata/compiled_parameter_layout.json`
+- `raw/metadata/training_runtime_summary.json`
+- `raw/metrics/feature_manifest.csv`
+- `raw/metrics/feasible_domain_manifest.csv`
+- `raw/metrics/rolling_window_schedule.csv`
+- `raw/metrics/rolling_settlement_results.csv`
+- `raw/metrics/robustness_metrics.csv`

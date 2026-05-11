@@ -27,7 +27,8 @@ def resolve_settlement_context(
     else:
         fixed_ratio = 1.0
         linked_ratio = 0.0
-        lt_price = float(metadata["lt_price_w"]) if pd.notna(metadata.get("lt_price_w")) else da_proxy
+        effective_price = metadata.get("lt_price_w_effective", metadata.get("lt_price_w"))
+        lt_price = float(effective_price) if pd.notna(effective_price) else da_proxy
         regime = "2026-02前上一自然周日前均价代理"
 
     mechanism_active = float(metadata.get("renewable_mechanism_active", 0.0))
