@@ -1,0 +1,14 @@
+Many real-world search and optimization problems involve inequality and/or equality constraints and are thus posed as constrained
+optimization problems. In trying to solve constrained optimization problems using genetic algorithms (GAs) or classical optimization
+methods, penalty function methods have been the most popular approach, because of their simplicity and ease of implementation.
+However, since the penalty function approach is generic and applicable to any type of constraint (linear or nonlinear), their performance is not always satisfactory. Thus, researchers have developed sophisticated penalty functions speci®c to the problem at hand and
+the search algorithm used for optimization. However, the most dicult aspect of the penalty function approach is to ®nd appropriate
+penalty parameters needed to guide the search towards the constrained optimum. In this paper, GA's population-based approach and
+ability to make pair-wise comparison in tournament selection operator are exploited to devise a penalty function approach that does
+not require any penalty parameter. Careful comparisons among feasible and infeasible solutions are made so as to provide a search
+direction towards the feasible region. Once sucient feasible solutions are found, a niching method (along with a controlled mutation
+operator) is used to maintain diversity among feasible solutions. This allows a real-parameter GA's crossover operator to continuously
+®nd better feasible solutions, gradually leading the search near the true optimum solution. GAs with this constraint handling approach
+have been tested on nine problems commonly used in the literature, including an engineering design problem. In all cases, the proposed
+approach has been able to repeatedly ®nd solutions closer to the true optimum solution than that reported earlier. Ó 2000 Elsevier
+Science S.A. All rights reserved.

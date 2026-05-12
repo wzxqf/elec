@@ -1,0 +1,34 @@
+A concept for the optimization of nonlinear functions using particle swarm methodology is introduced.
+The evolution of several paradigms is outlined, and an implementation of one of the paradigms is
+discussed. Benchmark testing of the paradigm is described, and applications, including nonlinear
+function optimization and neural network training, are proposed. The relationships between particle
+swarm optimization and both artificial life and genetic algorithms are described,
+1 INTRODUCTION
+This paper introduces a method for optimization of continuous nonlinear functions. The method was
+discovered through simulation of a simplified social model; thus the social metaphor is discussed,
+though the algorithm stands without metaphorical support. This paper describes the particle swarm
+optimization concept in terms of its precursors, briefly reviewing the stages of its development from
+social simulation to optimizer. Discussed next are a few paradigms that implement the concept.
+Finally, the implementation of one paradigm is discussed in more detail, followed by results obtained
+from applications and tests upon which the paradigm has been shown to perform successfully.
+Particle swarm optimization has roots in two main component methodologies. Perhaps more obvious
+are its ties to artificial life (A-life) in general, and to bird flocking, fish schooling, and swarming theory
+in particular. It is also related, however, to evolutionary computation, and has ties to both genetic
+algorithms and evolutionary programming. These relationships are briefly reviewed in the paper.
+Particle swarm optimization as developed by the authors comprises a very simple concept, and
+paradigms can be implemented in a few lines of computer code. It requires only primitive
+mathematical operators, and is computationally inexpensive in terms of both memory requirements and
+speed. Early testing has found the implementation to be effective with several kinds of problems. This
+paper discusses application of the algorithm to the training of artificial neural network weights,
+Particle swarm optimization has also been demonstrated to perform well on genetic algorithm test
+functions. This paper discusses the performance on Schaffer's f6 function, as described in Davis [l].
+2 SIMULATING SOCIAL BEHAVIOR
+A number of scientists have created computer simulations of various interpretations of the movement of
+organisms in a bird flock or fish school. Notably, Reynolds [8] and Heppner and Grenander [4]
+presented simulations of bird flocking. Reynolds was intrigued by the aesthetics of bird flocking
+choreography, and Heppner, a zoologist, was interested in discovering the underlying rules that enabled
+large numbers of birds to flock synchronously, often changing direction suddenly, scattering and
+regrouping, etc. Both of these scientists had the insight that local processes, such as those modeled by
+0-7803-2768-3/95/$4.00 0
+1995 IEEE
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TE

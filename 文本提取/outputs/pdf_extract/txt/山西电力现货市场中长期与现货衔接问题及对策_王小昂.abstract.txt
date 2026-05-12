@@ -1,0 +1,16 @@
+The connection between the medium &
+long-term trading and the spot market is one of the key factors
+considered in the construction of spot markets. The centralized
+spot market in Shanxi province, in which both the power
+generation and consumption participate in the tradings, has
+gone through several settlement trial operations under various
+typical grid circumstances. This paper analyzes the problems of
+marketized medium & long-term trading connected with the
+spot market in Shanxi province. It points out that the key to
+solve the problems is to establish the capacity compensation
+mechanism as soon as possible, and to carry out the time
+division medium & long-term trading fitting well with the spot
+markets. Combining with the spot market settlement trial
+operation, a new time division medium & long-term trading
+mechanism is designed, including the trading modes, the trading
+cycles, the contract decomposition, the risk control, and so on.

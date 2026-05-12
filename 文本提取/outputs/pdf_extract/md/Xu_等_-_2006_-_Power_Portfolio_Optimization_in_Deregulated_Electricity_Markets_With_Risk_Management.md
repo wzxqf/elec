@@ -1,0 +1,722 @@
+# Xu 等 - 2006 - Power Portfolio Optimization in Deregulated Electricity Markets With Risk Management
+
+## Metadata
+
+- source_pdf: 参考文献/Xu 等 - 2006 - Power Portfolio Optimization in Deregulated Electricity Markets With Risk Management.pdf
+- extraction_method: pymupdf
+- extraction_status: partial
+- title: 
+- doi: 
+
+## Abstract
+
+
+
+## Body
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+Power Portfolio Optimization in Deregulated
+Electricity Markets With Risk Management
+Jun Xu, Peter B. Luh, Fellow, IEEE, Frederick B. White, Ernan Ni, and Krishnan Kasiviswanathan
+Abstract—In a deregulated electric power system, multiple markets of different time scales exist with various power supply instruments. A load serving entity (LSE) has multiple choices from
+these instruments to meet its load obligations. In view of the large
+amount of power involved, the complex market structure, the risks
+in such volatile markets, the stringent constraints to be satisﬁed,
+and the long time horizon, a power portfolio optimization problem
+is of critical importance for an LSE to serve its load, maximize its
+proﬁt, and manage its risks. In this paper, a midterm power portfolio optimization problem with risk management is presented. Key
+instruments are considered, risk terms based on semi-variances
+of spot market transactions are introduced, and penalties on load
+obligation violations are added to the objective function to improve
+algorithm convergence and constraint satisfaction. To overcome
+the inseparability of the resulting problem, a surrogate optimization framework is developed, enabling a decomposition and coordination approach. Numerical testing results show that our method
+effectively provides decisions for various instruments to maximize
+proﬁt and manage risks, and it is computationally efﬁcient.
+Index Terms—Deregulated electricity market, power portfolio
+optimization, risk management.
+I. INTRODUCTION
+I
+N a deregulated electric power system, multiple markets of
+different time scales exist, e.g., forward market, day-ahead
+market, and real-time market; each market has multiple power
+supply instruments. A load serving entity (LSE) has multiple
+choices from these instruments to meet its load obligations.
+For example, in the forward market, different contracts for
+purchasing or selling power at ﬁxed prices are available months
+before the operating day to hedge against risks. In the day-ahead
+market, an LSE can submit demand bids and generation offers
+to purchase and sell power at the market-clearing price (MCP).
+Also, generation units can be self-scheduled to provide power
+for the operating day. In the real-time market, certain contracts,
+such as options, can be executed or not based on needs, and an
+LSE can directly purchase power from or sell power to the spot
+market at real-time market prices. In view of the large amount
+of power involved, the complex market structure, and the risks
+in such volatile markets, a power portfolio problem is of critical
+Manuscript received September 12, 2005; revised February 1, 2006. This
+work was supported in part by a grant from Select Energy Inc. and in part by the
+National Science Foundation under Grant ECS-0323685. Paper no. TPWRS-
+00574-2005.
+J. Xu and P. B. Luh are with the Department of Electrical and Computer
+Engineering, University of Connecticut, Storrs, CT 06269-2157 USA (e-mail:
+junxu@engr.uconn.edu; luh@engr.uconn.edu).
+F. B. White, E. Ni and K. Kasiviswanathan are with Select Energy Inc., Berlin,
+CT 06037 USA (e-mail: whitefb@selectenergy.com; nie@selectenergy.com;
+kasivk@selectenergy.com).
+Digital Object Identiﬁer 10.1109/TPWRS.2006.879272
+importance for an LSE to serve its load, maximize its proﬁt,
+and manage its risks.
+A midterm power portfolio optimization problem with risk
+management is presented in this paper. The time horizon ranges
+from a month to a year. The problem is difﬁcult in view that
+the instruments of different markets have different time scales
+but are coupled through load obligation constraints. Also, the
+conventional risk term deﬁned by portfolio variances [9] is not
+appropriate in the power market because an LSE is at risk only
+when purchasing power at prices higher than expected or when
+selling power at prices lower than expected. It is difﬁcult to de-
+ﬁne a risk term that captures this characteristic and can be ef-
+ﬁciently managed within an optimization framework. Finally,
+in view that some decision variables such as the amount of
+strips/options and pumping levels of pumped-storage units have
+discrete values and that there are tight limits on spot market purchases/sales to bound market risks, it is difﬁcult to obtain fast
+convergence and good feasible solutions.
+A literature review is presented in Section II, where it can be
+seen that a good method that efﬁciently manages risks within
+an optimization framework for a midterm large-scale portfolio
+optimization is lacking. The problem formulation is described
+in Section III. Risk terms based on semi-variances of spot
+market costs are introduced. To improve algorithm convergence
+and constraint satisfaction, quadratic penalty terms on the violation of load obligation constraints are added to the objective
+function. In view that the penalty term is not additive, the
+resulting problem is inseparable. To overcome this difﬁculty, a
+surrogate optimization framework is developed in Section IV.
+In the process, all decision variables associated with a particular
+instrument are pulled out to form an instrument subproblem,
+and decision variables for this instrument are optimized while
+keeping all other variables at their latest available values.
+Numerical testing results presented in Section V show that our
+method effectively provides near-optimal decisions to serve the
+load, maximize the proﬁt, and manage risks, and the method is
+computationally efﬁcient.
+II. LITERATURE REVIEW
+Studies on midterm power portfolio optimization and risk
+management can be categorized into three major approaches:
+portfolio evaluation based on existing ﬁnancial models;
+Markowitz mean-variance based methods; and stochastic
+programming.
+Existing ﬁnancial models have been used in portfolio optimization to evaluate power supply instruments and portfolios.
+For example, an option-pricing model, which evaluates an option by creating a replicating portfolio whose costs equal those
+0885-8950/$20.00 © 2006 IEEE
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+of the option, was used to evaluate individual instruments in
+[14]. The problem is then to maximize the overall proﬁt, subject
+to operational and ﬁnancial constraints. The problem thus formulated, however, is a large-scale, nonlinear, mixed-integer stochastic optimization problem and cannot be directly solved by
+using mathematical programming techniques. Heuristics were
+used to solve the problem. A value-at-risk model, which measures the minimum expected cost of a portfolio within a given
+conﬁdence interval, was used to evaluate a power portfolio in
+[5]. The problem is then to minimize the cost of the portfolio
+subject to operational and ﬁnancial constraints. The resulting
+problem is also a nonlinear, mixed-integer, stochastic optimization problem. Stochastic dynamic programming was used to
+solve a small portfolio problem. A similar approach was presented later in [11].
+The Markowitz mean-variance model has been widely used
+in portfolio optimization [9]. The problem is to minimize the
+risk, which is deﬁned as the variance of a portfolio, for a given
+return. Quadratic programming is used to solve the problem.
+The mean-variance model was extended to power portfolio optimization problems in [4], [16], and [17]. A power portfolio
+optimization problem considering forward contracts and generation units was presented in [17]. It is to minimize the cost variance of the portfolio subject to transaction cost limits, generation unit constraints, and ﬁnancial constraints. Because of the
+on/off decision variables of generation units, the problem thus
+formulated is a mixed-integer programming problem. Heuristics were used to solve a small problem. The risk deﬁnition,
+however, is not appropriate in the power market as explained
+before.
+A stochastic programming model was presented in [13]. The
+power supply instruments include forward contracts, generation
+units, and spot market transactions. The problem is to maximize
+the proﬁt while serving the load. To solve the problem, a large
+number of scenarios were generated through statistical models.
+Scenario analysis based on a decomposition technique was then
+used to select portfolio positions that perform well. A similar
+approach was presented earlier in [12]. A shortcoming of this
+method is that it is highly dependent on the choice of scenarios.
+From the above, it can be seen that a good method that efﬁ-
+ciently manages risks within an optimization framework for a
+midterm large-scale portfolio problem is lacking.
+III. PROBLEM FORMULATION
+Consider a midterm power portfolio optimization problem
+with time horizon ranging from a month to a year. The time
+horizon consists of K discrete time intervals of equal duration
+, with time index k ranging from 1 to K. For simplicity, physical constraints such as network limitations (congestion) are not
+considered. In view that decisions are made months before the
+operating day, it is assumed that the day-ahead market is merged
+with the real-time market. The power supply instruments include strips, call/put options, generation units, and spot market
+purchases/sales. In the following, uncertainties, individual instruments, load obligation constraints, risk terms, and the objective function are presented in detail.
+A. Uncertainties
+There are various uncertainties in a deregulated electricity
+market, such as spot market prices, load obligations, and strip/
+option prices. In view that spot market prices are much more
+volatile than other sources of uncertainties, they are modeled
+as random variables, while others are considered as deterministic. Assume that probability density functions (pdfs) of the
+spot market prices [S(k)] are given, e.g., lognormal distributions [5], [8], and are independent across hours in view of the
+long-term prediction. Based on these pdfs, a set of price levels
+are obtained for each hour after discretization.
+B. Strips
+A strip is a contract of purchasing or selling a ﬁxed amount
+of power at a ﬁxed price months before the operating day. For
+example, LSEs can purchase a December weekday on-peak strip
+at the beginning of the year. The price and amount of power are
+the same for every on-peak weekday hour in December.
+To describe strips mathematically, let
+be the number of
+available strips,
+($/MW) the price of Strip i, and
+(MW) the level of Strip i. For purchasing,
+is positive;
+otherwise,
+is negative. Usually, strips are purchased or
+sold at multiples of a discrete block
+(1)
+where
+(MW) is the size of a block, and
+is
+the maximum number of blocks for Strip i. Binary indicators
+are introduced to describe the strip type. For example, for a weekday on-peak strip,
+is given as
+if k is a weekday on peak hour
+otherwise.
+(2)
+Among the above,
+is the decision variable, and other
+variables are assumed given.
+The cost of Strip i is given as
+(3)
+C. Options
+Another contract in the forward market is an option, which
+is the right to purchase or sell a ﬁxed amount of power at a
+ﬁxed price months before the operating day. A certain amount
+of premium will be paid, and the decision to execute the option
+or not is made on the operating day/hour. There are two types
+of options: call options (to purchase) and put options (to sell).
+Let
+be the number of available options,
+($/MW) the premium,
+($/MW) the price, and
+(MW) the level of Option i. For purchasing,
+is positive;
+otherwise,
+is negative. Similar to a strip, Option i is
+purchased or sold at multiples of a discrete block
+(4)
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+XU et al.: POWER PORTFOLIO OPTIMIZATION IN DEREGULATED ELECTRICITY MARKETS
+where
+(MW) is the size of a block, and
+is
+the maximum number of blocks. The option type is described
+by
+deﬁned similar to (2), and option executions
+are described by binary decision variables
+. Among
+the above, the option amount
+and execution variables
+are decision variables, and other variables are assumed
+given.
+The cost of Option i is given as
+(5)
+D. Generation Units
+LSEs may possess generation units, including thermal,
+pumped-storage, and hydro units, and these units can be
+self-scheduled to serve load obligations. The decision variables
+are the generation or pumping levels.
+Let
+be the number of thermal units,
+(MW) the generation level,
+($) the generation cost, and
+($)
+the start-up cost of Unit i. Detailed description of individual
+thermal units can be found in [7]. The costs of Unit i include
+the generation cost and start-up cost given as
+(6)
+Let
+be the number of pumped-storage units and
+(MW) the generation/pumping level of Unit i at k. For generating,
+is positive; otherwise,
+is negative. For the
+units under consideration, generation levels are continuous, but
+pumping takes a few discreet levels. Detailed description of a
+pumped-storage system can be found in Ni and Luh [10], where
+the operation cost is assumed zero.
+Let
+be the number of hydro units and
+(MW) the
+generation level from Unit i at k. Detailed description of a hydro
+unit can be found in [7], where the operation cost is assumed
+zero.
+E. Spot Market Purchases/Sales
+In the real-time market, an LSE can directly purchase power
+from or sell power to the spot market based on the stochastic spot
+market prices. The decision variables are power purchases or
+sales
+(MW). When purchasing power from the market,
+is positive; when selling power to the market,
+is negative. The spot market purchase/sale cost is
+(7)
+To conﬁne market risks, a strict limit may be imposed on the
+power purchased from or sold to the spot market
+(8)
+F. Load Obligation Constraints
+The power from the above instruments must equal the given
+load obligation at each time k
+(9)
+In view of the stochastic spot market prices, constraints (9)
+have to be satisﬁed for various scenarios. The problem is therefore complicated because of the large number of scenarios. For
+simplicity, the load obligation constraints (9) are approximated
+in the expected sense
+(10)
+G. Risk Terms
+In view that spot market prices are assumed random and
+others, e.g., load obligations and strip/option prices, are considered deterministic, market risks can be analyzed by spot
+market purchases/sales. However, the conventional risk term
+deﬁned by variances of costs is not appropriate in the power
+market because an LSE is at risk only for purchasing power
+at prices higher than expected or for selling power at prices
+lower than expected. A risk term is thus introduced based on
+semi-variances of spot market transactions as follows:
+(11)
+where S(k,j) is price level j at k,
+is the set of possible price
+levels at k, E(S(k)) is the mean spot market price at k, and
+if
+and
+or
+and
+otherwise.
+(12)
+H. Objective Function
+The proﬁt of a portfolio equals its income from load sales
+minus costs for different instruments. In view that an LSE sells
+power to its customers at ﬁxed prices, it is assumed that the
+income is given. The problem is then to minimize the total cost
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+while serving the load obligations (10) and managing risks. In
+addition, in view of the discrete characteristic of certain decision
+variables such as strip/option levels and pumping for pumpedstorage units, the strict limit on spot market purchases/sales, and
+a long time horizon, the speed of algorithm convergence is an
+issue. To overcome the difﬁculties, quadratic penalty terms on
+the violation of load obligation constraints,
+, are
+introduced to the objective function, where
+($/MW ) is
+the weight for load obligation violation at k. The total cost is
+thus the expected costs from different instruments plus risk and
+penalty terms as follows:
+(13)
+The overall problem is then to minimize (13) subject to expected load obligation constraints (10) and individual instrument constraints.1 The decision variables are strip/option levels,
+option executions, power levels for generation units, and spot
+market purchases/sales. Among them, strip/option levels must
+be decided now and are therefore deterministic, and other decision variables are stochastic in view of stochastic spot market
+prices.
+The problem thus formulated, however, is not “separable”
+since quadratic penalty terms are not additive. This presents
+challenges to the standard Lagrangian relaxation method.
+IV. SOLUTION METHODOLOGY
+To overcome the inseparability difﬁculty, surrogate Lagrangian relaxation [18] is used to solve the problem by
+relaxing the expected load obligation constraints (10) using
+multipliers
+with
+(14)
+subject to individual instrument constraints. The key idea is then
+to pull out all decision variables associated with a particular instrument to form an instrument subproblem, and decision variables for this instrument are optimized while keeping other variables at their latest available values. A two-level structure is
+therefore formed where the low level consists of solving individual instrument subproblems, and the high level is to update
+the multipliers.
+1The above formulation is a snapshot of an ongoing midterm portfolio optimization process and is generally solved periodically, e.g., every month, using
+the latest available information. To indirectly consider future opportunities such
+as new strips and options, the load obligations are assumed declining toward the
+future.
+A. Solving the Strip Subproblem
+By pulling out all terms related to
+from L in (14), the
+subproblem for Strip i is given as
+with
+(15)
+where
+is calculated based on (10) by dropping the
+term
+and using latest expected values for other
+variables, including other strip terms j
+, i.e.,
+(16)
+The problem is subject to discrete values of
+in (1).
+There is no expectation in (15) because the decision variable
+is deterministic as discussed before, and all other
+variables are also deterministic. For this quadratic optimization
+problem, the solution is obtained by setting the ﬁrst-order
+derivative of (15) equal to zero and selecting the discrete value
+in (1) closest to the solution.
+B. Solving the Option Subproblem
+By collecting terms related to Option i from L in (14), the
+option subproblem is given as
+(17)
+where
+is calculated based on (10) by dropping the
+term
+and using latest expected
+values for other variables. The subproblem is subject to discrete values of
+in (4). The decision variables are the
+deterministic option level
+and stochastic execution
+variables
+. In view that stochastic spot market prices,
+which cause
+to be stochastic, do not appear in this
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+XU et al.: POWER PORTFOLIO OPTIMIZATION IN DEREGULATED ELECTRICITY MARKETS
+subproblem after decomposition, and all the parameters here
+are deterministic, the expected execution variables
+are therefore considered as decision variables in (17).
+There are only a few discreet option levels since they are de-
+ﬁned to be the same for hours. Also, for a given option level,
+the subproblem can be decomposed into K independent small
+problems, one for each k, in view that binary execution variables are independent across hours. There are therefore only a
+limited number of solutions for the option subproblem, and the
+problem is solved by using exhaustive search.
+C. Solving the Thermal Subproblem
+By collecting terms related to
+from L in (14), the
+thermal unit subproblem is given as
+with
+(18)
+where
+is calculated based on (10) by dropping the term
+and using latest expected values for other variables.
+The problem is subject to thermal unit constraints. Similar to
+what was discussed for the option subproblem, the decision variables are the expected generation levels. Dynamic programming
+is used to solve the subproblem, with time instances as stages
+and generator statuses as states [7].
+D. Solving the Pumped-Storage Subproblem
+By collecting terms related to
+from L in (14), the
+pumped-storage subproblem is given as
+with
+(19)
+where
+is calculated based on (10) by dropping the term
+and using latest expected values for other variables.
+The problem is subject to pumped-storage unit constraints.
+The decision variables are the expected generation or pumping
+levels. In view of discrete pumping levels together with a long
+time horizon, the traditional LR-based method (Ni and Luh
+[10]) is difﬁcult to converge. In this paper, dynamic programming is developed with time instances as stages and pond
+levels as states. One limitation of the DP method is the curse
+of the dimensionality. Because of the small number of discrete
+pumping levels, the number of feasible states is limited, and the
+DP method is computationally efﬁcient.
+E. Solving the Hydro Subproblem
+By collecting terms related to
+from L in (14), the hydro
+unit subproblem is given as
+with
+(20)
+where
+is calculated based on (10) by dropping the term
+and using latest expected values for other variables.
+The problem is subject to hydro unit constraints. The decision
+variables are the expected generation levels. The problem is
+solved by using a merit order allocation method, and the details
+can be found in [7].
+F. Solving the Spot Market Subproblem
+By collecting terms related to
+from L in (14), the
+spot market subproblem is given as
+with
+(21)
+where
+is calculated based on (10) by dropping the
+term
+and using latest expected values of other variables. The problem is subject to spot market constraints (8), and
+the decision variables are the stochastic power purchases/sales
+. In view that
+is a sum of costs over all the hours
+and the spot market prices
+are assumed independent
+across hours, the subproblem can be decomposed to K small
+problems, one for each k. Solutions are obtained by solving a
+quadratic optimization problem at each time k for each price
+level. The outputs are a set of spot market purchase/sale policies based on stochastic spot market prices.
+G. Solving the High-Level Surrogate Dual Problem
+The high-level problem is to ﬁnd a set of optimal multipliers
+to maximize the surrogate dual function, i.e.,
+with
+(22)
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+where
+is the optimal
+in (15) by dropping the
+penalty terms and similar for others. To solve the problem, the
+surrogate subgradient method [18] is used as presented below.
+The surrogate subgradient component with respect to
+is
+obtained from (10) as
+(23)
+The multipliers are updated according to
+(24)
+In the above,
+is the iteration index,
+is the step size at the
+th iteration given as
+(25)
+where
+is the optimal dual value, and
+is the surrogate dual
+value obtained at the
+th iteration. Since
+is not known, it is
+estimated as
+(26)
+where
+is the best current surrogate dual, and
+is a positive number.
+Given
+, one subproblem is selected and solved. To
+guarantee algorithm convergence, the following surrogate optimization condition is checked after solving each subproblem:
+(27)
+where
+refers to the set of decision variables. If such an
+cannot be obtained, set
+, and the next subproblem is
+solved.
+H. Checking Stopping Criteria
+The iterative optimization process is terminated if the number
+of iterations is greater than a preset number or if the level of
+constraint violation, i.e., the L2 norm of the subgradient vectors
+(23), is less than a speciﬁed small number.
+I. Obtaining a Feasible Solution
+The solutions for subproblems, when put together, however,
+are generally infeasible, i.e., the expected load obligation constraints (10) are not satisﬁed for some hours. To obtain feasible
+solutions, heuristics have been developed stepping through k
+from 1 to K. Based on the ﬂexibilities of decisions, the method
+ﬁrst adjusts the power levels of generation units in the sequence
+of thermal, hydro, and pumped-storage units within their capacities. If a feasible solution is obtained, the method stops. If not,
+option executions for the infeasible hours are checked and adjusted. Because of the discrete characteristic of option values,
+the adjustment of options alone may not be able to meet the
+load obligations. The adjustment of generation units is needed.
+If a feasible solution is obtained, the method stops. Otherwise,
+the spot market purchases/sales are adjusted within spot market
+transaction limitations (8).
+J. Summary of the Algorithm
+The overall algorithm is summarized as follows.
+Step
+1) [Initialize.] Initialize the multipliers
+Step
+2) [Solve one subproblem.] In the sequence of strip,
+call, thermal, hydro, pumped-storage, and spot
+market subproblems, one is selected and solved
+using (15)–(21).
+Step
+3) [Update the multipliers.] Update the multipliers
+using (23)–(27).
+Step
+4) [Check stopping criteria.] If stopping criteria have
+not been satisﬁed, go to Step 2 and solve the next
+subproblem. Otherwise, go to Step 5.
+Step
+5) [Generate feasible solutions.] Use heuristics to obtain feasible solutions if the supbroblem solutions
+obtained are infeasible.
+K. Monte Carlo Simulations and Feasible Solutions
+The outputs of the algorithm are deterministic strip/option
+values, expected option executions, expected generation levels,
+and spot market purchase/sale policies. The outputs, however,
+need to be veriﬁed because our problem formulation is a simpli-
+ﬁed one with expected load obligation constraints. Monte Carlo
+simulation (for a single snapshot of an ongoing midterm portfolio optimization process) was therefore used to check the total
+cost of each simulation run and the sample mean/variance and
+to compare the sample mean with the expected costs from the
+algorithm.
+For each Monte Carlo simulation run, the spot market price
+for each hour is generated based on its distribution, and the
+spot market purchases/sales are determined based on the policies from the spot market subproblem. Because the solutions
+for subproblems are generally infeasible, e.g., the load obligation constraints (9) are not satisﬁed for some hours, heuristics
+similar to those in Section I were used to obtain feasible solutions for each simulation run.
+After M simulation runs, the sample mean
+provides an
+estimate of the expected cost J
+(28)
+To measure the optimality of the algorithm, the relative duality gap is estimated by
+(29)
+where
+is the surrogate dual cost in (22).
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+XU et al.: POWER PORTFOLIO OPTIMIZATION IN DEREGULATED ELECTRICITY MARKETS
+Fig. 1. Predicted spot market price conﬁdence region and actual price.
+The sample standard deviation from Monte Carlo runs is
+given by
+(30)
+By using (28) and (30), different methods can be compared
+based on the conﬁdence region for a given probability of error.
+V. NUMERICAL TESTING RESULTS
+The algorithm was implemented using C++ and ran on a Pentium 4 2.5-GHz PC with 512 MB memory. In the following,
+hourly resolution is used. Lognormal distributions were used to
+describe the random spot market prices. The pdf is
+(31)
+where
+and
+are the mean and variance of the normally distributed
+, respectively. In the testings, the standard deviation for the logarithm of a spot market price is set to be 10% of
+logarithm of the corresponding hourly mean price.
+To examine how the lognormal distribution characterize the
+spot market prices, the 95% conﬁdence intervals of the predicted
+spot market prices for New England Connecticut zone from January 6–10 and the actual spot market prices are depicted in
+Fig. 1. It shows that 86% of actual spot market prices are within
+the predicted conﬁdence region. Therefore, lognormal distributions can be used to approximate the spot market prices.
+Three examples are presented. In Example 1, a simple
+problem is tested to demonstrate how our risk management scheme affects the cost variance and decisions. In
+Example 2, a realistic yearly portfolio problem is tested.
+Algorithm performance and decisions on different instruments are analyzed. In Example 3, portfolio problems with
+different numbers of instruments and time horizons are
+tested to examine the algorithm scalability. The complete
+input data and results for the three examples are available at
+http://www.engr.uconn.edu/msl/test_data/JunX/Portfolio.txt.
+A. Example 1
+A simple portfolio problem of one day duration is tested.
+Available instruments include two strips, two hourly call options, and spot market purchases/sales as presented in Table I.
+The load obligations are shown in Fig. 2, and the mean spot
+TABLE I
+INSTRUMENT PARAMETERS
+Fig. 2. Load obligations for Example 1.
+Fig. 3. Mean spot market prices for Example 1.
+market prices are shown in Fig. 3. It can be seen that both ﬁgures have peaks at around 6 P.M.
+To demonstrate how our risk management scheme affects the
+cost variance and decisions, three cases are tested. In Case 1, risk
+management is not considered, i.e.,
+in (11); in Case
+2, risk is deﬁned by variance as opposed to semi-variance of
+spot market transactions; and in Case 3, risk is deﬁned by semivariance of spot market transactions as presented in our method.
+Results obtained after 50 Monte Carlo runs are summarized in
+Table II.
+The low duality gaps for the three cases show that near-optimal solutions are obtained. By comparing the expected total
+costs after our algorithm and the sample mean of total cost
+after 50 runs for all three cases, it can be seen that the simulation results match the expected results from our algorithm.
+By comparing Cases 1 and 3, it can be seen that our semi-variance-based risk management scheme signiﬁcantly reduces the
+expected total cost by 33% and the sample standard deviation
+by 47%. The reason is that more power is purchased from spot
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+TABLE II
+SIMULATION RESULTS (AFTER 50 MONTE CARLO RUNS)
+TABLE III
+DECISIONS FOR STRIPS AND CALLS OF ONE SCENARIO
+Fig. 4. Spot market purchases/sales of one scenario.
+market at stochastic spot market prices in Case 1 by not considering the risks, resulting in higher total costs and larger variances. By comparing Cases 2 and 3, it can be seen that our semivariance-based risk management scheme reduces 5% expected
+cost with 2% higher sample standard deviation. The reason is
+that less power at low prices is purchased from spot market in
+Case 2 by overestimating the risks, resulting in higher call costs
+but smaller variances.
+To illustrate in detail how our risk management scheme
+achieves the savings, the decisions of three cases are compared
+for a particular scenario. The values of strips and calls are
+depicted in Table III, and spot market purchases/sales are
+shown in Fig. 4. It can be seen that on/off-peak strips are
+purchased at their capacities for all three cases because of the
+low prices. Comparing Cases 1 and 3, more power is purchased
+from the on-peak call, and less power is purchased from the
+spot market during 5–10 P.M. for Case 3 because of high spot
+TABLE IV
+MAJOR PARAMETERS
+Fig. 5. Load obligation for Example 2.
+Fig. 6. Mean spot market prices for Example 2.
+market price uncertainties around 6 P.M. To purchase less from
+the spot market and use other available instruments such as
+calls effectively reduces risks. Comparing Cases 2 and 3, spot
+market purchases/sales are further reduced for Case 2 because
+the variance-based method overestimates risks by weighting
+both sides of semi-variances of spot market transactions. In
+view that the expensive Call 1 is purchased more to reduce
+stochastic spot market purchases/sales, the total cost for Case
+2 is higher than that for Case 3, although the sample standard
+variance is reduced as shown previously in Table II.
+B. Example 2
+A yearly portfolio problem is tested for an LSE in New England for 2004. The input data include available instruments, load
+obligations, and predicted spot market prices at the beginning
+of 2004. Key parameters of major instruments are presented in
+Table IV.
+For illustration purpose, the load obligations and mean spot
+market prices of January 2004 are depicted in Figs. 5 and 6, respectively. It can be seen from the ﬁgures that spot market prices
+are much more volatile as compared to load obligations. The average on-peak spot market price for the month is $70.7/MW.
+The CPU time for this yearly problem is 302.3 s after 50 iterations. Simulation results of 50 Monte Carlo runs show that there
+are on average six hours of violations of constraint (9), and all of
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+XU et al.: POWER PORTFOLIO OPTIMIZATION IN DEREGULATED ELECTRICITY MARKETS
+Fig. 7. Decisions for strips of one scenario.
+Fig. 8. Decisions for options of one scenario.
+Fig. 9. Power from generation units and spot market.
+them are caused by discrete values of certain decision variables.
+The relative duality gap (29) is 0.9%, showing that near-optimal
+solutions are obtained.
+To examine various decisions, the results of strips and options
+for January 1–10 are displayed in Figs. 7 and 8, respectively,
+for one scenario. It can be seen that strips are the major sources
+to serve the load and hedge against risks (the minor strip value
+differences in hours 1–25 and 49–97 are due to on/off peaks
+in weekends/holidays). It can also be seen that call options (to
+purchase) are usually executed during high spot market price
+days/hours (e.g., January 5 on-peak hours from 104 to 119 with
+average spot market price $83.7/MW), and put options (to sell)
+are usually executed during low spot market price hours (e.g.,
+January 9 on-peak hours from 200 to 215 with average spot
+market price $61.5/MW).
+The sum of three thermal unit generations, the pumpedstorage unit decisions, and spot market purchases/sales for January 5 (a weekday with high spot market prices) are depicted
+in Fig. 9. It can be seen that the units are scheduled to generate
+at high levels during most on-peak hours with high spot market
+prices (except for Hours 15–17, where spot market prices are
+low). During off-peak hours with low spot market prices, the
+pumped-storage units are scheduled to pump at high levels
+TABLE V
+TWO SETS OF INSTRUMENTS
+TABLE VI
+COMPUTATION TIME AND PERFORMANCE OF SET 1
+TABLE VII
+COMPUTATION TIME AND PERFORMANCE OF SET 2
+(except for Hour 7, where the load obligation is high). It can
+also be seen that the power is sold to the market during most
+hours in view that spot market prices are high for the day, and
+the pumped-storage unit is well scheduled.
+C. Example 3
+To examine the scalability of the SLR-based method, portfolio problems with different numbers of instruments and different time horizons are tested. Two sets of instruments as summarized in Table V are used, where Set 1 contains the same set
+of instruments as those in Example 2, and Set 2 consists of instruments of Set 1 plus the duplication of all the instruments
+except the hydro unit and the spot market. The load obligations
+for Example 2 are used for Set 1 and are increased by 95% for
+Set 2. Spot market prices of Example 2 are used for both sets.
+Three time horizons, 1-month, 6-month, and 1-year, are tested.
+For easy comparison, the iteration number is set as 50 for all the
+testings.
+The simulation results of 50 Monte Carlo runs for different
+time horizons are summarized in Table VI for Set 1 and in
+Table VII for Set 2. It can be seen from the tables that computation time grows linearly with respect to the number of instruments and time horizons. For all the cases, the numbers of
+constraint violations are small, and by checking the results, the
+violations are all caused by discrete values of decision variables.
+Also, the small duality gaps (below 1% for all the cases) demonstrate that near-optimal solutions are obtained.
+VI. CONCLUSION
+This paper presents a midterm power portfolio optimization
+model and the corresponding methodology to serve the load,
+maximize the proﬁt, and manage risks. Risk terms based on
+semi-variances of spot market transactions are introduced, and
+penalties on load obligation violations are added to the objective
+Authorized licensed use limited to: Portland General Electric. Downloaded on March 30,2026 at 07:52:38 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 21, NO. 4, NOVEMBER 2006
+function to improve algorithm convergence and constraint satisfaction. A decomposition and coordination methodology based
+on surrogate optimization framework is then developed to solve
+the problem. Numerical testing results based on a load serving
+entity in New England show that our method provides near-optimal solutions with quantiﬁed quality for a large complex portfolio problem with different instruments to maximize the proﬁt
+and manage risks, and it is computationally efﬁcient.

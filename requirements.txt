@@ -8,6 +8,9 @@ scikit-learn
 matplotlib
 pyyaml
 tqdm
+requests
+lxml
+pymupdf
 torch==2.9.0
 openpyxl
 numba

@@ -1,0 +1,21 @@
+In electricity market environment, accurate
+short-term load forecasting can ensure safe and stable operation
+of power grid, and save a lot of cost for power generation,
+electricity sales and power consumption units. However,
+real-time fluctuations in electricity prices increase complexity
+of load changes and difficulty of forecasting. In view of such
+situation, the maximum information coefficient method was
+used to analyze the correlation of current time load with
+electricity price and historical load respectively in this paper.
+The input feature vector of the prediction model could be
+determined with this method. And on this basis, a short-term
+load forecasting model based on Attention-LSTM (Attention
+long short-term memory) network was proposed. The model
+took full advantage of the timing characteristics of the load and
+used Attention mechanism to highlight input features playing
+key role in load forecasting. Taking the real data of a certain
+area in Australia as an example, simulations were performed
+with the proposed Attention-LSTM model and other models.
+Results show that the proposed model outperforms other
+models in terms of prediction accuracy and algorithm
+robustness.

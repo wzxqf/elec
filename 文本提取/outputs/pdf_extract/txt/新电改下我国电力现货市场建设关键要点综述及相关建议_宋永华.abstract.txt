@@ -1,0 +1,32 @@
+As a critical part connecting long-term
+transactions and real-time operation, the spot market can fully
+restore the commodity attributes of electricity under the new
+round of Chinese power system reform. Besides, the spot
+market could play the role of price discovery and resource
+optimization. At present, eight pilot spot markets in China have
+all been put into trial operation, and the spot market
+construction has achieved staged achievements. With the
+comprehensive deepening of China’s power system reform, the
+comprehensive roll-out of the spot market has become the next
+stage of China's power market construction. Therefore, it is
+urgent to carry out the review and summary of the spot market
+design, compare and analyze the key points of spot market
+construction in different regions, which can provide experience
+for the areas where spot markets have not been constructed.
+Based on the urgent requirement of spot market construction,
+this paper summarized several key issues, including the
+coordination mechanism of long-term transactions and spot
+transactions, spot market model, price mechanism and etc.
+Moreover, this paper analyzed the power industry realities of
+different regions from the angles of power supply structure,
+network characteristics, market experience and etc. On the
+basis, correlation diagram method was utilized to analyze the
+relationship between market rules and power industry realities.
+
+基金项目：国家电网公司科技项目：大规模复杂网络环境下的ATC
+中长期交易算法研究与开发。
+Project Supported by STATE GRID Corporation of China; the
+algorithm research and development of long-term transactions of ATC for
+large-scale and complex network.
+Finally, considering the realities of China, the paper proposes
+suggestions for the construction of spot markets.

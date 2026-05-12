@@ -1,0 +1,23 @@
+Electricity spot market is significant in reflecting
+the short-term supply and demand relationship and the
+temporal and spatial value of electricity, and in guiding the
+optimal allocation of the electricity resources. The construction
+of the electricity spot market is also one of the key tasks in the
+new-round reform of the electric industry. The centralized
+electricity spot market generates the locational prices or the
+zonal prices at different time intervals, thus the stakeholders are
+confronted with risks of the locational market prices and
+congestions. The contract for differences, the financial
+transmission right, and the settlement right transaction are the
+efficient approaches to hedging against risks and improving
+trading utilities. This work analyzes the mechanisms for the
+three risk management approaches, indicating the three
+approaches have the same financial essence and results in the
+same mathematical expressions for the changes of the
+stakeholders’ revenues. Furthermore, the equivalences and
+differences of the three risk management mechanisms are
+discussed and their application scenarios, conditions and
+limitations are discussed. Finally, considering the key
+characteristics of the current early-stage electricity spot market
+in China, the three-stage construction path of the risk
+management mechanism is proposed.

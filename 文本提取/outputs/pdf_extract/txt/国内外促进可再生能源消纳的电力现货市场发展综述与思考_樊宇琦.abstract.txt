@@ -1,0 +1,12 @@
+Electricity spot market fully plays the role of
+allocating electric power resources to realize sufficient
+competition and find optimal allocation of power resources,
+reflecting the authentic price signals of both demand and
+supply entities. However, characteristics of renewable energy
+output, such as randomness and uncertainty, pose great
+challenges to the operation of the mentioned market. Designing
+reasonable market mechanisms, which promotes renewable
+energy consumption, is the key demand of the new round
+electric power system reformation. This paper first summarized
+the state-of-the-art market mechanisms for renewable energy
+promotion in foreign mature power systems, followed by the

@@ -1,0 +1,827 @@
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+Optimization of Electricity Retailer’s Contract
+Portfolio Subject to Risk Preferences
+Janne Kettunen, Member, IEEE, Ahti Salo, and Derek W. Bunn
+Abstract—When an electricity retailer faces volume risk in
+meeting load and spot price risk in purchasing from the wholesale
+market, conventional risk management optimization methods can
+be quite inefﬁcient. For the management of an electricity contract
+portfolio in this context, we develop a multistage stochastic optimization approach which accounts for the uncertainties of both
+electricity prices and loads, and which permits the speciﬁcation of
+conditional-value-at-risk requirements to optimize hedging across
+intermediate stages in the planning horizons. Our experimental
+results, based on real data from Nordpool, suggest that the modeling of price and load correlations is particularly important. The
+sensitivity analysis is extended to characterize the behavior of
+retailers with different risk attitudes. Thus, we observe that a risk
+neutral retailer is more susceptible to price-related than load-related uncertainties in terms of the expected cost of satisfying the
+load, and that a risk averse retailer is especially sensitive to the
+drivers of the forward risk premium.
+Index Terms—Electricity market, retailer’s contract portfolio
+optimization, risk management, stochastic optimization.
+I. INTRODUCTION
+E
+LECTRICITY retailers face the problem of meeting instantaneous and variable loads which they may need to
+satisfy by purchasing electricity from wholesale power markets
+through spot and forward contracts. Optimizing this process is
+socially important and analytically challenging, incorporating
+volume as well as extreme price risks [1], [2]. Wholesale power
+is increasingly being produced and traded via exchanges as an
+energy commodity, but its stochastic characteristics and risks are
+inﬂuenced by its delivery as an essential service to end-users.
+As a consequence, with companies facing uncertainties about
+their future loads as well as prices, the development of optimization models that allow power utilities to make appropriate
+production and trading decisions to maximize expected proﬁts
+within speciﬁc risk constraints [3]–[10] presents extreme and
+special characteristics compared to other commodities and ﬁ-
+nancial markets [11], [12]. Electricity cannot be stored, but customers expect a high standard of service, and thus utilities bear
+Manuscript received April 02, 2009; revised July 20, 2009. First published
+November 17, 2009; current version published January 20, 2010. This work
+was supported in part by the Jenny and Antti Wihuri foundation and in part by
+the Research Foundation of the Helsinki University of Technology. Paper no.
+TPWRS-00233-2009.
+J. Kettunen is with the Haskayne School of Business and Institute for Sustainable Energy, Environment, and Economy, University of Calgary, Calgary,
+AB T2N 1N4, Canada (e-mail: jskettun@ucalgary.ca).
+A. Salo is with the Systems Analysis Laboratory, Helsinki University of Technology, 02015 TKK Helsinki, Finland (e-mail: ahti.salo@tkk.ﬁ).
+D. W. Bunn is with Decision Science at London Business School, London
+NW1 4SA, U.K. (e-mail: dbunn@london.edu).
+Digital Object Identiﬁer 10.1109/TPWRS.2009.2032233
+load as well as price risk. Furthermore, spot price and load are
+correlated, often in a nonlinear manner, as in the example we
+report later where the correlation is stronger at higher levels of
+load. Both load and price time series exhibit daily, weekly and
+annual seasonality, volatility clustering (periods of low and high
+variance in the time series), mean reversion (a tendency for the
+time series to revert to a stationary average), and in the case of
+prices, forward risk premiums (persistent differences between
+the forward prices and their expected spot prices) are ampli-
+ﬁed through the irregular, but not infrequent, spot price spikes
+that emerge at times of resource scarcity. A distinctive methodological challenge is, therefore, to formulate a multi-period contract portfolio that incorporates the correlated price and demand
+risks, both of which evolve stochastically in path-dependent processes, such that risks are managed efﬁciently throughout the
+contracting horizon.
+Conventional approaches to constructing the forward contract portfolio have approximated the stochastic processes of
+the electricity prices and loads using simulations, moment
+matching, and models adapted from ﬁnancial markets. These,
+however, have not included the correlation between price and
+load. For example, [13] simulates uncertainties accounting for
+mean-reversion based on an extended Ornstein–Uhlenbeck
+process [14], [15] construct their scenario trees using Monte
+Carlo simulation and a scenario reduction technique [6], [16]
+uses scenarios that are based upon user-speciﬁed moments;
+while various ﬁnancial market models have been used in
+electricity markets to model options and the dynamics of the
+forward prices [17]–[21]. Overall, there exists an extensive
+line of research in scenario generation techniques [22]–[27],
+but, as far as we are aware, contract portfolio optimization
+within power risk management has not adequately reﬂected
+the correlation between load and spot prices. In this paper,
+we seek to be innovative in adapting the HSS scenario tree
+building method [28]–[30] to capture this correlation within an
+optimized contract risk management process.
+In risk management, research has mostly focused on extreme
+risks. For example, [7] focuses upon “value-at-risk” (VAR) measures, which are the extreme fractiles of the loss distributions,
+to constrain expected losses at a given level of conﬁdence. But,
+although VAR is the de facto standard for risk compliance monitoring in the ﬁnancial sector [31], it is not a “coherent” (deﬁned
+later) risk measure [32]–[36] and hence may not capture correctly the portfolio diversiﬁcation beneﬁts. Consequently, conditional-VAR (CVAR), which measures the weighted average
+loss of the tail events, for a given fractile, is “coherent” and theoretically preferable [35]. Furthermore, since it can be formulated
+using linear programming [37], CVAR constraint portfolio opti-
+0885-8950/$26.00 © 2009 IEEE
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+mizations have gained popularity [13], [15], [38]–[40]. Hence,
+we use CVAR as our key risk measure and show that by specifying multiple constraints in intermediate time periods as well
+as at the end, it is possible to control for risk throughout the contract spanning horizon.
+Speciﬁcally, we develop a contract portfolio optimization
+method, using multistage stochastic optimization [41], formulated primarily from the perspective of an electricity retailer
+who is contractually obliged to fulﬁll an uncertain demand 1)
+by buying electricity from the spot market and 2) by hedging
+spot price exposure with forward contracts for later delivery of
+electricity. The retailer seeks to minimize the expected cost of
+establishing these contracts subject to various risk constraints
+[13], [15], [38]. The problem is also analogous to that faced
+by an electricity generator who must produce electricity at
+an uncertain load level and sell this electricity at an uncertain
+spot price in a setting where it can also use forward contracts
+for hedging [42], [43]. In this journal, this topic has been
+considered from the generator side by [44] and [45] and in a
+retailer setting by [46]–[49]. We extend these approaches by
+considering a dynamic forward portfolio. Hence, the retailer
+can purchase and sell forwards over multiple time periods
+depending on the evolution of the electricity prices and loads.
+The contract portfolio optimization model presented here is
+innovative in that it integrates 1) correlation between spot price
+and demand, 2) risk premiums in forward contracts, and 3) temporal risk preferences in intermediate time periods over the contracting horizon. Results from numerical experiments with real
+data from Nordpool indicate that it is essential to model the
+demand and price correlations to achieve efﬁciency. They also
+yield some behavioral insights. For example, a risk neutral retailer is more susceptible to price-related than load-related uncertainties in terms of the variability in the cost of satisfying the
+demand, whereas a risk averse retailer is more sensitive to the
+risk premium and demand-related uncertainties.
+The paper is organized as follows. Section II introduces the
+decision problem, Section III develops the portfolio optimization approach, and Section IV presents numerical results which
+are based on empirical data. Section V concludes with a discussion of practical implications and future research directions.
+II. DECISION PROBLEM
+The problem is formulated from the perspective of the electricity retailer, who has to serve electricity demand through purchases from the spot and forward wholesale markets. However,
+both the demand and the spot electricity prices are uncertain.
+They are both assumed to follow a mean reverting processes,
+i.e., deviations from the local average price and load are expected to revert back to the local averages. This is a standard
+model in power and other energy commodities [10], [50]. Furthermore, deviations from the averages show volatility clustering, i.e., periods of high and low volatilities, again a standard
+heteroscedastic characteristic of power prices. In addition, we
+model the nonlinear relation between price and demand with the
+correlation coefﬁcient increasing exponentially with respect to
+demand. The service costs of the retailer, without forward contracts, are the simple product of spot price and load. The risks of
+Fig. 1. Daily and weekly future contracts and monthly forward contracts.
+the retailer are the extreme service costs which occur when both
+load and spot prices are high. The retailer can reduce its exposure to risks by purchasing forward contracts for later delivery
+periods, e.g., in the Nordic Power Exchange Nordpool there are
+daily contracts available for up to nine days ahead, weekly contracts for up to six weeks ahead, monthly forwards for up to
+six months ahead, as well as quarterly and yearly contracts for
+several years ahead (see Fig. 1). As with the other liquid forward markets, e.g., U.K., Germany, the products traded become
+increasingly aggregated as the contract extends further into the
+future. Typically in Europe, traders will deal mainly in baseload
+contracts (i.e., continuous supply) in the longer term, from a
+year to three years ahead. Over the medium term, for quarterly
+and weekly periods, the demand proﬁle will be coarsely hedged
+with a simple mixture of two products, peakload (i.e., continuous power for the whole daytime, e.g., 8 am to 8 pm) and
+baseload. Only at the daily, or day-ahead, spot market or power
+exchange, would the expected demand be re-proﬁled from the
+two baseload and peakload products into hourly positions. This
+progression of granularity is necessary in order to concentrate
+the liquidity in trading. Thus, in those markets with active, liquid
+forward trading, spot trading may actually account for less than
+a few percent of the total volume, as it would be mainly associated with this re-proﬁling of peak and base contracts into
+hourly (or half-hourly in the U.K.) physical commitments. Risk
+management therefore evolves in several horizons: a longer term
+portfolio of quarterly and annual contracts, a midterm portfolio
+of weekly and monthly products, and short-term day-ahead to
+daily operations trading. In this paper, we are concerned with
+the midterm horizon, which tends to be the most active, and of
+course this work only applies to those markets with sufﬁcient
+liquidity in forward contracting.
+The retailer can adjust the contract portfolio within the
+horizon in each consecutive time period by selling some of
+the existing contracts or by purchasing additional contracts.
+Forward contracts are likely to involve risk premiums, i.e., the
+forward price may differ from the expected spot price due to
+the different risk aversions between supply and demand participants in the market or their relative market power [51]. In our
+analysis we treat “forward” and “futures” contracts as similar
+(and use the terms interchangeably), even though as products
+they can differ in their implications on whether the contracts
+will ultimately lead to physical delivery or a purely ﬁnancial
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+KETTUNEN et al.: OPTIMIZATION OF ELECTRICITY RETAILER’s CONTRACT PORTFOLIO SUBJECT TO RISK PREFERENCES
+settlement at expiry. Since, we are assuming a midterm horizon
+in a market sufﬁciently liquid to allow participants to trade out
+of physical positions, these become effectively identical in our
+analysis.
+The retailer’s optimal contract portfolio is computed using
+modules for scenario generation and contract portfolio optimization. The scenario generation module takes 1) forward
+prices, 2) expected loads, 3) conditional standard deviations and
+mean reversions of spot price and load, 4) forward premiums,
+and 5) correlation parameters as exogenous input. The forward
+prices are observed directly from the market while the other
+parameters can be estimated using historical time series data.
+Based on the estimated parameters, the discrete time scenario
+tree accounting for the unique characteristics of the stochastic
+processes of the spot price and demand are generated. The
+second module uses the generated scenario tree and optimizes
+the contract portfolio while accounting for the time-dependent
+risk constraints. This provides optimal purchasing and selling
+decisions for contracts at the speciﬁc time points as well as
+the contingency plan. Overall, it is assumed that the retailer’s
+objective is to minimize the expected cost of the contract
+portfolio while meeting its risk constraints.
+Note that the existence of long-term bilateral electricity
+supply contracts, which the retailer can use to secure a
+pre-speciﬁed amount of electricity at a pre-speciﬁed price, or
+own-generation, do not affect this model. The reason is that
+their inclusion does not remove the risk management need
+because a retailer still needs to adjust the remaining portion of
+the electricity load via spot market and use contracts to hedge
+these risks [48]. Also, because the problem is formulated from
+the cost minimization perspective, there is no need to model
+the retailer’s revenues that are received from the end-users.
+III. MODEL SPECIFICATION
+A. Scenario Tree
+We deﬁne the following parameters:
+instantaneous electricity spot price and load,
+i.e., price and load per time unit when the time
+interval is inﬁnitesimally small;
+mean reversion factors of price and load;
+instantaneous means to which price and load
+revert;
+instantaneous standard deviations of price and
+load;
+instantaneous correlation between price and
+load.
+The scenario tree is generated for a ﬁnite planning horizon
+over
+time periods. The uncertainties pertain to the
+instantaneous electricity spot price
+and load
+which follow
+mean-reverting Ornstein–Uhlenbeck stochastic process
+(1)
+where
+and
+are
+correlated
+Wiener
+processes
+such
+that
+. These processes are modeled with
+the extension of the HSS scenario tree [30] which generates
+a recombining discrete time scenario tree of two correlated
+binomial trees. Binomial trees are used because the computational burden is thus lower than if trees had greater number of
+branches. The number of scenarios grows exponentially with
+respect to the number of time periods and child nodes, i.e., by
+using two binomial trees, the number of scenarios in period
+is
+. Binomial trees are commonly used in ﬁnance to represent
+the path-dependent evolution of an uncertainty [52], [53].
+The advantages of the extension of the HSS scenario generation method are, among others, that it 1) matches initially the
+market observed future prices and 2) provides an arbitrage-free
+pricing environment. The method can be used to approximate a
+correlated multivariate-lognormal process exhibiting mean-reversion and volatility clustering. Thus, it can capture essential
+characteristics of the electricity price and load processes if
+applied at the daily, weekly, or monthly intervals in which the
+future and forward contracts are also speciﬁed at the Nordpool.
+The HSS method does not, for instance, incorporate spikes,
+which are more pronounced in higher frequency, hourly level
+[54].
+The steps of building the HSS scenario tree for correlated
+price and load consist of the computation of 1) nodal values for
+price and load, 2) scenario probabilities, and 3) future prices.
+1) Nodal Values: To compute nodal values, we deﬁne movements in the scenario tree as follows. Let
+be the base scenario
+in period
+and
+be the set of all scenarios in period ;
+there are
+such scenarios because we have two uncertainties
+that are modeled as binomial trees. A scenario
+is represented
+as a
+-matrix whose elements consist of binary variables
+for load movements and
+for price movements in period ,
+The unique immediate predecessor of scenario
+is
+such that
+, and
+. All the preceding scenarios of
+are denoted
+by
+(see Fig. 2).
+The scenario matrices are interpreted so that
+means
+that the load in period
+is higher compared to the expected load
+as seen on
+, while
+corresponds to a lower load in
+period
+compared to the expected load as seen on
+. Likewise, higher and lower prices compared to the expected price as
+seen on
+are denoted by
+and
+We also deﬁne
+electricity spot price (EUR/MWh) in period
+in
+scenario
+electricity load (MWh) in period
+in scenario
+multiplicative increase and decrease in electricity
+spot price in period when
+and
+respectively;
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+Fig. 2. Scenario tree with two example scenarios highlighted.
+multiplicative increase and decrease in electricity
+load in period
+when
+and
+respectively;
+number of multiplicative increases in the price
+during periods
+in scenario
+, i.e.,
+number of multiplicative increases in the load
+during periods
+in scenario
+, i.e.,
+expected spot price (EUR/MWh) and expected
+electricity load (MWh) in period
+as seen at
+time 0;
+conditional standard deviations of electricity spot
+price and load in period ;
+market observed futures prices as seen at time
+0 for delivery period ;
+risk premium (in % of future prices) for
+periods
+later starting future.
+The electricity spot price
+and electricity load
+in
+scenario
+are as follows [28]:
+(2)
+(3)
+where
+(4)
+(5)
+The expected spot prices
+can be obtained from the
+observed futures prices by removing the risk premiums [55];
+hence, the model can be matched to observed prices of futures
+contracts
+(6)
+2) Scenario Probabilities: We deﬁne
+scenario
+probability in period ;
+probabilities of the higher price and load in
+period
+in scenario
+compared to the
+expected levels as seen on
+correlation of electricity price and load in
+period
+in scenario
+correlation parameters;
+future contract prices as seen in period
+in
+scenario
+for the contract period
+Scenario probabilities
+can be computed by using the probabilities of the higher price
+and
+load
+compared to the expected levels as seen on
+(7)
+Probabilities of the higher price
+and load
+compared to the expected levels as seen on
+can be computed
+following [30],
+(8)
+(9)
+The probabilities of lower prices and loads compared to the
+expected levels as seen on
+are one minus the probabilities of higher prices and loads compared to the expected levels
+as seen on
+. The increased correlation between load and
+price as a function of increasing load (i.e., similar to the increase
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+KETTUNEN et al.: OPTIMIZATION OF ELECTRICITY RETAILER’s CONTRACT PORTFOLIO SUBJECT TO RISK PREFERENCES
+in the demand elasticity of price) is modeled through an exponential function. The parameters
+and
+for the following formulation can be estimated from the market or by using marginal
+cost supply function:
+(10)
+Based on the estimated parameters
+and
+, it is possible to
+conﬁrm that the correlation remains between [ 1, 1] in all load
+levels that are computed using (3). If this is not the case, then
+the violating correlations can be gapped to [ 1, 1], for example.
+In other words,
+if
+, then set
+and if
+, then set
+. If the
+violations occur frequently, it is worth investigating alternative
+speciﬁcation for the correlation equation.
+3) Future Prices: Future prices are computed at each node in
+period for the later delivery
+. We assume that the contract
+period lasts the whole period
+, and hence, the future price is
+equivalent to the conditional expected spot price multiplied by
+the risk premium for that period. Therefore, the future price is
+(11)
+4) Scenario Tree Generation Steps:
+1) Obtain historical time series data regarding spot prices, future prices, and loads.
+2) Estimate conditional standard deviations
+and
+using GARCH(1,1) model, for example.
+3) Compute
+, and
+using (4) and (5).
+4) Calculate expected spot prices
+using (6), market
+observed futures
+, and estimated premiums
+5) Estimate expected electricity loads
+based on historical data or experts’ opinions, for example.
+6) Calculate electricity spot prices
+and electricity loads
+with (2) and (3).
+7) Estimate
+and
+based on historical time series data applying the least squares method to the linearized version of
+(10).
+8) Calculate probabilities of the higher price and load in scenario
+compared to the expected levels as seen on
+using (8) and (9) and ﬁnally the scenario probabilities
+with (7).
+B. Contract Portfolio Optimization
+We deﬁne
+cash position in period
+in
+scenario
+initial cash position;
+short rate at which
+cash accrues interest
+between periods
+amount (MWh) of purchased
+and sold
+period electricity
+at time
+in scenario
+if
+contract is spot, if
+future;
+net amount (MWh) of
+electricity contracts
+at time
+in scenario
+, i.e.,
+set of all purchased future
+contracts which delivery
+period ends in period ;
+risk constraint matrix,
+pre-speciﬁed risk tolerance
+levels measured in
+conditional-cash-ﬂow-atrisk;
+auxiliary variables,
+probability of a non-tail
+event,
+auxiliary variables in period
+in scenario
+reference target amount,
+which divides the scenarios
+into proﬁt and loss scenarios,
+The optimization problem is formulated using stochastic optimization [41] subject to cash-ﬂow constraints, trading constraints, and risk management constraints. The stochastic optimization approach is advantageous in our setting because it permits the introduction of risk constraints also in intermediate time
+periods. This would be practically impossible with dynamic programming approaches [56] where the intermediate nodes represent the maximum cash position when discounting from the
+terminal time period and hence do not account for the cash-ﬂow
+impacts of past decisions [57].
+1) Cash-Flow Constraints: In period
+, the cash position
+in base scenario
+is
+(12)
+where
+is the initial cash position and
+is the cost of
+acquiring electricity for satisfying the load in the base scenario.
+In period
+, the cash position in scenario
+consist of three parts: 1) cash position from the base scenario
+and interest on it,
+[58]; 2) cost of spot contracts purchased in
+; and 3) changes in the
+values of the future contracts purchased in the base scenario
+, i.e., futures contracts are
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+marked-to-market in every period. These components can be
+generalized to periods
+as follows:1
+(13)
+2) Trading Constraints: We assume that the electricity
+retailer trades forward contracts primarily for hedging purposes
+and not for speculating. Hence, we do not permit the short
+selling of futures contracts (i.e., borrowing future contracts
+from a broker and selling it with the obligation to buy it back to
+the broker later), but permit the selling of previously purchased
+futures. These assumptions correspond to the following trading
+constraints
+(14)
+3) Risk Management Constraints: Extreme risks can be
+taken into consideration by using VAR or CVAR risk measures
+[37], [59]. But although VAR is the de facto standard in the
+ﬁnancial industry [31], it is problematic in that it does not fulﬁl
+the subadditivity condition [32]–[36] of the following four
+requirements on coherent risk measure, stated for risk measure
+where
+and
+are random returns [60].
+1) Translation invariance
+2) Subadditivity
+3) Positive homogeneity
+4) Positivity
+We apply CVAR which is a coherent risk measure and can be
+solved using linear (convex) optimization formulation of [37].
+This formulation can be used for a cash-ﬂow version, conditional-cash-ﬂow-at-risk (CCFAR), with minor modiﬁcations as
+presented. Extreme risks can be curtailed throughout the planning horizon by introducing concurrent CCFAR risk constraints
+at several conﬁdence levels as follows,
+(15)
+1As we have a cost minimization problem, the retailer’s revenues that are received from the end-users are not included. If the model were formulated for
+maximizing proﬁts, an analogous approach could be used in which revenues,
+that are typically based on a pre-agreed price per consumed MWh, could be included by replacing P (s ) with P (s ) from which is subtracted the pre-agreed
+constant price.
+We included in the above formulation reference target
+amounts
+. They allow to specify different reference, or
+benchmark, cash positions for each time periods shifting the
+CCFAR levels accordingly to reﬂect that the total cumulative
+benchmark costs increase in time.
+4) Objective Function and Complete Maximization Problem:
+As in stochastic programming [41], we maximize the expected
+cash position (i.e., minimize expected costs) in the terminal time
+period
+(16)
+subject to constraints (12)–(15).
+IV. NUMERICAL RESULTS FROM EMPIRICAL DATA
+The experiments illustrate the key characteristics of stochastic optimization and its sensitivities to input parameters
+and concurrent risk constraints. The experiments were analyzed
+from the point of view of two different retailers of the electricity
+market: 1) a risk neutral retailer who uses few forward contracts
+and seeks to minimize the expected cost of its portfolio and 2)
+a risk averse retailer who uses substantial forward contracting
+and seeks to minimize its extreme risks measured in CCFAR.
+The experiments also test the following hypotheses.
+• H1: An increase (decrease) in premiums increases (decreases) the cost of hedged portfolio. An increase in the
+premiums results in higher future prices which in turn increases the expected cost of the hedged portfolio, the more
+the futures are used.
+• H2: An increase (decrease) in correlation increases (decreases) risk. High correlation means that load and spot
+are more likely to move together which means that there
+are more extreme events and risk.
+• H3: An increase (decrease) in mean reversion decreases
+(increases) risk. Stronger mean reversion is expected to
+keep the values closer to their mean resulting in less extreme scenarios and less risk.
+• H4: An increase (decrease) in the conditional standard deviation of spot price or load increases (decreases) risk.
+The optimization problems were solved with the Dash Optimization software Xpress, run on a PC with a 700-MHz Pentium III processor, 256 MB of RAM, and Windows XP operating system. The running time of the optimization models was
+about 5 s.
+A. Data
+We consider the midterm horizon problem, with weekly and
+monthly level contracts, as these are the most actively traded
+[61], and may therefore represent a crucial stage in contract
+portfolio risk management process. This is without loss of
+generality, however, since an analogous approach can be used
+over different contract portfolio optimization horizons. We
+consider a six-week time horizon, which includes all forward
+contracts in the market with one-week periods. This resulted
+in a tractable model, which did not call for the use of scenario
+reduction methods [16], [22]. At the same time, this horizon
+was long enough for testing the above hypotheses and for
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+KETTUNEN et al.: OPTIMIZATION OF ELECTRICITY RETAILER’s CONTRACT PORTFOLIO SUBJECT TO RISK PREFERENCES
+exploring the properties of the model and its sensitivities to
+input parameters. The weekly level of aggregation allowed us
+to ignore spot market spikes and issues of daily seasonality.
+Weekly market data on six weeks futures were obtained on
+24.3.2006 from the Nordic power exchange Nordpool. The premiums of the futures were estimated for this six-week period
+based on Nordpool’s future and spot prices from the past seven
+years (weeks 13–18 in 1999–2005). The estimation of future
+premiums with a least squares approach resulted in the linear
+equation
+that estimates the premiums
+for six one-week long futures
+,2,3,4,5,6, each of which
+started from where the previous future ended as seen on March
+24, for a similar method of estimating premiums (see, e.g., [55]).
+Our estimated coefﬁcient of t is twice the magnitude of [55]. It is
+also positive as in their study suggesting that, within the estimation period, the premium increases the further ahead the starting
+date of the future contract is. This can be due to an increase in
+the risk aversion of power generators although the size of our
+data set does not warrant general conclusions. In an extensive
+study focusing on forward contracts, [62] shows that the premium is seasonal and can be even negative when the standard
+deviation of the electricity load is low.
+We considered the future
+as the weekly spot price
+after accounting for the risk premium. The conditional weekly
+standard deviations for spot prices were estimated from the
+same seven-year data set. This was done by 1) taking a 26-week
+moving average of the data and 2) modeling the standard
+deviation of the difference of the moving average and the actual
+data with GARCH(1,1)
+so
+that the long-term trend and seasonal effects were ﬁltered out.
+The estimated parameters were
+, and
+For the electricity load, we obtained the weekly loads in Finland for the period 1990–2005 from [63], of which we used
+1% (comparable to the load in an average small town). The expected weekly electricity loads were estimated by taking an average load change in the past (weeks 13–18 in 1990–2005) and
+applying these expected changes to forecast expected loads in
+weeks 13–18 in 2006. The conditional weekly standard deviations for the loads were estimated from the same data set applying a GARCH(1,1) model
+for ﬁltered data (similar to the estimation of the conditional
+spot price standard deviations). The estimated parameters were
+, and
+The estimation of load and spot price correlation parameters
+was based on weekly data for the six months prior to 24.3.2006,
+which reﬂected the capacity of electricity generation at the time
+the model was run (unlike the full set of data from seven years).
+The estimation was conducted by dividing the data into four
+segments based on load and evaluating the correlations in the
+segments, whereafter the least squares method was applied to
+the linearized version of (10). This resulted in
+and
+. The mean reversion parameters were obtained by ﬁtting with least squares method linear equations for the mean reversion processes of the spot price and load during weeks 13–18
+in years 1999–2005. The means to which the spot and the load
+values revert are the expected spots and the expected loads for
+the corresponding week as seen in the beginning of week 13.
+TABLE I
+DATA OF EXPERIMENTS (WEEKLY FUTURE PRICES AS SEEN ON 24.3.2006
+IN EUR/MW CONTRACT AND EXPECTED LOADS IN GWh)
+Mean reversion for spot price c
+= 0:2 and load c
+= 0:4, correlation
+parameters N = 0:08 and  = 0:1 (which implied that the effective range
+of the correlation coefﬁcient was between 30% and 70%), the yearly interest
+rate was 2%, and trade fee was 0.03 EUR/MWh.
+The estimated mean reversion parameters for the spot and the
+load were 0.2 and 0.4, respectively. The data of the experiments
+are summarized in Table I.
+Some simpliﬁcations and adjustments were made in the experiments. In the scenario tree generation, probabilities of the
+higher and lower prices and loads compared to the expected
+levels were rounded to obtain values between zero and one, as
+suggested by [28]; this is because the HSS model can, at times,
+result in probabilities that are either negative or greater than
+one if correlation between the modeled variables is very strong
+[28].2 This rounding of probabilities between zero and one can
+mean that the tree does not match the values of the observed
+futures perfectly. To avoid this, the nodal values were re-scaled
+after the tree was created and a perfect match achieved (for similar approach, see [30]). Reference [30] also demonstrates that
+re-scaling can be done as “the computation of the probabilities
+is independent of the means of the process” and thus the structure of the stochastic process remains correct. Fig. 3 shows the
+scenarios in time periods
+and
+, after re-scaling. In the
+terminal period,
+, there are
+scenarios and the
+ranges of values that load and price can obtain, given
+are [13.39, 19.42] and [11.57, 117.75], respectively.
+Taxation issues were ignored, and it was assumed that the
+purchased contracts do not inﬂuence contract prices. We also assumed that future contracts can be purchased in any size of units,
+although in reality, the minimum contract volume is 1 MW.
+B. Results
+The experiments were conducted to compare the meanCCFAR efﬁciency of 1) our proposed stochastic optimization,
+2) periodic optimization, and 3) a ﬁxed allocation strategy
+(in which futures were purchased according to the following
+ﬁxed percentages of the load 80%, 70%, 60%, 50%, and 40%
+for the one, two, three, four, and ﬁve weeks dated futures,
+respectively). Periodic optimization approach differs from the
+stochastic optimization approach by determining a single optimal portfolio for each period instead of computing the optimal
+2We observed that this phenomenon occurred also if the mean reversion parameters or conditional standard deviations were high.
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+Fig. 3. Generated scenarios for periods t = 0 and t = 1.
+Fig. 4. Comparison of stochastic optimization, periodic optimization, and ﬁxed
+allocation (ﬁgures in million EUR).
+portfolio for each scenario in each period. Periodic optimization is conducted over the same scenario tree using (12)–(16)
+but replacing
+, and
+with period
+speciﬁc decisions
+, and
+, respectively.
+Periodic optimization approach is used, for example in Monte
+Carlo simulations, when the optimization is done over each
+simulation trial independently, and the decisions are averaged
+out for each period in the end.
+Fig. 4 shows the mean-efﬁcient frontiers with respect to the
+six-week 95% CCFAR, in which losses relate to an initial budget
+of 5.2 million EUR. The stochastic optimization is the most ef-
+ﬁcient one with respect to the expected cost and CCFAR. For
+example, a comparison of stochastic optimization with ﬁxed allocation indicates that the same risk level (as measured by 95%
+CCFAR) can be attained at about 5.6% lower cost in relation to
+the initial budget. The gap between the methods can be expected
+to increase if the risks increase due to changes in correlation,
+standard deviations, or mean reversions.
+From the point of view of the risk averse retailer, which corresponds to the leftmost end of the curve, the stochastic optimization approach provides signiﬁcant beneﬁts in reduction of
+expected cost as contract portfolio is efﬁciently managed. For
+the risk neutral retailer, which corresponds to the rightmost end
+of the curve, the beneﬁts of the stochastic optimization method
+are less signiﬁcant because only a few futures are purchased.
+When the hypotheses H1–H4 were tested with respect
+to changes in the input parameters, these hypothesis were
+validated (see Fig. 5). Speciﬁcally, the impact of increased
+premiums can be seen in Fig. 5(a). For the risk neutral retailer
+(the rightmost end of the curves), the change in premiums does
+not have impact on the expected cost. In contrast, for the risk
+averse retailer (the leftmost end of the curves), the increased
+premiums result in signiﬁcantly higher expected cost. In fact,
+the impact on expected cost is stronger the more hedging is
+conducted.
+The change in the risk (H2, H3, and H4) can be observed
+similarly by comparing the horizontal changes of the risk neutral retailer, for example. Fig. 5(e) and (f) shows that for the
+price-related input parameters, the change in risk strongly depends whether the retailer is risk averse or risk neutral. This
+can be seen by comparing the horizontal differences between
+the curves for risk averse and risk neutral retailer. As can be
+seen, the risk averse retailer is almost immune to variability in
+price-related input parameters while the risk can vary signiﬁ-
+cantly for risk neutral retailer. Also it can be observed that uncertainty in load-related input parameters causes roughly equal
+amount of risk for both risk averse and risk neutral retailers
+[see Fig. 5(c) and (d)]. This effect can be explained by noting
+that their future contracts provide a perfect hedge against price
+changes but cannot capture volume risks. Thus, both retailers
+need to pay attention to the load-related uncertainties and possibly use swing options to protect against the volume risks.
+However, the risk neutral retailer also has to be concerned about
+the price-related risks which result in greater variability in risk
+than load-related uncertainties.
+Further experiments were also run with the correlation being
+zero [see Fig. 5(b)] to analyze how much risk this assumption
+underestimates compared to the model with positive exponential correlation. Similar tests were also run for the correlation
+parameter
+and corresponding results were obtained. The difference was signiﬁcant for the risk neutral retailer as risk was underestimated by approximately 23%, in absolute terms about 0.3
+million EUR, while the effect was less for risk averse retailer.
+Thus, including correlation into the analysis was important.
+The robustness of the optimum strategies were also evaluated
+by observing how close the optimal contract portfolio strategy
+of the original problem, i.e., solution for a given risk aversion, were to the efﬁcient frontiers when the input parameters
+were changed one at a time. The results suggested that the
+optimal strategies of the original problem were not sensitive
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+KETTUNEN et al.: OPTIMIZATION OF ELECTRICITY RETAILER’s CONTRACT PORTFOLIO SUBJECT TO RISK PREFERENCES
+Fig. 5. Sensitivity of mean-CCFAR efﬁcient frontier with respect to changes in (a) , (b) N, (c) c , (d)  , (e) c , and (f)  .
+Note, the change in premiums corresponded to the change in the gradient and in conditional standard deviations to a parallel shift.
+to the changes in the input parameters. These are illustrated
+also in Fig. 5. Here the point marked with “O” is the optimal
+contract portfolio strategy of the original problem, when six
+week CCFAR constraint was set to 0.4 million EUR, and is
+thus on the mean-CCFAR efﬁcient frontier. The points marked
+with “X” are computed applying the original contract portfolio
+strategy when the input parameter was 50%3 higher and lower,
+respectively, than originally.
+3For N, we used 20% as an increase of 50% would have resulted correlation
+values that were greater than 1.
+Authorized licensed use limited to: CHANGSHA UNIV OF SCIENCE AND TECHNOLOGY. Downloaded on December 20,2025 at 04:51:36 UTC from IEEE Xplore. Restrictions apply.
+
+IEEE TRANSACTIONS ON POWER SYSTEMS, VOL. 25, NO. 1, FEBRUARY 2010
+Fig. 6. Mean efﬁcient surface with respect to four weeks and six weeks 95%
+CCFAR (ﬁgures in million EUR).
+Finally, we conducted experiments to analyze the effects of
+introducing a risk constraint matrix (with two risk constraints)
+compared to a single risk constraint. For this purpose, we plot
+the mean-CCFAR efﬁcient surface with respect to four and six
+weeks 95% CCFAR, which losses relate to an budget of 3.5
+and 5.2 million EUR, respectively (see Fig. 6). The risk neutral
+retailer is located in this graph close to the corner marked as
+at which point the cost of the portfolio is minimized. The risk
+averse retailer is close to the extreme corners in the opposite end,
+for example at point marked as
+, depending on the required
+level of risks at six and four weeks.
+In Fig. 6, we also highlight a point A which represents a situation when the expected procurement costs are minimized and
+a risk constraint only on the six weeks 95% CCFAR is applied
+at the level of 0.6 million EUR. At this point, the risk at the
+intermediate four weeks 95% CCFAR is not curtailed. However, by setting an additional constraint for the four weeks 95%
+CCFAR at the level of 0.4 million EUR, it is possible to reduce
+the four weeks risk by approximately 50% (in absolute terms
+roughly 0.5 million EUR) while the increase in cost is insignificant being only by 0.1% (in absolute terms only 0.005 million
+EUR). Consequently, setting constraints concurrently at several
+time periods can reduce signiﬁcantly the intermediate period
+risks which can be important, for example due to regulatory reasons or if the company is close to ﬁnancial distress.
+V. CONCLUSIONS
+Our results suggest that the stochastic optimization approach
+can be more efﬁcient for risk management by an electricity retailer than periodic optimization or ﬁxed allocation approaches.
+This result can be attributed to the fact stochastic optimization
+uses the path dependency of information along individual scenario paths to optimize hedging in each period. This result is
+also analogous to the ﬁndings of [6] which compares the effectiveness of a production and hedging portfolio using dynamic
+and static models for electricity production.
+One of the key insights from the numerical studies is that it is
+important to incorporate the correlation between spot price and
+load into the model as correlation increases the probability of
+the extreme outcomes and hence risks. The results of the experiments also suggest that a risk neutral retailer would be more
+concerned about the price-related uncertainties, which result
+in greater variability in risk, than load related uncertainties. A
+risk averse retailer, on the other hand, should estimate carefully
+the risk premiums which strongly affect the expected cost and
+should also use derivatives, such as swing contracts, to hedge for
+load-related uncertainties. Overall the model is relatively robust
+in that the solutions remain close to the efﬁcient frontier even if
+there are minor variations in the input parameters.
+Our approach also includes CCFAR constraints across several
+time periods rather than focusing only upon the terminal period.
+This is important as it allows retailers to keep the cash position in
+intermediate periods within risk limits for satisfying compliance
+regulation requirements or above a desired risk level if the company is ﬁnancially constrained. This risk management across intermediate periods is also important in the methodology, as retailers will continue to operate after the terminal period, and in
+practice, risk management needs to feed forward continuously.
+Consequently, it is important in practice to incorporate the risks
+during the intermediate time periods and to re-run the model for
+all time periods, rolling forward, when updated information becomes available. The same rationale applies to risk management
+at different conﬁdence levels, as well.
+This research has made contributions to the general direction of methodology. It is possible to integrate additional details,
+for instance regarding the special market characteristics of the
+price formation process and load prediction errors, to consider
+different time speciﬁcations, as well as cross-hedging with related markets, most of which present substantial but essentially
+computational extensions. But, more generally, this research has
+demonstrated that more accurate results can be achieved in the
+electricity retailing business by incorporating path-dependencies in the generated scenarios and using multistage evaluation
+to optimize hedging at intermediate stages. We found that stochastic optimization, combined with a risk constraint matrix
+framework and allied to the HSS scenario building process, provided a viable methodology for this class of problems. Furthermore, it provides insights into the relative sensitivity of risk
+management parameters to different kinds of market participants in this context.
+ACKNOWLEDGMENT
+The authors would like to thank S. Makkonen for fruitful discussions and K. Berg, A. Toppila, and E. Vilkkumaa for comments on the previous versions.

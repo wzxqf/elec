@@ -1,0 +1,1587 @@
+1. Introduction
+In March 2015, the Central Committee of the Communist Party of China
+and the State Council issued “Several Opinions on Further Deepening the
+Reform of the Electric Power System (Document No. 9 issued by the General
+Office of the CPC Central Committee [2015])” to reform China's power
+system. The reform targeted the sell-side of “multi-channel cultivation of the
+competitive main players in the electricity retail market and the orderly
+opening of the electricity retail transactions to social capital” as one of the
+most important tasks [1]. Liberalizing the electricity retail market, en­
+couraging further competition, and forming a new “multi-buyer-multiseller” structure are notable development trends after the reform of China's
+power sales system. Reforms also may serve to improve the quality of
+electricity retail services and the satisfaction of power users while ensuring
+safe and reliable energy supply. Appropriate reform may also optimize the
+allocation of resources.
+Electricity market-oriented transactions also began alongside this
+reform. The system initially centered on mid-long-term physical trans­
+actions, and the trading frequency was annual and monthly. A spot
+market was then gradually established. Mid-long-term market transac­
+tions are now conducted nationwide on the Chinese electricity market
+while the electricity spot market is in the early stages of development,
+and it has only been piloted in certain provinces (e.g., Guangdong). The
+electricity financial market (such as options market and futures market,
+etc.) has not yet begun to be constructed. At present, mid-long-term
+transactions in China mainly include annual bilateral transactions,
+monthly bilateral transactions, monthly concentrated bidding transac­
+tions and monthly nominal quotation transactions [2]. The electricity
+spot market transactions in Guangdong Province include day-ahead
+market and real-time market transactions [3]. In a word, China cur­
+rently adheres to mid-long-term transactions while vigorously advan­
+cing the construction of the electricity spot market.
+Electricity retail transactions in China were liberalized after the
+introduction of a new power reform plan. Various types of electricity
+retailers have sprung up since entered an increasingly competitive
+market. New electricity retailers in China must swiftly gain a foothold
+in the complex and changing competitive electricity retail market if
+they are to effectively maximize their profits. Retailers that directly
+participate in Chinese electricity market-oriented transactions face risks
+inherent to frequent real-time price fluctuations and user demand un­
+certainty [4-5]. These retailers participate in a variety of transactions as
+they attempt to hedge risks. Today's electricity retailers in China must
+develop strategies for purchasing electricity from the current typical
+Chinese electricity market. They also face the problem of planning and
+https://doi.org/10.1016/j.epsr.2020.106833
+Received 7 January 2020; Received in revised form 19 August 2020; Accepted 19 August 2020
+⁎ Corresponding author
+E-mail address: wang_fan_fiona@163.com (F. Wang).
+Electric Power Systems Research 190 (2021) 106833
+Available online 25 August 2020
+0378-7796/ © 2020 Elsevier B.V. All rights reserved.
+T
+
+distribution of flexible and diverse electricity retail contracts as the
+retailers respond to various load characteristics and user purchases
+preferences. Therefore, it is necessary to study the optimization deci­
+sions made by the electricity retailer in terms of electricity purchases
+and sales at the same time. Risk must be reasonably allocated according
+to this optimization of electricity purchases and sales across the trans­
+action portfolio. Ultimately, the retailer must secure the proper strategy
+to maximize profits while effectively avoiding risks.
+The existing research on electricity retailers mainly centers on profit
+model discussion, marketing strategy formulation and bidding issues.
+Authors in [6] discussed the profit model of the electricity retailer under the
+background of new power reform according to the current development of
+Chinese electricity market. Authors in [7] studied the influence of dis­
+tributed power on the marketing strategy of electricity retailers. Authors in
+[8] studied the decision-making problem of electricity retailers with mul­
+tiple electricity purchases channels. Authors in [9] and [10] studied the
+effect of user price mechanism on bidding strategies of electricity retailers.
+The formulation of bidding strategies for electricity retailers was studied
+when conducting bilateral transactions and spot transactions respectively
+[11-12]. These studies did not involve decision-making problems of elec­
+tricity retailers considering risk assessment. Authors in [13] considered a
+variety of electricity purchases businesses to model risk factors by condi­
+tional value-at-risk and determined the best electricity sales price for con­
+sumers and electricity purchases strategies on the retailer side. Authors in
+[14] have investigated risk management in electricity retailer's investment
+portfolios with multiple electricity purchases contracts, the goal of which is
+maximizing the return of the investment portfolio according to the draw­
+down risk. Authors in [15] compared models of different electricity pur­
+chases source combinations from the perspective of electricity retailers with
+the objective of maximizing returns and constraining risk within the dayahead market. An inner-outer two-layer model system based on stochastic
+mixed-integer optimization was proposed for electricity retailer's day-ahead
+electricity market bidding decision-making which includes the conditional
+value-at-risk (CVaR) of profit in the objective function [16]. Authors in [17]
+studied the behavior of electricity retailers in purchasing and selling elec­
+tricity from the perspective of risk control based on the portfolio optimi­
+zation theory. Authors in [18] studied the impact of the real-time price
+uncertainty on the retailer's optimization of electricity purchases decisions.
+However, the studies discussed above only deal with decisions on
+the supply-side and neglected the impact of the retail transactions in the
+sell-side or demand response on the electricity retailers’ electricity
+purchases and sales strategies. Authors in [19] presented a model for
+optimizing retailer portfolios which includes risk-return optimization
+under Markowitz theory and places emphasis on the interaction be­
+tween retailers and end-use customers. Authors in [20] focused on the
+impact of user demand elasticity on retailer profitability by considering
+the user demand response. Authors in [21] proposed a real-time pricing
+(RTP) framework for various users and provided various risk-based
+strategies for electricity retailers by implementing downside risk con­
+straints method. A stochastic profit maximization model for the demand
+response aggregator has also been proposed, in which risk is taken into
+account as per the CVaR measure [22]. Authors in [23] built the Capital
+Asset Pricing Model (CAPM) to determine the retail electricity price for
+end users and used the Risk Adjusted Recovery on Capital (RAROC) to
+quantify the price risk involved. Other researchers have designed
+electricity price packages for electricity retailers by enhancing the
+stickiness of the users [24]. Authors in [25] studied the impact of de­
+mand response on power system optimization decision in different
+markets: day-ahead market and real-time market. These studies only
+focused on demand-side issues.
+There has been a great deal of research on electricity retailers, but in
+the context of the Chinese electricity market, few previous researches
+have considered the influence of both the supply- and sell-side on
+electricity retailers. The researches discussed above mainly focused on
+risk assessment on the supply-side and on various bidding strategies.
+They proposed electricity purchases strategies applicable to multi-level
+electricity markets and corresponding risk management methods.
+Although CVaR has been occasionally utilized, CVaR models in the
+literature do not involve both electricity purchases and sales transac­
+tions. Sell-side transactions optimization and user demand responses
+may be used to improve the electricity retailer's transaction strategies,
+but these approaches generally do not consider electricity retail con­
+tracts. In actuality, the electricity retailer's management must target
+optimization strategies to both the supply-side and sell-side, so the
+optimization of single-side transactions is not sufficient to ensure the
+stable and sustainable development of electricity retailers.
+Therefore, the transactions in supply- and sell-side, including retail
+contracts and demand and price elasticity, in the current Chinese
+electricity market are investigated in this paper. Transactions on both
+the supply-side and sell-side were combined to model various portfo­
+lios. A set of the electricity purchases and sales transaction portfolio can
+be obtained through changing the ratio operator of each retail trans­
+action (implementing one or more types of transactions on the sellside). The goal is to optimize the combination and proportional dis­
+tribution of the electricity retailer in the market and to determine the
+impact of retail proportions on the profits of the electricity retailer.
+The contributions of this paper can be summarized as follows.
+1) Current transaction models for electricity purchases in the Chinese
+electricity market are summarized, including the mid-long-term
+market, day-ahead market, and real-time market. Retail transactions
+including the fixed price, time-of-use (TOU) price (different elec­
+tricity prices during different periods), and real-time price guaran­
+teeing the bottom and top price are reviewed.
+2) On the basis of the current Chinese electricity market with multilevel electricity market and different retail contract transactions, a
+comprehensive electricity trading optimization model of decisionmaking and risk assessment for both the supply- and sell-side based
+on CVaR is established.
+3) Recommendations for electricity purchases and sales strategies are
+proffered to electricity retailers with different risk attitudes. These
+recommendations also involve proportional distribution plans tai­
+lored specially to three respective retail transactions.
+The rest of this paper is organized as follows. In Section 2, retailers’
+transactions are defined according to the supply-side and sell-side.
+Section 3 presents the comprehensive model of decision-making and
+risk assessment for electricity trading optimization based on CVaR. The
+case study and its results are reported in Section 4. Section 5 provides a
+brief summary and conclusion.
+2. Analysis of China's electricity retailers
+To comprehensively investigate electricity trading optimization of
+electricity retailers based on the current Chinese electricity market, this
+study was conducted under the following assumptions:
+1) The subject is assumed to be an independent electricity retailer. Other
+types of electricity retailers (e.g., those with distribution system opera­
+tion rights, those with self-supplying power plants and comprehensive
+energy retailers) are not considered to compete in the electricity market.
+The electricity retailers’ own plans are emphasized for maximizing
+profitability in their electricity transactions.
+2) It is assumed here that the electricity retailer only conducts
+electricity transactions, not value-added business. Today's Chinese
+electricity market is in the initial stages of construction. Its retailers
+mainly rely on electricity transactions to gain profits; the electricity
+transactions are the retailers’ primary function and value-added
+business only plays an auxiliary role. Value-added business may play
+a more important role as the market further develops.
+3) It is assumed that the electricity purchases market includes midlong-term, day-ahead and real-time markets on a time scale. Only
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+bilateral contract transactions are considered in the mid-long-term
+market. Other financial markets (e.g., options markets) do not cur­
+rently exist in Chinese electricity market.
+2.1. Electricity transaction modes
+In the electricity markets, a retailer has the role of a mediator entity
+that purchases electricity from supply-side and sells it on the sell-side to
+those consumers that do not participate directly in the electricity
+markets. The basic core business conducted by electricity retailers is
+electricity trading currently, though they also are engaged in some
+value-added business which encompass fault handling, user equipment
+maintenance, energy-saving services, etc. This paper focuses on elec­
+tricity transaction practices. Electricity transactions of electricity re­
+tailers take place on the supply-side and the sell-side.
+On the supply-side, electricity retailers can purchase electricity by
+signing different physical contracts according to their own needs in
+multi-level electricity market. The retailer purchases a certain amount
+of electricity in the mid-long-term market and the day-ahead market in
+advance, then strikes a balance between the purchased electricity and
+the electricity for sale through the real-time market.
+On the sell-side, end users are consumers. To best cater to the pre­
+ferences of the majority of users, the electricity retailer provides them
+with a variety of price packages. The sell-side transaction of electricity
+retailers can be divided into fixed price, TOU price, and real-time price
+guaranteeing the bottom and top price contracts. The transaction model
+of the electricity retailer is shown in Fig. 1.
+2.2. Transactions on supply-side
+In the Chinese electricity market, the supply-side transactions are
+mainly conducted in the mid-long-term market, day-ahead market, and
+real-time market.
+2.2.1. Electricity purchases in the mid-long-term market
+The mid-long-term electricity purchases transactions of the elec­
+tricity retailer referred to in this paper are bilateral contract transac­
+tions. Purchases are made in the mid-long-term market based on a
+contract signed by the supplying and demanding parties in advance.
+The physical delivery of electricity at a fixed price is agreed upon in the
+contract within a certain period of time. The price and quantity of such
+a contract are determined after signing; thus, this purchases behavior
+occurs prior to the spot market and can be used to hedge the volatility
+and variability of spot market prices [26]. In the electricity purchases
+and sales strategies discussed here, “mid-long-term transactions” be­
+tween electricity retailers and generators mainly refer to retailer pur­
+chases made by signing various bilateral mid-long-term contracts with
+generators according to user demand forecasts in the jurisdiction area
+(mainly annual bilateral and monthly bilateral transactions). These
+contracts result in the satisfaction of long-term user demand [27].
+The purchases cost of the electricity retailer in the mid-long-term
+market is formulated as follows:
+C
+L
+p
+t
+T
+t
+B
+B
+B
+(1)
+where T is the entire observation period; CB is the purchases cost of the
+retailer in the mid-long-term market during the observation period; t is
+the basic observation period; L t
+B is the contract electricity of the
+transaction in the mid-long-term market during the tth period; pB is the
+transaction contract price in the mid-long-term market.
+2.2.2. Electricity purchases in the day-ahead market
+The “day-ahead market” refers to a trading market one day prior to
+the real-time operation. It is an important aspect of the electricity spot
+market. The retailer purchases electricity through centralized trading in
+the day-ahead market according to the forecasted user demand for the
+subsequent day. This serves to balance the deviation between the midlong-term transactions of the retailer and the user demand.
+The purchases cost of the electricity retailer in the day-ahead
+market is formulated as follows:
+C
+L
+p
+t T
+t
+t
+D
+D
+D
+(2)
+where CD is the purchases cost of the electricity retailer in the dayahead market during the whole observation period; L t
+D is the contract
+electricity of the transaction in the day-ahead market during the tth
+period; p t
+D is the day-ahead market clearing price during the tth period.
+2.2.3. Electricity purchases in the real-time market
+The “real-time market” usually refers to a trading market wherein power
+is delivered immediately [28]. Factors such as weather changes, grid acci­
+dents, rapid changes in power due to the intermittency of renewable energy,
+and load fluctuations during actual operation may cause large deviations
+between the electricity planned to be purchased in advance and the realtime demand for electricity. It is crucial to resolve the imbalance between
+power supply and demand in the operation of the power grid in the realtime market. The real-time market is generally organized and implemented
+periodically by State Grid Dispatching Center, which directs the operation of
+the grid at certain intervals; its main role is not to trade electricity, but to
+ensure a real-time balance in power generation and consumption across the
+grid while ensuring operational safety. The real-time market also plays an
+important role in providing adjustments and price signals to manage con­
+gestion as well as offering auxiliary services to swiftly mitigate any power
+scarcity.
+Fig. 1. Electricity transaction modes of electricity retailer
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+The electricity retailer makes purchases in the real-time market to
+balance any deviation between the electricity purchased according to
+the plan in advance and the users’ real-time demand within individual
+trading periods. The real-time market is a centralized place for elec­
+tricity trading. Its most essential characteristics include uncertainty and
+randomness. The scenario method [29] was used in this study to si­
+mulate real-time prices. A set of real-time price scenarios Λ can be
+expressed as follows:
+p
+t
+N
+( ):
+1, 2, ...,
+t
+R
+(3)
+where p ( )
+t
+R
+is the real-time price during the tth period under the ωth
+scenario; N is the number of trading sessions in the real-time market.
+It is assumed that the electricity retailer is a price-taker in the realtime market which purchases and sells electricity at a real-time price
+according to its own needs. When the electricity purchased by the re­
+tailers in the mid-long-term market and the day-ahead market falls
+below the user demand, the retailers must purchase electricity in the
+real-time market, and now the value of the purchased electricity is
+positive. Otherwise, the retailers can sell electricity in the real-time
+market, and now the value of the purchased electricity is negative. If
+the electricity purchased by the retailers in the mid-long-term market
+and the day-ahead market precisely meets the user demand, then the
+retailers do not need to trade in the real-time market. The purchases
+cost of the electricity retailer in the real-time market during the period
+N and under the ωth scenario is expressed as follows:
+C
+L
+L
+L
+p
+( )
+( )]·
+( )
+t
+N
+t
+t
+t
+t
+R
+B
+D
+R
+(4)
+where C ( )
+R
+is the purchases cost of the electricity retailer in the realtime market under the ωth scenario, which may be a positive value,
+negative value, or zero; L ( )
+t
+is the user demand during the tth period
+under the ωth scenario.
+2.2.4. Electricity retailers’ deviation assessment model
+Assuming that the amount of electricity in contract signed by the
+electricity retailer in the mid-long-term market is LB, the amount of
+electricity traded in the day-ahead market is recorded as LD, and the
+actual electricity consumption of the user that the electricity retailer
+agent for in the month under the ωth scenario is recorded as L(ω), so:
+L
+L
+L
+L
+( )
+( )
+B
+D
+(5)
+where ΔL(ω) is the electricity deviation of the electricity retailer under
+the ωth scenario. The amount of electricity that the retailer needs is
+evaluated based on the deviation as-assessed. When ΔL(ω) ≠ 0, there is
+deviation under the ωth scenario. At this time, the additional cost of the
+electricity retailer consists of two parts: the deviation as-evaluated
+(penalty fee) and the deviation of trades in the real-time market, which
+may be positive, negative, or zero [30].
+C
+p
+L
+p
+L
+( )
+( )
+( )·
+( )
+pe
+pe
+t
+T
+t
+R
+(6)
+where Cpe(ω) is the additional cost of the electricity retailer under the
+ωth scenario; ppe is the unit assessment cost of the electricity deviation.
+2.3. Transactions on sell-side
+By providing users with a diverse array of services, electricity re­
+tailers can enhance user loyalty while expanding the scale of their users.
+This is the key to ensuring continued profitability. There are three ty­
+pical differentiated electricity price contracts on today's Chinese elec­
+tricity market: the fixed price contracts, TOU price contract, and realtime price guaranteeing the bottom and top price contract.
+2.3.1. Retail transactions under fixed price mode
+If the user selects a fixed price contract offered by the electricity
+retailer, then the electricity price stipulated in the contract is fixed, and
+the electricity price remains unchanged throughout the contract period.
+Here, the price of the fixed price contract with the user is set as pcon.
+2.3.2. Retail transactions under TOU price mode
+Unlike the fixed price, the TOU price load curve can be divided into
+peak, flat, and valley periods each featuring a different electricity price
+based on the half-ladder membership function principle [31].
+The TOU price is calculated as follows:
+p
+t
+p
+t
+T
+p
+t
+T
+p
+t
+T
+( )
+fen
+t
+t
+t
+p
+p
+s
+s
+r
+r
+(7)
+where p
+t( )
+fen
+is the TOU price during the tth period; Tp, Tr, Ts are the
+collection of peak load periods, valley load periods, and flat load per­
+iods in a day, respectively; pt
+p, pt
+r , pt
+s are the retail price of peak load
+periods, valley load periods, and flat load periods, respectively.
+2.3.3. Retail transactions under real-time price guaranteeing the bottom and
+top price mode
+The contract referred to here as “real-time price guaranteeing the
+bottom and top price” stipulates a maximum and minimum electricity
+transaction price which do not change during the contract period. The
+electricity retail price varies as per the real-time market. When the
+linked price is lower than the maximum price and higher than the
+minimum price, the retail price is a real-time price linked to market.
+When the linked price is higher than the maximum, the maximum price
+is adopted by the retailer as the retail price; conversely, when the linked
+price is lower than the minimum price, the minimum price is adopted.
+The real-time price guaranteeing the bottom and top price for the
+electricity retailer is denoted as p^:
+p
+p
+p
+t
+p
+p
+t
+p
+p
+t
+p
+p
+p
+t
+p
+( )
+( ),
+( )
+( )
+ss
+ss
+ss
+ss
+max
+max
+min
+max
+min
+min
+(8)
+where pmax is the maximum retail price (top price); pmin is the minimum
+retail price (bottom price); pss(t) is the linked price which is lower than
+the top price and higher than the bottom price.
+Price variations under this contract, as mentioned above, follow the
+real-time market. The sharing ratio of the profit between the electricity
+retailer and the user is agreed upon in advance. Based on profit sharing,
+the user's linked price can be expressed as:
+p
+t
+p t
+p t
+p
+( )
+( )
+( )
+ss
+e
+e
+t
+R
+(9)
+where pe(t) is the electricity price of the user during the tth period ac­
+cording to the grid company's catalog electricity price; η is the sharing
+ratio of the profit agreed upon between the electricity retailer and the
+user.
+2.3.4. User demand elasticity based on price elasticity coefficient
+The incentive effect of the retail contract price mechanism on users’
+electricity consumption behavior is examined here from the perspective of
+the electricity retailer. The demand and price elasticity under the retail
+contract mode is defined accordingly. The demand and price elasticity
+based on the elastic coefficient refers to the user's adjustments of his own
+electricity consumption in response to the electricity price signal [32]. The
+electricity retailer guides the user to change this consumption behavior by
+changing the retail contract price. Based on the user demand under the fixed
+price, the user demand under the TOU price and the real-time price guar­
+anteeing the bottom and top price can be expressed as:
+L
+L
+p
+z
+p
+t
+p
+t
+p
+t
+p
+t
+p
+t
+( )
+( )(1
+( )
+( )
+( )
+( )
+( )
+( )
+t
+t
+z
+z t
+T
+zt
+fen
+fen
+con
+tt
+fen
+con
+con
+2,
+1,
+1,
+(10)
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+L
+L
+p z
+p t
+p
+t
+p t
+p
+t
+p
+t
+( )
+( )(1
+^( )
+^( )
+( )
+^( )
+( )
+( )
+t
+t
+z
+z
+t
+T
+zt
+con
+tt
+con
+con
+3,
+1,
+1,
+(11)
+where L1, t(ω) is the user demand under fixed price mode during the tth
+period and under the ωth scenario; L2, t(ω) is the user demand under TOU
+price mode during the tth period and under the ωth scenario, when t ∈ Tp,
+L
+L
+( )
+( )
+t
+p t
+2,
+, which indicates the actual user demand in the peak
+period during the tth period and under the ωth scenario, when t ∈ Tr,
+L
+L
+( )
+( )
+t
+r t
+2,
+, which indicates the actual user demand in the valley
+period during the tth period and under the ωth scenario, when t ∈ Ts,
+L
+L
+( )
+( )
+t
+s t
+2,
+, which indicates the actual user demand in the flat period
+during the tth period and under the ωth scenario; L3, t(ω) is the user demand
+under real-time price guaranteeing the bottom and top price mode during
+the tth period and under the ωth scenario, when t ∈ T1,
+L
+L
+( )
+( )
+t
+t
+3,
+max,
+which indicates the actual user demand during the top period during the tth
+period and under the ωth scenario, when t ∈ T2,
+L
+L
+( )
+( )
+t
+ss t
+3,
+, which
+indicates the actual user demand during the real-time period during the tth
+period and under the ωth scenario, when t ∈ T3,
+L
+L
+( )
+( )
+t
+t
+3,
+min,
+, which
+indicates the actual user demand during the bottom period during the tth
+period and under the ωth scenario,; ɛzt is the user's cross-elasticity coefficient
+during the zth and tth period; ɛtt is the user's self-elasticity coefficient during
+the tth period; pfen(z) is the TOU price during the zth period; p z
+^ ( ) is the realtime price guaranteeing the bottom and top price during the zth period.
+2.3.5. User satisfaction model
+The electricity consumption of users is affected by the sales price
+provided by the electricity retailer. User satisfaction with electricity
+cost is defined here as a ratio of the difference between the electricity
+cost under the retail contract price of the selected transactions and the
+cost under the catalog price of the power grid company to the cost
+under the catalog price of the power grid company. The user satisfac­
+tion rate can be expressed as follows:
+m
+p t L t
+t
+p
+L t
+t
+p t L t
+t
+( ) ( )
+( )
+( ) ( )
+100%
+t T
+e
+t
+T
+t T
+e
+con
+con
+(12)
+m
+p t L t
+t
+p
+L t
+t
+p t L t
+t
+( ) ( )
+( )
+( ) ( )
+100%
+fen
+t
+T
+e
+t T
+fen
+t
+t T
+e
+(13)
+m
+p t L t
+t
+p
+t L t
+t
+p t L t
+t
+( ) ( )
+( ) ( )
+( ) ( )
+100%
+ss
+t T
+e
+t
+T
+ss
+t
+T
+e
+(14)
+where mcon is the user's satisfaction rate under a fixed price contract;
+mfen is the user's satisfaction rate under the TOU price contract; mss is
+the user's satisfaction rate under the real-time price guaranteeing the
+bottom and top price contract; L(t) is the user demand during the tth
+period.
+3. Risk assessment and decision-making model based on CVaR
+The fluctuations of real-time market prices and the uncertainty of
+user demand are the main risk factors in the electricity transactions.
+Both are continuous random variables, so decision-making and risk
+assessment problems facing the electricity retailer can be transformed
+into a decision-making problem of random planning. A typical scenario
+is established in this study by simulating electricity prices in the realtime market with dynamic user demand under the risk factors discussed
+above. The CVaR variable is used to secure an electricity purchases and
+sales strategy that maximizes the profit of different electricity retailer's
+transaction portfolios under certain risk constraints.
+Based on the description of the electricity purchases transactions men­
+tioned above, the cost of the electricity retailer, accounting for an assess­
+ment of electricity deviation under the ωth scenario, can be expressed as:
+C
+C
+C
+C
+C
+( )
+( )
+( )
+pe
+B
+D
+R
+(15)
+where C(ω) is the total cost of the electricity retailer in all markets under the
+ωth scenario.
+The electricity retailer provides users with a variety of retail con­
+tracts and settles electricity bills with users according to the prices
+agreed upon therein. F(ω) denotes the income (profit) of the electricity
+retailer under the ωth scenario, which is expressed as follows:
+F
+p
+L
+t
+p
+L
+t
+p
+L
+t
+p
+L
+t
+p
+L
+t
+p
+t L
+t
+p
+L
+t
+( )
+( )·
+( )
+( )·
+( )
+( )
+( )
+( )·
+( )
+( )
+( )
+( )
+t
+T
+t
+t
+T
+t
+t
+T
+t
+t
+T
+t
+t
+TI
+t
+t
+T
+ss
+ss t
+t
+T
+t
+con 1,
+p
+p
+p,
+r
+r
+r,
+s
+s
+s,
+max
+max,
+min
+min,
+(16)
+where ∀ωɛΩ satisfies the following:
+L
+L
+L
+L
+L
+L
+L
+( )
+( )
+( )
+( )
+( )
+( )
+( )
+t
+T
+t
+t
+T
+t
+t T
+t
+t
+T
+t
+t
+T
+t
+t
+T
+ss t
+t
+T
+t
+p,
+r,
+s,
+max,
+min,
+I
+p
+r
+s
+(17)
+ρ1(ω), ρ2(ω), ρ3(ω) are the ratio operators assigned by the retailer to the
+three electricity transactions under the ωth scenario; When the user
+chooses the transaction of TOU price contract, Lp, t(ω), Lr, t(ω), Ls, t(ω)
+indicate the user's actual demand in the peak period, valley period, and
+flat period during the tth period and under the ωth scenario; T1, T2, T3
+are the set of time periods for the top price, real-time price, and bottom
+price under the real-time price guaranteeing the bottom and top price
+contract. When the user chooses the real-time price guaranteeing the
+bottom and top price contract, Lmax , t(ω), Lss, t(ω), Lmin , t(ω) are his or
+her actual user demand in the top period, real-time period, and bottom
+period during the tth period and under the ωth scenario.
+The profit of the electricity retailer when implementing multiple
+retail contracts simultaneously under the ωth scenario can be expressed
+as follows:
+W
+F
+C
+( )
+( )
+( )
+(18)
+where W(ω) is the profit of the electricity retailer under the ωth sce­
+nario.
+The expected profit of the electricity retailer is the sum of the
+product of the electricity retailer's profit and the corresponding prob­
+ability under all scenarios:
+W
+W
+( )·
+( )
+(19)
+where W is the expected profit of the electricity retailer.
+The electricity purchases and sales losses of the electricity retailer
+under the ωthscenario is characterized here as the inverse of the re­
+tailer's profit:
+G
+W
+( )
+( )
+(20)
+Because the electricity purchases and sales model of the electricity re­
+tailer must reflect (and constrain) the electricity purchases and sales
+loss through the CVaR method [33], G(ω) in the electricity purchases
+and sales CVaR model of the retailer is considered here to be equivalent
+to the loss function f(W, Ri) of Formula (A8) in Appendix A (which is
+the standard derivation of the CVaR methodology). FVaR is the max­
+imum risk loss that a retailer may incur in the electricity market while
+the confidence level is β, which is equivalent to the loss value α of
+Formula (A8) in Appendix A. The sample set of risk factors is Ω.
+The electricity purchases and sales model of the electricity retailer
+based on the CVaR is:
+F
+F
+G
+F
+(1
+( )·[
+( )
+CVaR
+VaR
+VaR
+(21)
+G
+F
+G
+F
+( )
+max{0,
+( )
+VaR
+VaR
+(22)
+The virtual variable zω can be used to transform optimization problems
+into linear programming problems:
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+F
+F
+z
+( )·
+CVaR
+VaR
+(23)
+s t z
+z
+G
+F
+. .
+0,
+( )
+VaR
+(24)
+When the electricity retailer formulates a trading strategy, it attempts
+to maximize profit and minimize the risk of loss. The objective function
+is:
+W
+F
+max
+CVaR
+(25)
+where δ is a risk aversion factor related to the attitude of the electricity
+retailer. For risk-averse electricity retailers δ is larger and for riskpreferring electricity retailers is smaller.
+There are various methods for measuring returns and risks under the
+portfolio theory. The fundamental goal of any such method is to construct a
+portfolio optimization model with returns or risks as targets or constraints. A
+set of solutions with the least risk at the same level of return or the greatest
+return at the same level of risk are secured as the optimal solution.
+Assume x is a decision vector, ϕ(x) is a risk function, W(x) is a profit
+function, and X is a decision feasible set in which x ∈ X, γ is a risk factor
+parameter, ɛ is a limited return level, τ is a limited risk level, and a con­
+fidence level 0 < β < 1 has been given. Investors inherently seek the
+greatest possible return at the least possible risk. Existing combination op­
+timization models applicable to the electricity market include the following.
+An optimization problem that comprehensively considers increasing
+returns
+and
+reducing
+risks
+to
+obtain
+maximum
+utility
+x
+W x
+min
+( )
+( ),
+0.
+An optimization problem with the lowest risk under the constraints
+of the expected level of portfolio returnsmin ϕ(x), W(x) ≥ ɛ .
+An optimization problem with the largest portfolio returns under
+the constraints of certain risk levels
+W x
+x
+min[
+( )],
+( )
+. This pro­
+duces the same effective frontier when the parameters ɛ, τ, and γ are
+changed under certain conditions, that is, x* is the same optimal so­
+lution of the three problems under certain conditions.
+(a) Objective function
+According to the above situation 3), under the constraints of the
+CVaR, the maximum expected revenue of the electricity retailer (with
+minimal loss) is the objective function of the electricity retailer's elec­
+tricity purchases and sales decision-making:
+W
+min(
+(26)
+(b) Constraints
+F
+z
+( )·
+VaR
+(27)
+z
+z
+G
+F
+0,
+( )
+VaR
+(28)
+p
+p
+p
+C
+t
+t
+t
+e
+p
+s
+r
+(29)
+min
+max
+(30)
+m
+m
+con
+min
+(31)
+m
+m
+fen
+min
+(32)
+m
+m
+ss
+min
+(33)
+where δ is a risk aversion factor; ξ is the upper limit of the electricity
+purchases and sales risk of the electricity retailer; p
+C
+t
+e
+r
+indicates that
+the valley price should be greater than the marginal cost Ce of the
+system during the valley period. ηmax and ηmin are, respectively, the
+upper and lower limits of the profit-sharing percentage agreed upon
+between the electricity retailer and the user. mmin represents the
+minimum user satisfaction with electricity bill expenditures.
+In summary, the objective function is a minimization of the elec­
+tricity purchases and sales losses of the electricity retailer represented
+by Formula (26). Formulas (27)-(33) are the constraints. A compre­
+hensive model of decision-making and risk assessment for the
+optimization of electricity transaction practices based on CVaR is thus
+established. As discussed in detail below, MATLAB was used to call the
+CPLEX solver to operate this model to validate it via case study.
+4. Case study
+4.1. Data
+The planning period selected for this analysis is 30 days. (The basic
+period is 15 min, which is the duration of the “real-time market” to­
+taling 2,880 periods.) Four sets of real-time market price and user de­
+mand under fixed price mode scenarios were simulated according to
+historical data for a typical area [34] (Appendix B Fig. 1 and Fig. 2).
+Assuming that the probability of each real-time price scenario and
+corresponding user demand scenario is 1/4, the average expected realtime market price is $48.56/(MW•h), and the purchases price of the
+electricity retailer in the mid-long-term market is $25/(MW•h). The
+user's self-elasticity coefficient and cross-elasticity coefficient are -0.415
+and 0.145, respectively. It is assumed that within one planning period,
+the user does not change his or her electricity retailer. The confidence
+level is α = 0.95 and the user's satisfaction rate does not fall below 2%.
+Based on the above parameters, different electricity transaction models
+were formed in this study by limiting the values of ρ1, ρ2, and ρ3 before
+conduction separate risk assessments and decision-making operations.
+4.2. Mode 1
+In Mode 1, ρ1= 1 and ρ2=ρ3= 0; the electricity retailer only con­
+ducts fixed price contracts. All types of electricity purchases contracts
+are included in the supply-side. The retailer mainly faces the risks of
+real-time market price volatility and user demand uncertainty. This is
+the most basic transaction mode for electricity trading of the electricity
+retailer in the market environment.
+The impact of risk factors on the electricity retailer's electricity pur­
+chases and sales strategies was assessed as reported below. The purchases
+scales of the electricity retailer in different markets under different risk
+aversion factors δ were calculated with a unit assessment cost of electricity
+deviation of $50/(MW•h). The results are shown in Table 1.
+As shown in Table 1, as the risk aversion factor δ of the electricity
+retailer gradually increases, the electricity retailer gradually reduces
+the amount of electricity purchased in the real-time market but in­
+creases the amount of electricity purchased in the mid-long-term
+market. The negative values indicate instances where the electricity
+retailer sells rather than purchases electricity on the real-time market.
+The retailer's risk level has decreased alongside a decrease in expected
+profit. This is because the risk of real-time market price fluctuations and
+higher corresponding penalty costs grow as the company trades more
+electricity in the real-time market, leading to a greater risk of loss.
+Risk-preferred electricity retailers are willing to risk substantial loss
+and can expect to obtain greater profit by appropriately increasing the
+proportion of electricity purchased in the real-time market. Conversely,
+risk-averse electricity retailers must expand the scale of the electricity
+purchased in the mid-long-term market to maintain stable profits while
+avoiding large price fluctuations. Ensuring profitability is dependent on
+accurate prediction of user demand and minimal deviation in electricity
+service. The electricity purchases and sales strategy of the retailer in
+this mode is optimal in Mode 1 when the fixed price is $58.8/(MW•h).
+The impact of the unit assessment cost of electricity deviation on the
+retailer's electricity purchases and sales strategy was also assessed in
+this study. The results with a risk aversion factor of 2 are shown in
+Table 2. The negative values indicate that the electricity retailer is
+selling electricity rather than purchasing electricity in the real-time
+market. A higher unit assessment cost of electricity deviation results in
+a smaller scale of electricity purchased in the real-time market, higher
+penalty fees for the retailer, and a lower expected profit for the retailer.
+Therefore, when the unit assessment cost of electricity deviation on the
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+retailer side is high, it is necessary to reduce transactions in the realtime market by improving the accuracy of user demand predictions or
+properly implementing user demand responses to ensure profitability.
+Finally, when =2, the purchases scales of the electricity retailer in
+different markets at different purchases electricity prices in the midlong-term electricity market were calculated as shown in Table 3.
+Table 3 shows that under the same circumstances (unchanged δ), as
+the price of electricity in the mid-long-term market increases, the op­
+timal electricity purchases and sales strategy of the retailer is to reduce
+the electricity purchased in the mid-long-term market while stabilizing
+the retail contract price. This prevents reduction in expected profit or
+intensifying risk levels for the retailer. When the prices of various types
+of electricity retail contracts remain unchanged, the total user demand
+remains unchanged as well while the electricity purchases activity in
+the mid-long-term market decreases. This forces the retailer to purchase
+more electricity in the real-time market, to bear greater risk of price
+fluctuations in the real-time market, and to experience a decrease in
+both profit and risk level. Whether to purchase cheap electricity in the
+mid-long-term market is key as the retailer seeks to improve its fi­
+nancial competitiveness under Mode 1.
+4.3. Mode 2
+In Mode 2, ρ2= 1 and ρ1=ρ3= 0; the retailer only conducts trans­
+action of the TOU price contracts. All types of electricity purchases
+contracts are included in the supply-side. When the unit assessment cost
+of the electricity deviation is $50/(MW•h), the expected profit of the
+electricity retailer under different risk aversion factors δ were calcu­
+lated as shown in Table 4.
+Table 4 shows that as the risk aversion factor increases, the trading
+activity among retailers in the real-time market gradually decreases.
+This is determined by the demand for real-time market price hedging.
+When the risk which the retailer can afford decreases, the risks caused
+by the fluctuations of real-time market price must be hedged as effec­
+tively as possible.
+Fig. 2 shows that under the same risk aversion factor, the expected
+profit under the TOU price contract is higher than the expected profit
+under the fixed price contract. This is because the price and demand
+elasticity are taken into account. When the retailer implements the
+former contract, economic leverage effectively mobilizes users to “cut
+the peaks” and “fill the valleys” to reasonably bear the cost of elec­
+tricity. This reduces the purchases cost of the retailer thereby increasing
+Fig. 2. Expected profit of the electricity retailer under constant risk aversion factors (Mode 1, Mode 2)
+Table. 1
+Scale of electricity purchased by the electricity retailer in different markets under different risk aversion factors in Mode 1
+δ
+Electricity purchased in mid-longterm market/(106MW•h)
+Electricity purchased in day-ahead
+market/(106MW•h)
+Electricity purchased in real-time
+market/(106MW•h)
+Expected profit of the electricity
+retailer/ (107$)
+Penalty costs/
+(107$)
+0.1
+1.02
+0.76
+-0.04
+3.19
+0.20
+1.38
+0.40
+-0.03
+3.13
+0.15
+1.5
+1.74
+0.02
+-0.02
+2.98
+0.10
+1.75
+0.01
+-0.01
+2.96
+0.05
+Table. 2
+Expected profit of the electricity retailer under different unit assessment costs of
+electricity deviation
+p
+Electricity purchased in realtime market /(106MW•h)
+Expected profit of the
+electricity retailer/ (107$)
+Penalty costs/
+(107$)
+-0.01
+2.99
+0.005
+-0.01
+2.96
+0.05
+-0.0019
+2.90
+0.950
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+the expected profit. Therefore, electricity retailers can appropriately
+utilize such contracts to optimize their retail structures and maximize
+profits. The electricity purchases and sales strategy in Mode 2 is optimal
+when the TOU price is $215.6/(MW•h) in the peak period, $103.7/
+(MW•h) in the flat period, and $49/(MW•h) in the valley period.
+4.4. Mode 3
+In Mode 3, ρ3= 1 and ρ1=ρ2= 0; the electricity retailer only con­
+ducts transaction of the real-time price guaranteeing the bottom and
+top price contracts. All types of electricity purchases contracts are in­
+cluded in the supply-side. When the unit assessment cost of the elec­
+tricity deviation is $50/(MW•h) and the sharing ratio is 0.3, the ex­
+pected profit of the electricity retailer under different risk aversion
+factors δ were calculated as shown in Table 5.
+Table 5 shows that the variation trend of expected profit of the
+electricity retailer with the risk aversion factors in Mode 3 is the same
+as that in Mode 1, which is, as the risk aversion factor δ of the electricity
+retailer gradually increases, the expected profit of the retailer will de­
+crease. The results differ significantly when comparing the expected
+profit of the electricity retailer in Mode 1 and Mode 3 under various risk
+aversion factors. The expected profit and penalty costs of the electricity
+retailer under the same risk aversion factors under Modes 1 and 3 are
+shown in Fig. 3.
+The user demand changes as the electricity price changes when
+demand and price factors are elastic. As shown in Fig. 3, under any risk
+aversion, compared with Mode 1, the penalty costs of the electricity
+retailer in Mode 3 is reduced as the expected profit is increased. The
+user demand links to the electricity price. Once the user perceives a
+signal of the price change, he adjusts his own demand accordingly,
+which is quite beneficial for the electricity retailer. The retailers can
+guide users to reduce or increase their electricity demand through price
+signals, thereby reducing their own electricity deviations while redu­
+cing penalty costs and increasing expected profit.
+Table. 3
+Scale of electricity purchased by the electricity retailer at different purchases prices in mid-long-term markets
+Purchases price in midlong-term market/ ($)
+Electricity purchased in midlong-term market/(106MW•h)
+Electricity purchased in dayahead market/(106MW•h)
+Electricity purchased in realtime market/(106MW•h)
+Expected profit of the
+electricity retailer/ (107$)
+Fixed price /
+($/(MW•h) )
+1.64
+0.10
+0.04
+2.96
+58.8
+1.53
+0.11
+0.10
+2.93
+58.8
+1.32
+0.11
+0.31
+2.85
+58.8
+1.18
+0.11
+0.45
+2.79
+58.8
+Table. 4
+Expected profit of the electricity retailer under different risk aversion factors in
+Mode 2
+δ
+Electricity purchased in real-time
+market/(106MW•h)
+Expected profit of the electricity
+retailer/(107$)
+0.1
+0.04
+8.75
+0.03
+4.18
+1.5
+0.02
+3.99
+0.01
+3.92
+Table. 5
+Expected profit of the electricity retailer under different risk aversion factors in
+Mode 3
+δ
+Expected profit of the
+electricity retailer/ (107$)
+Real-time price guaranteeing the bottom and top
+price / ($/(MW•h) )
+Bottom price/
+($/(MW•h) )
+Top price/ ($/(MW•h) )
+0.1 7.53
+47.3
+215.60
+3.39
+45.58
+78.71
+1.5 3.15
+41.86
+75.57
+2.95
+74.00
+Fig. 3. Expected profit and penalty costs of the electricity retailer under constant risk aversion factors (Mode 1, Mode 3)
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+Fig. 3 also suggests that under a small risk aversion factor, the ex­
+pected profit under the real-time price guaranteeing the bottom and top
+price contract is higher than the expected profit under a fixed price
+contract. This difference is exacerbated by any decrease in the risk
+aversion factor. Under a larger risk aversion factor, however, the ex­
+pected profit under the real-time price guaranteeing the bottom and top
+price contract is a bit lower than that under the fixed price contract. The
+real-time price guaranteeing the bottom and top price is linked with the
+real-time market price, which makes the retail price variable. A smaller
+risk aversion factor indicates greater risk for the retailer. The risks and
+price-related uncertainties in the real-time electricity market are passed
+down to the user via a market linkage mechanism. To a certain extent,
+risk-sharing between the retailer and user is realized in this case as the
+purchases cost of the retailer is reduced. The profit of the retailer in­
+creases significantly under this scenario.
+This has certain significance for the retailer in terms of its business
+structure. For risk-preferred retailers, the real-time price guaranteeing
+the bottom and top price contract results in higher expected profit. In
+Mode 3, the electricity purchases and sales strategy are optimal when
+the real-time price guaranteeing the bottom and top price is $47.3/
+(MW•h) in the bottom period and $215.6/(MW•h) in the top period.
+The linkage mechanism is reflected in a profit-sharing scenario where
+the real-time price guaranteeing the bottom and top price is linked to the
+real-time price under a set agreement between the retailer and user.
+Different sharing ratios have different effects on the retailer's electricity
+purchases strategies in this case. Fig. 2 shows the expected profit of the
+retailer with increase in sharing ratio under different risk aversion factors.
+As shown in Fig. 4, a smaller sharing ratio benefits the retailer's
+profitability regardless of its attitude towards risk, provided its goal is
+to ensure user satisfaction.
+4.5. Mode 4
+In Mode 4, 0 ≤ ρ1 ≤ 1, 0 ≤ ρ2 ≤ 1, 0 ≤ ρ3 ≤ 1,
+and
+= 1
+denotes the electricity retailer conducting fixed
+price, TOU price, and real-time price guaranteeing the bottom and top
+price contracts simultaneously. When the fixed price is $58.8/(MW•h),
+the prices in the peak period, flat period, and the valley period of the
+TOU price are $215.6/(MW•h), $103.7/(MW•h), and $49/(MW•h), re­
+spectively; the prices in the top period and the bottom period are
+$215.6/(MW•h), and $47.3/(MW•h), respectively. Fig. 5 shows the
+expected profit of the electricity retailer under the same risk aversion
+factors in Mode 1 to Mode 4.
+Fig. 5 shows that under any risk aversion factor, the expected profit of
+the retailer in Mode 4 are higher than in any of the three modes discussed
+above. Regardless of the risk attitude of the electricity retailer, conducting
+multiple electricity retail contracts simultaneously plays a significant role in
+increasing expected profit. Multiple electricity retail contracts better meet
+the needs of different users, which improves revenue.
+The proportion of these three types of contract under different risk
+aversion factors is shown in Table 6.
+Table 6 shows that the proportion of fixed price contracts gradually
+increases (and the proportion of the other two contract types gradually
+decrease) as the risk aversion factor increases, as a lower tolerance for
+risk indicates a greater priority for price stability. The TOU and espe­
+cially the real-time price guaranteeing the bottom and top price con­
+tracts are not desirable for the retailer in pursuit of steady income in
+this context due to their uncertainty. The TOU price contract con­
+sistently accounts for a large proportion of the total contracts for similar
+reasons as discussed in Mode 2: it is a transaction practice that con­
+sistently leads to maximum profit.
+Fig. 4. Relationship between electricity retailer's expected profit and sharing
+ratio
+Fig. 5. Expected profit of the electricity retailer under constant aversion factors (Modes 1 to 4)
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+Therefore, for risk-preferred companies, the proportion of real-time
+price guaranteeing the bottom and top price transaction and TOU price
+contracts can be appropriately increased in order to maximize the expected
+profit. For risk-averse electricity retailers, profit will be relatively low but
+stable when the proportion of fixed price contracts is increased.
+5. Conclusion
+A comprehensive decision-making and risk assessment model was es­
+tablished in this study for the optimization of electricity transaction prac­
+tices based on CVaR. Three types of transaction practices were assessed on
+the supply-side and the sell-side of the electricity retailer/user relationship
+with consideration of deviations in electricity. Different modes of electricity
+transactions are formed as different contracts are enacted. These modes are
+selected on a case-by-case basis as the retailer seeks to minimize loss,
+maximize profit, and ensure user satisfaction.
+The primary conclusions of this study can be summarized as follows.
+1) The amount of electricity purchased in multi-level electricity market
+is affected by the retailer's risk aversion factor, and retailers with
+different risk attitudes have different electricity purchases strate­
+gies. Risk-averse retailers will benefit from enhancing the accuracy
+of user demand forecasting. The key to financial competitiveness is
+obtaining cheap electricity from the mid-long-term market.
+2) The TOU price can obviously increase the expected profit of the elec­
+tricity retailer. In effect, considering the demand and price elasticity, the
+TOU price contract is an effective means of demand-side management.
+3) The real-time price guaranteeing the bottom and top price can
+transfer risk from some extent from the retailer to the user. It is
+recommended that risk-preferred electricity retailers implement this
+contract to maximize profitability.
+4) The electricity retailer maximizes profits when conducting all types
+of contracts simultaneously. Risk-preferred companies may increase
+the proportion of real-time price guaranteeing the bottom and top
+price and TOU price contracts while risk-averse retailers may benefit
+from increasing their proportion of fixed price contracts.
+The results presented in this paper may assist China's electricity
+retailers to develop new ideas, enrich their electricity transactions, and
+enhance the vitality of the electricity market. This work also may
+provide theoretical guidance for China's retailers as they navigate a
+relatively newly liberalized sell-side. Sound, effective electricity trading
+practices benefit not only electricity retailers with different risk atti­
+tudes, but also assist in reforming Chinese electricity market. In the
+future, with the continuous development of the transactions on sellside, retailers can carry out demand-side management and provide in­
+tegrated energy services to manage risk and enhance competitiveness.
+CRediT authorship contribution statement
+Bo Sun: Conceptualization, Methodology, Writing - review &
+editing, Funding acquisition. Fan Wang: Software, Writing - original
+draft, Data curation, Investigation. Jingdong Xie: Supervision, Project
+administration. Xin Sun: Visualization, Writing - review & editing.
+Declaration of Competing Interest
+The authors declare that they have no known competing financial
+interests or personal relationships that couldhave appeared to influence
+the work reported in this paper.
+Acknowledgments
+This work is supported by the National Natural Science Foundation
+of China (NSFC)(No.71972127).
+Appendix A
+Standard Derivation of the CVaR Methodology
+CVaR refers to the average portfolio loss under the condition that the loss of the portfolio is greater than a given value-at-risk (VaR) value. The
+VaR alone does not allow for consistent risk measurements. The CVaR has been applied to risk assessment in the electricity retail scenario.
+In general, f(W, ξ) indicates the loss corresponding to the decision vector (portfolio) W ∈ ℘⊂Rn and risk factor (random vector) ξ ∈ Rn. For
+convenience, it may be assumed that ξ ∈ Rn is a continuous random vector. For a given portfolio W, the probability of loss which does not exceed α is:
+W
+P f W
+( (
+(A1)
+The VaR corresponding to the portfolio W and a given confidence level β is:
+VaR
+W
+R
+W
+inf{
+(A2)
+Under the assumption that ψ(W, α) is continuous, then
+P f W
+VaR
+W
+W VaR W
+( (
+(A3)
+CVaR is defined as the conditional expectation that the loss exceeds VaR, which is expressed as:
+CVaR
+W
+E f W
+f W
+VaR
+W
+xp x dx
+[ (
+( )
+VaR
+W
+(A4)
+where E is the expectation operator and p(x) is the density function of loss f(W, ξ).
+The definition of CVaR is defined as the following equivalent:
+Table. 6
+Proportion of electricity retail transaction types under different risk aversion factors
+δ
+Expected profit of the electricity
+retailer/ (107$)
+Proportion of real-time price guaranteeing the bottom and
+top price contract
+Proportion of TOU price
+contract
+Proportion of fixed price
+contract
+0.1
+12.56
+0.047
+0.831
+0.122
+11.63
+0.029
+0.724
+0.247
+1.5
+10.82
+0.023
+0.688
+0.289
+10.35
+0.020
+0.671
+0.309
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833
+
+CVaR
+W
+F W
+min
+(A5)
+where Fβ(W, α) is defined as:
+F W
+E
+f W
+[( (
+) ]
+(A6)
+and
+z
+z
+( )
+max{ , 0}. Minimizing the CVaR of W ∈ ℘⊂Rn is equivalent to minimizing Fβ(W, α) of (W, α) ∈ ℘ × R, which is formulated as follows:
+CVaR
+W
+F W
+min
+min
+W
+W
+R
+, )
+(A7)
+Moreover, when ℘ is a convex set and f(W, ξ) is a convex function, Formula. (A7) is a convex programming problem.
+The CVaR is applied here to resolve portfolio optimization problems. The first step in this task is to find an estimate of the density function of the
+loss f(W, ξ) or risk factor ξ. When ξ is a given sample set, {R1, R2, ..., RT}, Fβ(W, α) can be estimated; T represents the sample size. Estimating Fβ(W, α)
+as follows:
+F W
+T
+f W R
+˜ (
+(1
+( (
+i
+T
+i
+(A8)
+Appendix B
+Fig. 6, Fig. 7,
+Fig. 6. Real-time electricity price in 4 scenes (30 days)
+Fig. 7. Power demand of users in 4 scenes (30 days)
+B. Sun, et al.
+Electric Power Systems Research 190 (2021) 106833

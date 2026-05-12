@@ -1,0 +1,21 @@
+In the environment of electricity spot market, the
+spot price based on time and location will bring the risk of
+price fluctuation, so it is necessary to design effective tools to
+avoid the risks. As the most common financial instrument in
+medium- and long-term market, contract-for-difference (CfD)
+can provide market participants with an instrument to hedge
+against price fluctuations, and be used by government to
+achieve stranded cost recovery, market power control, and
+renewable energy accommodation. This paper firstly presents
+basic concepts related to CfD design, including contract body,
+contract period and contract design parameters. Then, based on
+relevant experience in China and abroad, the design elements
+and methods of CfDs are summarized, and the selection
+methods of design parameters such as contract quantity,
+contract price and benchmark price are discussed. Then, this
+paper presents design of typical CfDs in the United Kingdom,
+Canada, Singapore, Australia and other countries, and discusses
+and analyzes their application. Finally, taking the current status
+of electricity market in China into consideration, this paper
+proposes implications and suggestions for design of CfD
+mechanism in construction of electricity market in China.
