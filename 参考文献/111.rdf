@@ -1,0 +1,3194 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/"
+ xmlns:vcard="http://nwalsh.com/rdf/vCard#">
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0142061508000884">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:01420615"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Aggarwal</foaf:surname>
+                        <foaf:givenName>Sanjeev Kumar</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Saini</foaf:surname>
+                        <foaf:givenName>Lalit Mohan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kumar</foaf:surname>
+                        <foaf:givenName>Ashwani</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_229"/>
+        <dc:title>Electricity price forecasting in deregulated markets: A review and evaluation</dc:title>
+        <dcterms:abstract>The main methodologies used in electricity price forecasting have been reviewed in this paper. The following price-forecasting techniques have been covered: (i) stochastic time series, (ii) causal models, and (iii) artiﬁcial intelligence based models. The quantitative analysis of the work done by various authors has been presented based on (a) time horizon for prediction, (b) input variables, (c) output variables, (d) results, (e) data points used for analysis, (f) preprocessing technique employed, and (g) architecture of the model. The results have been presented in the form of tables for ease of comparison. Classiﬁcation of various price-inﬂuencing factors used by different researchers has been done and put for reference. Application of various models as applied to different electricity markets is also presented for consideration.</dcterms:abstract>
+        <dc:date>1/2009</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Electricity price forecasting in deregulated markets</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0142061508000884</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-12-22 07:53:47</dcterms:dateSubmitted>
+        <dc:rights>https://www.elsevier.com/tdm/userlicense/1.0/</dc:rights>
+        <bib:pages>13-22</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:01420615">
+        <prism:volume>31</prism:volume>
+        <dc:title>International Journal of Electrical Power &amp; Energy Systems</dc:title>
+        <dc:identifier>DOI 10.1016/j.ijepes.2008.09.003</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>International Journal of Electrical Power &amp; Energy Systems</dcterms:alternative>
+        <dc:identifier>ISSN 01420615</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_229">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/229/Aggarwal 等 - 2009 - Electricity price forecasting in deregulated markets A review and evaluation.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ieeexplore.ieee.org/document/5337980/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0885-8950,%201558-0679"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kettunen</foaf:surname>
+                        <foaf:givenName>J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Salo</foaf:surname>
+                        <foaf:givenName>A.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bunn</foaf:surname>
+                        <foaf:givenName>D.W.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_231"/>
+        <dc:title>Optimization of Electricity Retailer's Contract Portfolio Subject to Risk Preferences</dc:title>
+        <dcterms:abstract>When an electricity retailer faces volume risk in meeting load and spot price risk in purchasing from the wholesale market, conventional risk management optimization methods can be quite inefﬁcient. For the management of an electricity contract portfolio in this context, we develop a multistage stochastic optimization approach which accounts for the uncertainties of both electricity prices and loads, and which permits the speciﬁcation of conditional-value-at-risk requirements to optimize hedging across intermediate stages in the planning horizons. Our experimental results, based on real data from Nordpool, suggest that the modeling of price and load correlations is particularly important. The sensitivity analysis is extended to characterize the behavior of retailers with different risk attitudes. Thus, we observe that a risk neutral retailer is more susceptible to price-related than load-related uncertainties in terms of the expected cost of satisfying the load, and that a risk averse retailer is especially sensitive to the drivers of the forward risk premium.</dcterms:abstract>
+        <dc:date>02/2010</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/5337980/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-12-22 07:53:52</dcterms:dateSubmitted>
+        <dc:rights>https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html</dc:rights>
+        <bib:pages>117-128</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0885-8950,%201558-0679">
+        <prism:volume>25</prism:volume>
+        <dc:title>IEEE Transactions on Power Systems</dc:title>
+        <dc:identifier>DOI 10.1109/TPWRS.2009.2032233</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>IEEE Trans. Power Syst.</dcterms:alternative>
+        <dc:identifier>ISSN 0885-8950, 1558-0679</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_231">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/231/Kettunen 等 - 2010 - Optimization of Electricity Retailer's Contract Portfolio Subject to Risk Preferences.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201714003">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>14</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杨甲甲</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>赵俊华</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>文福拴</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>孟科</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>董朝阳</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_233"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力零售</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>零售电量预测</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>零售定价</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>零售市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电决策</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>业务流程</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>电力零售核心业务架构与购售电决策</dc:title>
+        <dcterms:abstract>随着电力工业改革的不断发展和智能电网的兴起,现代电力系统正逐步演变为更加复杂的信息物理融合系统。未来电力系统中将同时融合可再生能源、分布式发电设备、储能设备、智能表计、需求响应等新技术与新机制。在电力零售市场环境下,这些新技术与新机制给零售公司带来了严峻挑战,需要发展新的决策机制与方法。随着中国新一轮电力市场化改革的逐步深化,多个区域的电力零售市场也正在逐步建立和运营。为了给国内构建完整的竞争性电力零售市场提供有益的参考,并帮助相关研究学者和技术人员更好地了解电力零售市场的研究现状,文中首先介绍了一些主要国家的电力零售市场情况,然后以澳大利亚和芬兰为例,详细说明了电力零售公司的组织结构和购售电业务流程。接着,比较系统地综述了近年来国内外电力零售决策方面的研究进展,包括零售负荷预测、零售公司购电策略、零售定价策略、零售风险管理等。最后,讨论了电力零售研究领域的一些关键问题和未来可能的发展方向。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201714003</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:01</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家自然科学基金资助项目(51477151)； 深圳市科技创新委员会国际合作研发项目(GJHZ20160301165723718)； 中国南方电网有限责任公司科技项目(WYKJ00000027)~~；
+CNKICite: 101</dc:description>
+        <bib:pages>10-18</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_233">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/233/电力零售核心业务架构与购售电决策_杨甲甲.pdf"/>
+        <dc:title>电力零售核心业务架构与购售电决策_杨甲甲</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2022.0375">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>47</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2022.0375</dc:identifier>
+                <prism:number>1</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>尚楠</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈政</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>卢治霖</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>冷媛</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_235"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>交互机理</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>绿证市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>碳市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>衔接机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>电力市场、碳市场及绿证市场互动机理及协调机制</dc:title>
+        <dcterms:abstract>面向“碳达峰、碳中和”战略目标，应在统一的能源、气候、环境治理框架体系下，统筹协调碳市场、电力市场、绿证市场等各类市场的关联关系，做好市场机制层面有效衔接。分析了欧盟、美国等国外电、碳市场协同运作的实践经验，总结了国内推进碳市场、电力市场、绿证市场建设的现状，剖析了碳市场、电力市场、绿证市场之间的关联关系与交互影响机理，探索了市场间协调发展的衔接机制。最后，立足国内市场建设发展环境和现实需要，提出了当前阶段助力碳市场、电力市场、绿证市场协调发展的相关建议，以充分发挥综合调控作用，助力能源电力行业和社会低碳转型。</dcterms:abstract>
+        <dc:date>2023</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2022.0375</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:13</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 228</dc:description>
+        <bib:pages>142-154</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_235">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/235/电力市场、碳市场及绿证市场互动机理及协调机制_尚楠.pdf"/>
+        <dc:title>电力市场、碳市场及绿证市场互动机理及协调机制_尚楠</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2014&amp;filename=DLXT201413004">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>38</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>13</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>邹鹏</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈启鑫</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>夏清</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>何畅</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>葛睿</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_237"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>出清机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>价格机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>交易模型</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>市场体系</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>制度设计</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>国外电力现货市场建设的逻辑分析及对中国的启示与建议</dc:title>
+        <dcterms:abstract>现货市场是电力市场体系的重要环节,对于电力市场的开放、竞争、有序运行起到了基础性的支撑作用,也是协调市场交易与系统安全的关键所在。文中在全面比对、分析不同国家电力市场建设最新实践的基础上,剖析了电力现货市场的体系架构与构建方式,提炼总结了现货市场建设过程中所需遵循的普遍性规律。并对现货市场构建中的一些关键问题和微观要素进行了深入研究和内在逻辑分析,包括:现货市场的交易规模及其影响因素,市场出清方式及其物理模型,现货市场的价格机制,市场力抑制等相关配套机制,以及现货市场与双边市场、金融市场的协调运行等。最后,对中国下一步建设与大用户直购电相适应的电力现货市场提出了相应的政策建议。</dcterms:abstract>
+        <dc:date>2014</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2014&amp;filename=DLXT201413004</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:51</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家电网公司科技项目(DZ71-14-047)~~；
+CNKICite: 402</dc:description>
+        <bib:pages>18-27</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_237">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/237/国外电力现货市场建设的逻辑分析及对中国的启示与建议_邹鹏.pdf"/>
+        <dc:title>国外电力现货市场建设的逻辑分析及对中国的启示与建议_邹鹏</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2018.1554">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>43</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2018.1554</dc:identifier>
+                <prism:number>5</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>彭文</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王金睿</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>尹山青</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_239"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>负荷预测</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>最大信息系数</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Attention机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>LSTM</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>电力市场中基于Attention-LSTM的短期负荷预测模型</dc:title>
+        <dcterms:abstract>电力市场环境下,精准的短期负荷预测可以保障电网安全稳定运行,但电价的实时波动增加了负荷变化的复杂性,加大了预测难度。针对这一问题,采用最大信息系数法分析电价及历史负荷与当前时刻负荷的相关性,为预测模型输入特征的确定提供依据。在此基础上,提出了基于Attention-LSTM (attention long short-term memory,Attention-LSTM)网络的短期负荷预测模型。该模型充分利用负荷的时序特性,并采用Attention机制突出对负荷预测起到关键作用的输入特征。以澳大利亚某地区真实数据为算例,分别应用Attention-LSTM模型与其他模型进行仿真实验。结果表明,所提方法在预测精度和算法鲁棒性方面均优于其他模型。</dcterms:abstract>
+        <dc:date>2019</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2018.1554</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:53</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 300</dc:description>
+        <bib:pages>1745-1751</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_239">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/239/电力市场中基于Attention-LSTM的短期负荷预测模型_彭文.pdf"/>
+        <dc:title>电力市场中基于Attention-LSTM的短期负荷预测模型_彭文</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2010.05.040">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>34</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2010.05.040</dc:identifier>
+                <prism:number>5</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>赵鸿图</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>朱治中</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>于尔铿</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_241"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应收益</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应项目</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>电力市场中需求响应市场与需求响应项目研究</dc:title>
+        <dcterms:abstract>需求响应市场与需求响应项目是实施需求响应的有效运作方式,需求响应收益是实施需求响应的动因。提出了需求响应市场的设计原则与需求响应项目的构成要素,划分了需求响应市场与需求响应项目的类型,探讨了需求响应市场与项目的时间跨度关系,阐述了需求响应的本质,分析了需求响应在增强电网可靠性、降低电网成本、提高市场效率、增强风险管理能力、改善环境质量、提升服务水平与缓解市场力等方面的作用,详细论述了PJM实施需求响应的情况。对我国需求响应市场与需求响应项目的建设提出了建议与设想。</dcterms:abstract>
+        <dc:date>2010</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2010.05.040</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:56</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 247</dc:description>
+        <bib:pages>146-153</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_241">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/241/电力市场中需求响应市场与需求响应项目研究_赵鸿图.pdf"/>
+        <dc:title>电力市场中需求响应市场与需求响应项目研究_赵鸿图</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13334/j.0258-8013.pcsee.201408">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>中国电机工程学报</dc:title>
+                <dc:identifier>DOI 10.13334/j.0258-8013.pcsee.201408</dc:identifier>
+                <prism:number>5</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>樊宇琦</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>丁涛</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>孙瑜歌</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>贺元康</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王彩霞</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王永庆</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈天恩</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘健</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_243"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源消纳</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>市场机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>国内外促进可再生能源消纳的电力现货市场发展综述与思考</dc:title>
+        <dcterms:abstract>电力现货市场充分发挥市场在电力资源配置中的决定性作用,实现电力市场的充分竞争和电力资源的高效优化配置,反映供需双方真实价格信号。然而,可再生能源出力具有随机性和不确定性,给现货市场带来挑战,如何设计合理机制促进可再生能消纳是新一轮电改提出的重要要求。该文梳理归纳总结了当前国外成熟电力系统现货市场促进可再生能源消纳的市场机制,并介绍了我国8个试点省份现货市场建设特点和促进可再生能源消纳的相关机制。通过对比国内外现货市场发展现状,提出了未来我国现货市场建设的几个难点和挑战。在借鉴国外现货市场建设和可再生能源消纳经验的基础上,深刻把握我国电力现货市场建设的实际情况,统筹有序推进我国的电力现货市场建设。希望该文的研究成果能够为未来我国现货市场落地建设提供新思路和新见解,特别是为促进可再生能源消纳的现货市场提供研究方向。</dcterms:abstract>
+        <dc:date>2021</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13334/j.0258-8013.pcsee.201408</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:03:58</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家重点研发计划项目(2016YFB0901100)； 国家自然科学基金项目(51977166)； 陕西省重点研发项目国际合作项目(2020KW-022)~~；
+CNKICite: 373</dc:description>
+        <bib:pages>1729-1752</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_243">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/243/国内外促进可再生能源消纳的电力现货市场发展综述与思考_樊宇琦.pdf"/>
+        <dc:title>国内外促进可再生能源消纳的电力现货市场发展综述与思考_樊宇琦</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201720001">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>20</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>周明</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>严宇</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>丁琪</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>武昭原</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>贺宜恒</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>龙苏岩</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_245"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>结算机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>偏差电价</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>偏差电量</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>国外典型电力市场交易结算机制及对中国的启示</dc:title>
+        <dcterms:abstract>目前中国单一买方模式下与合同电量有关的偏差电量处理已成为交易结算中的一个难题。随着国内电力市场深化改革的启动,通过市场交易的电量比例不断增大、交易主体更加多元化,交易的品种和交易周期更加多样,这些又对电力市场的交易结算提出了更高要求,而目前缺乏有效的市场工具解决这些问题。为此,文中选取世界上3个代表性电力市场:英国、美国德州及北欧电力市场的交易结算机制进行对比分析,总结了3个市场中不平衡电量的结算方法及特点,并给出了针对中国电力市场不同阶段偏差电量结算机制的建议。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201720001</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:00</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家自然科学基金资助项目(51577061)； 国家电网公司科技项目(SGSXJC00FZJS[2016]319)~~；
+CNKICite: 207</dc:description>
+        <bib:pages>1-8</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_245">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/245/国外典型电力市场交易结算机制及对中国的启示_周明.pdf"/>
+        <dc:title>国外典型电力市场交易结算机制及对中国的启示_周明</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2013&amp;filename=DLXT201317012">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>37</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>17</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>高赐威</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李倩玉</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李慧星</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>翟海保</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张亮</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_247"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>储能装置</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>分布式电源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>负荷聚合商</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应资源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>基于负荷聚合商业务的需求响应资源整合方法与运营机制</dc:title>
+        <dcterms:abstract>负荷聚合商(LA)可以为具有潜在产品价值的需求响应资源提供参与市场调节的机会,还可以通过专业的技术手段充分发掘负荷资源,提供市场需要的辅助服务产品。总结国外开展LA业务的研究与实践,从整合需求响应资源的角度,概述了LA的定义和作用,对其控制资源进行分类研究,包括单纯可调负荷、储能装置和分布式电源。文中详细论述了LA的2个关键问题:运营机制、调度和控制策略,着重介绍了其与电力系统其他参与者的区别。最后,在综述发达国家LA实际应用的基础上,结合国内的实际情况,提出了推广LA这一商业模式的实施方法和途径。</dcterms:abstract>
+        <dc:date>2013</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2013&amp;filename=DLXT201317012</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:03</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家高技术研究发展计划(863计划)资助项目(2011AA05A115)； 华东电网有限公司科技资助项目(HDDDKJ[2012]69)~~；
+CNKICite: 393</dc:description>
+        <bib:pages>78-86</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_247">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/247/基于负荷聚合商业务的需求响应资源整合方法与运营机制_高赐威.pdf"/>
+        <dc:title>基于负荷聚合商业务的需求响应资源整合方法与运营机制_高赐威</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13334/j.0258-8013.pcsee.191382">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>40</prism:volume>
+                <dc:title>中国电机工程学报</dc:title>
+                <dc:identifier>DOI 10.13334/j.0258-8013.pcsee.191382</dc:identifier>
+                <prism:number>2</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈国平</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>梁志峰</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>董昱</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_249"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>顶层设计</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>泛在电力物联网</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>能源清洁低碳转型</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>水电和新能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>中国特色电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>基于能源转型的中国特色电力市场建设的分析与思考</dc:title>
+        <dcterms:abstract>随着我国能源清洁转型的不断深入和电力市场建设的加快推进,需要结合发展需要和实际国情,在保障电网安全运行和绿色发展的前提下,充分激发市场竞争活力,构建具有中国特色的电力市场体系。该文总结我国能源发展的需求和趋势,分析新形势下电力系统特性变化及电力市场运作的影响,在总结前期实践与成果的基础上,研究我国电力市场建设面临的挑战,提出基于能源转型的中国特色电力市场建设的原则和若干关键问题。</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13334/j.0258-8013.pcsee.191382</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:05</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 338</dc:description>
+        <bib:pages>369-379</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_249">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/249/基于能源转型的中国特色电力市场建设的分析与思考_陈国平.pdf"/>
+        <dc:title>基于能源转型的中国特色电力市场建设的分析与思考_陈国平</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201714005">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>14</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>任艺</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>周明</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李庚银</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_251"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电决策</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>购电决策</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电公司</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>双层规划</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>考虑用户需求响应的售电公司购售电决策双层模型</dc:title>
+        <dcterms:abstract>随着中国售电侧市场的逐步开放,大量售电公司迅速成立。作为新型市场主体,售电公司购售电决策成为其运营的核心问题。针对不断增强的用户响应市场价格和激励信息的能力,提出了一种考虑用户需求响应的售电公司购售电决策双层模型,上层模型以售电公司利润最大化为目标,下层模型以用户用电效用最大化为目标。模型考虑了双边合同违约惩罚机制,且对具有需求响应能力的用户用电负荷进行建模,采取了售电公司代理用户需求响应资源参与实时市场的互动机制。最后对所建模型采用美国PJM市场数据进行了验证,结果表明考虑用户需求响应能够给出更优的售电公司购电决策方案。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2017&amp;filename=DLXT201714005</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:20</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家重点研发计划资助项目(2016YFB0901100)； 国家自然科学基金资助项目(51577061)~~；
+CNKICite: 174</dc:description>
+        <bib:pages>30-36</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_251">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/251/考虑用户需求响应的售电公司购售电决策双层模型_任艺.pdf"/>
+        <dc:title>考虑用户需求响应的售电公司购售电决策双层模型_任艺</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2016.11.004">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>40</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2016.11.004</dc:identifier>
+                <prism:number>11</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杨萌</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>艾欣</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>唐亮</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>郭帅</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>罗庚玉</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_253"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>双层规划</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>风险规避</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>平衡市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>计及风险规避的售电公司平衡市场优化交易策略研究</dc:title>
+        <dcterms:abstract>由于市场价格具有波动性和不确定性,售电公司在平衡市场的直接交易面临较大风险。引入用户侧负荷作为平衡资源,提出了包含可中断负荷/电量收购和关键负荷电价两类需求响应项目参与的平衡市场优化交易策略,以规避市场风险。采用条件风险价值度量交易策略风险,并建立了基于随机规划的非线性数学模型。利用双层规划思想,以售电公司收益最大、风险损失最小为上层目标,以用户满意度最大为下层目标,采用自适应遗传算法和二代非劣排序遗传算法进行模型求解。最后通过算例分析了风险偏好和市场电价波动程度对售电公司收益和风险损失的影响,对比证明了所提模型可显著优化售电公司的收益并降低风险损失。</dcterms:abstract>
+        <dc:date>2016</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2016.11.004</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:22</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家863高技术基金项目(2015AA050102)； 国家自然科学基金项目(513111122)~~；
+CNKICite: 101</dc:description>
+        <bib:pages>3300-3309</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_253">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/253/计及风险规避的售电公司平衡市场优化交易策略研究_杨萌.pdf"/>
+        <dc:title>计及风险规避的售电公司平衡市场优化交易策略研究_杨萌</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13334/j.0258-8013.pcsee.172424">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>38</prism:volume>
+                <dc:title>中国电机工程学报</dc:title>
+                <dc:identifier>DOI 10.13334/j.0258-8013.pcsee.172424</dc:identifier>
+                <prism:number>3</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>肖云鹏</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王锡凡</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王秀丽</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>别朝红</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_255"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>交易机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>行为策略</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>面向高比例可再生能源的电力市场研究综述</dc:title>
+        <dcterms:abstract>电力市场为可再生能源的充分消纳和能源互联网的高效运行提供了驱动力和平台。近年来,随着可再生能源参与电力市场比例的提高,各国电力市场均出现了一些问题。该文立足各国电力市场适应可再生能源发展实际,对比了现有可再生能源并网激励政策和交易模式,分析了可再生能源参与电力市场所遇到的特殊问题,总结了各国面向高比例可再生能源电力市场研究的最新成果,提出了进一步研究的问题,特别是中国发展面向高比例可再生能源电力市场面临的关键问题。</dcterms:abstract>
+        <dc:date>2018</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13334/j.0258-8013.pcsee.172424</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:36</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家重点研发计划项目(2017YFB0902200)； 国家电网公司科技项目(DZN17201700175)~~；
+CNKICite: 390</dc:description>
+        <bib:pages>663-674</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_255">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/255/面向高比例可再生能源的电力市场研究综述_肖云鹏.pdf"/>
+        <dc:title>面向高比例可再生能源的电力市场研究综述_肖云鹏</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2021.0963">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>46</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2021.0963</dc:identifier>
+                <prism:number>1</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王小昂</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>邹鹏</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>任远</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>赵兴泉</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李鸣镝</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王其兵</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李宏杰</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>常伟</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_257"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>结算试运行</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>容量补偿机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>中长期分时段交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>中长期与现货衔接</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>山西电力现货市场中长期与现货衔接问题及对策</dc:title>
+        <dcterms:abstract>中长期交易与现货市场的衔接是现货市场建设需要考虑的关键要素之一。山西发用两侧均参与的集中式现货市场已在各类典型电网运行方式下经过多次结算试运行。文章对山西在市场化中长期交易与现货市场衔接方面存在的问题进行了深入分析,指出尽快建立容量补偿机制、开展适应现货市场的中长期分时段交易是解决问题的关键。最后结合现货结算试运行设计了一种新的中长期分时段交易机制,包括交易方式、交易周期、合同分解、风险控制等内容。</dcterms:abstract>
+        <dc:date>2022</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2021.0963</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:39</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 70</dc:description>
+        <bib:pages>20-27</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_257">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/257/山西电力现货市场中长期与现货衔接问题及对策_王小昂.pdf"/>
+        <dc:title>山西电力现货市场中长期与现货衔接问题及对策_王小昂</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201801007">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>42</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>1</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王林炎</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张粒子</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张凡</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>金东亚</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_259"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>场景法</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>储能</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>风险评估</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>购售电</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>决策</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>条件风险利润</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>售电公司购售电业务决策与风险评估</dc:title>
+        <dcterms:abstract>购售电业务的决策和风险评估是售电公司适应电力市场的关键。为丰富售电公司购售电业务,在中长期加现货交易的市场模式下,对售电公司可能的购售电业务进行分类,组合得到不同购售电业务模式。采用场景法对模型中的现货价格和用电需求等风险随机变量进行模拟,以条件风险利润作为风险评估指标,以售电公司风险和预期收益综合效用最大化为目标,建立购售电业务综合决策与风险评估模型。探究在不同购售电业务模式下不同因素对购售电业务决策和风险水平影响。算例选取了3种购售电业务模式进行分析。模式1分析了售电公司的风险偏好和不同类型的售电合同对售电公司购售电行为以及风险的影响,初步验证了模型的有效性。模式2和模式3在模式1购售电业务模式的基础上,分别引入可再生能源中长期购电业务和储能租用业务,评估其单位成本和规模对售电公司购售电决策和风险的影响。</dcterms:abstract>
+        <dc:date>2018</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201801007</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:43</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 142</dc:description>
+        <bib:pages>47-54</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_259">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/259/售电公司购售电业务决策与风险评估_王林炎.pdf"/>
+        <dc:title>售电公司购售电业务决策与风险评估_王林炎</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2018.1132">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>43</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2018.1132</dc:identifier>
+                <prism:number>3</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>罗舒瀚</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>蒋传文</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王旭</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杨萌</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王江波</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>尹硕</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_261"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>分布式电源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>储能</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>概率场景</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>购售电策略</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>条件风险价值</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>新电改背景下售电公司的购售电策略及风险评估</dc:title>
+        <dcterms:abstract>随着我国电力体制改革的深入和能源利用技术的发展,售电公司日渐成为多能量市场的主体。开展多时间尺度购电、合理配置各类能源购电比例及提供差异化售电合同是提高售电公司经营效益和降低风险的核心策略。综合考虑中长期市场及现货市场、可再生能源、分布式电源及储能设备等因素建立多时间尺度的多能量市场购电模型,并基于差异化合同建立售电模型;采用概率场景描述可再生能源出力及负荷预测的随机性,并以条件风险价值作为购售电风险评估指标;通过最大化收益及最小化风险损失最终确定购售电策略。算例分析结果表明,最大程度采购分布式电源电量、科学安排储能设备充放电及提高可再生能源出力预测精度,均能增加售电公司收益,同时减低购售电风险。</dcterms:abstract>
+        <dc:date>2019</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2018.1132</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:45</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家电网公司科技项目(5217L017000M)~~；
+CNKICite: 133</dc:description>
+        <bib:pages>944-953</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_261">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/261/新电改背景下售电公司的购售电策略及风险评估_罗舒瀚.pdf"/>
+        <dc:title>新电改背景下售电公司的购售电策略及风险评估_罗舒瀚</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2016.11.003">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>40</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2016.11.003</dc:identifier>
+                <prism:number>11</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>胡晨</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杜松怀</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>苏娟</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>童光毅</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王梦真</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_263"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电公司</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>购售电途径</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>技术挑战</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>经营模式</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>新电改背景下我国售电公司的购售电途径与经营模式探讨</dc:title>
+        <dcterms:abstract>促进售电侧开放是我国新一轮电力体制改革的重要目标,加快售电公司的组建与发展是实现这一目标的必要措施。按照新电改及相关政策的思路与要求,首先明确了售电公司的基本内涵和组建资质;其次,根据售电公司的所属性质及满足条件进行分类;然后,归纳了各类售电公司的购售电途径及其特点。在此基础上,借鉴国外具有特色的成功经验,总结了售电公司的主要经营模式,并根据各类售电公司优势,提出适合其发展的经营模式。最后,结合我国电力市场的发展情况,提出了售电公司未来将要面对的技术挑战。</dcterms:abstract>
+        <dc:date>2016</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2016.11.003</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:04:58</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家重点研发计划项目课题(2016YFB0900101)~~；
+CNKICite: 254</dc:description>
+        <bib:pages>3293-3299</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_263">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/263/新电改背景下我国售电公司的购售电途径与经营模式探讨_胡晨.pdf"/>
+        <dc:title>新电改背景下我国售电公司的购售电途径与经营模式探讨_胡晨</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2021&amp;filename=DLXT202116005">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>45</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>16</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王彩霞</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>时智勇</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>梁志峰</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李钦淼</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>洪博文</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>黄碧斌</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>蒋莉萍</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_265"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力供应</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>新能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>新型电力系统</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求侧资源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>新能源为主体电力系统的需求侧资源利用关键技术及展望</dc:title>
+        <dcterms:abstract>能源转型背景下的电力清洁低碳化将推动传统电力系统向以新能源为主体的新型电力系统发展。新型电力系统中的电力供应保障和安全稳定运行能力将受到高比例新能源的极大挑战,传统电力系统运行模式下单靠电源侧资源已无法满足安全稳定且经济高效的电力供应要求,必须充分挖掘需求侧资源的潜力,由&quot;源随荷动&quot;向&quot;源荷互动&quot;转变。文中首先阐述了新型电力系统面临的电力安全可靠经济供应新形势,其次研究分析了国内外需求侧资源利用实践,在此基础上,提出了面向新型电力系统的需求侧资源利用关键技术,并从资源开发重点、运行管理、市场机制、政策措施、商业模式5个方面对中国新型电力系统需求侧资源利用进行了展望。</dcterms:abstract>
+        <dc:date>2021</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2021&amp;filename=DLXT202116005</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:01</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家电网公司科技项目（4000-202057046A-0-0-00）~~；
+CNKICite: 358</dc:description>
+        <bib:pages>37-48</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_265">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/265/新能源为主体电力系统的需求侧资源利用关键技术及展望_王彩霞.pdf"/>
+        <dc:title>新能源为主体电力系统的需求侧资源利用关键技术及展望_王彩霞</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13334/j.0258-8013.pcsee.191251">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>40</prism:volume>
+                <dc:title>中国电机工程学报</dc:title>
+                <dc:identifier>DOI 10.13334/j.0258-8013.pcsee.191251</dc:identifier>
+                <prism:number>10</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>宋永华</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>包铭磊</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>丁一</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>邵常政</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>尚楠</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_267"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>报价机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>定价机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>市场模式</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>市场组成</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>协调机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>新电改下我国电力现货市场建设关键要点综述及相关建议</dc:title>
+        <dcterms:abstract>在新一轮电力体制改革背景下,现货市场作为连接中长期交易与实时运行的关键环节,能充分还原电力的商品属性,真正起到价格发现和资源优化配置的作用。目前我国首批八个现货试点已全部投入模拟试运行,现货市场建设取得阶段性成就;随着当前我国电力体制改革的全面深化,现货市场的全面铺开已成为下一阶段我国电力市场建设的核心与重点。值此新电改的关键阶段,亟需开展现货市场设计的回顾总结工作,通过比较分析不同省(区)现货市场建设的情况,既可为上述试点地区规则的完善提供参考,也为我国其余未开展现货试点的地区提供经验借鉴。为此,该文根据我国现货市场建设的迫切需求,提炼总结了市场建设的关键要点,包括中长期交易与现货交易的协调机制和现货市场模式等六个方面。紧接着,从电源结构、电网特点和市场实践经验等多维度、多层次地剖析了不同区域的电力行业现状。以此为基础,运用关联图法对市场机制与电力现状特征开展相关性分析,提炼现货市场机制设计的内在逻辑。最后,结合我国国情,提出未来我国现货市场建设的相关建议。</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13334/j.0258-8013.pcsee.191251</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:03</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家电网公司科技项目：大规模复杂网络环境下的ATC中长期交易算法研究与开发~~；
+CNKICite: 309</dc:description>
+        <bib:pages>3172-3187</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_267">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/267/新电改下我国电力现货市场建设关键要点综述及相关建议_宋永华.pdf"/>
+        <dc:title>新电改下我国电力现货市场建设关键要点综述及相关建议_宋永华</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2010&amp;filename=DLXT201003006">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>34</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>3</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张钦</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王锡凡</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王建学</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_269"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>实时电价</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>需求响应</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>风险管理</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>双边合同</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>套期保值合同</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>需求侧实时电价下供电商购售电风险决策</dc:title>
+        <dcterms:abstract>实施需求侧实时电价(RTP)让供电商可以将电价风险有效地转移给用户,但供电商提供给用户的RTP套期保值合同也给其购售电风险管理带来了新的挑战。文中对RTP下供电商在购售电市场的成本、收入与风险进行了综合分析。购电侧重点考虑了日前市场和普通/分段双边合同,售电侧考虑了基本RTP合同与各类RTP套期保值合同。基于条件风险价值(CVaR)法,以供电商购售电效用最大化为目标,建立了不同风险喜好供电商的最优购电组合决策模型。算例仿真验证了所述方法的有效性,它有利于供电商协调RTP下购售电交易的利润与风险。</dcterms:abstract>
+        <dc:date>2010</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFD2010&amp;filename=DLXT201003006</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:05</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家重点基础研究发展计划(973计划)资助项目(2004CB217905)~~；
+CNKICite: 104</dc:description>
+        <bib:pages>22-27</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_269">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/269/需求侧实时电价下供电商购售电风险决策_张钦.pdf"/>
+        <dc:title>需求侧实时电价下供电商购售电风险决策_张钦</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724019">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>24</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>曾嘉志</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>赵雄飞</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李静</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李刚</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李康敬</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>魏震波</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_271"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电公司</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>强化学习</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>博弈分析</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>多代理技术</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>集中交易市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>双边合同市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>用电侧市场放开下的电力市场多主体博弈</dc:title>
+        <dcterms:abstract>为保证新一轮电改的顺利进行,研究新结构下的市场主体间特别是售电公司与其他主体间的利害冲突关系是关键。文中在梳理并搭建了新形势下电力市场结构关系的基础上,采用多代理技术构建了含发电企业、售电公司及市场用户(对比于非市场用户)的市场多主体博弈框架;其次,就各主体特点、相关交易规则及各主体博弈交互关系,设计了以主体收益函数为目标的市场博弈模型;最后,采用强化学习方法对发电企业、售电公司等市场主体在双边合同市场、集中交易市场的买卖电价、电量进行优化求解。仿真结果表明,发电企业和售电公司的市场收益与份额,主要取决于售、购电量在双边合同市场与集中交易市场的合理分解;随着博弈过程深入和市场信息透明化,市场价格与收益将趋于平稳。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724019</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:45</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 125</dc:description>
+        <bib:pages>129-136</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_271">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/271/用电侧市场放开下的电力市场多主体博弈_曾嘉志.pdf"/>
+        <dc:title>用电侧市场放开下的电力市场多主体博弈_曾嘉志</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724013">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>24</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>史连军</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>周琳</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>庞博</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>严宇</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张凡</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘俊</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_273"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>差价合约</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>发电权交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>清洁能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>中国促进清洁能源消纳的市场机制设计思路</dc:title>
+        <dcterms:abstract>近年来中国清洁能源消纳矛盾日渐突出,新一轮电力市场化改革为解决这一问题提供了良好的条件。在分析新一轮电力体制改革要求的基础上,根据中国电力市场建设现状和推进步骤,分阶段对中国促进清洁能源消纳的市场机制进行设计,近期主要包括省间发电权交易、电力直接交易等促进新能源跨区跨省输送的机制,中远期主要包括差价合约机制和溢价机制等新能源直接参与的市场机制。最后,提出在电力市场建设环境下促进中国新能源消纳的政策和市场机制建议。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724013</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:47</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 243</dc:description>
+        <bib:pages>83-89</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_273">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/273/中国促进清洁能源消纳的市场机制设计思路_史连军.pdf"/>
+        <dc:title>中国促进清洁能源消纳的市场机制设计思路_史连军</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13195/j.kzyjc.2017.1632">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>33</prism:volume>
+                <dc:title>控制与决策</dc:title>
+                <dc:identifier>DOI 10.13195/j.kzyjc.2017.1632</dc:identifier>
+                <prism:number>5</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>孙秋野</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杨凌霄</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张化光</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_275"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>人工智能</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力系统</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>能源互联网</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>优化控制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>智慧能源</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>智慧能源—–人工智能技术在电力系统中的应用与展望</dc:title>
+        <dcterms:abstract>在环境污染日趋严重,化石能源逐渐枯竭的背景下,能源系统的发展趋向于清洁化、智能化,我国已将智慧能源的发展提升为国家战略.电力系统作为能源系统的核心环节,应用广泛,具有较强的调节能力且控制复杂,其智能化程度将决定能源系统的智能化水平.伴随着分布式电源、电动汽车、分布式储能元件等具有能源生产、存储、消费多种特性的新型能源终端高比例接入电网,现代电力系统呈现出复杂非线性、强不确定性、强耦合性等特点,传统建模、优化、控制技术存在诸多局限性,人工智能技术将是解决复杂系统控制与决策问题的有效措施.鉴于此,首先梳理人工智能在电力系统应用的发展脉络;然后根据人工智能在电力系统的应用热点领域,阐述人工智能技术在电力系统调度、规划以及电力市场等方面的应用,并对各重点研究内容的未来方向进行展望.</dcterms:abstract>
+        <dc:date>2018</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://doi.org/10.13195/j.kzyjc.2017.1632</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:50</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家自然科学基金项目(61433004,61573094)；
+CNKICite: 115</dc:description>
+        <bib:pages>938-949</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_275">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/275/智慧能源—–人工智能技术在电力系统中的应用与展望_孙秋野.pdf"/>
+        <dc:title>智慧能源—–人工智能技术在电力系统中的应用与展望_孙秋野</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724003">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>41</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>24</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>葛睿</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈龙翔</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>王轶禹</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘敦楠</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_277"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>建设路径</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>中长期电力交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>中国电力市场建设路径优选及设计</dc:title>
+        <dcterms:abstract>在新一轮电力体制改革中,电力市场建设是重中之重,设计一条合理的电力市场建设路径对于从计划模式向市场模式平稳过渡、最终达成目标市场模式尤为重要。文中基于对中国电力系统运营现状、电力市场基本模式、国外电力市场建设经验教训等的分析,建立了适应中国电力市场建设路径优选的评价指标,在此基础上论证了中国开展&quot;先期开展中长期电量交易、再开展现货交易&quot;的可行性,并进一步设计了其具体实现路径,对路径实现中的关键技术问题进行了探讨。考虑到中国新能源消纳、电网安全约束等方面存在的矛盾,建议中国应由中长期电量实物交易和均衡调度,逐步过渡到中长期差价合约和集中式现货市场,并适时建设辅助服务市场和电力期货等电力金融市场,最终达到建成体系完备的市场目标。</dcterms:abstract>
+        <dc:date>2017</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2018&amp;filename=DLXT201724003</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:52</dcterms:dateSubmitted>
+        <dc:description>CNKICite: 176</dc:description>
+        <bib:pages>10-15</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_277">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/277/中国电力市场建设路径优选及设计_葛睿.pdf"/>
+        <dc:title>中国电力市场建设路径优选及设计_葛睿</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2020&amp;filename=DLXT202016001">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>44</prism:volume>
+                <dc:title>电力系统自动化</dc:title>
+                <prism:number>16</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张显</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>史连军</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_279"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>市场机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>能源转型</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>商业模式</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>中国电力市场未来研究方向及关键技术</dc:title>
+        <dcterms:abstract>近年来中国电力市场建设已取得诸多成果,市场交易量及可再生能源消纳比例均显著提升。为进一步深化电力市场建设,明确未来中国电力市场研究及发展方向,首先,分析了中国电力市场建设现状并研究了中国电力市场未来的发展趋势。然后,聚焦对电力市场发展产生重要影响的方向及关键技术进行了广泛研究,主要包括具有中国特色的电力市场理论和机制创新,以及适应能源转型和电力市场化改革大背景下的电力市场商业模式。最后,结合中国电力市场现状及未来发展的现实需要提出了相关政策建议,以期为中国电力市场建设提供参考。</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CJFQ&amp;dbname=CJFDLAST2020&amp;filename=DLXT202016001</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:05:54</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家电网公司科技项目（SGBR0000KJJS1904106）~~；
+CNKICite: 200</dc:description>
+        <bib:pages>1-11</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_279">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/279/中国电力市场未来研究方向及关键技术_张显.pdf"/>
+        <dc:title>中国电力市场未来研究方向及关键技术_张显</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://link.cnki.net/doi/10.13648/j.cnki.issn1674-0629.2018.12.007">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>12</prism:volume>
+                <dc:title>南方电网技术</dc:title>
+                <dc:identifier>DOI 10.13648/j.cnki.issn1674-0629.2018.12.007</dc:identifier>
+                <prism:number>12</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>马辉</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈雨果</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈晔</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘文涛</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>林少华</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张轩</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>白杨</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>罗钢</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>赖晓文</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>汪洋</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_281"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>机制设计</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>中长期交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>南方(以广东起步)电力现货市场机制设计</dc:title>
+        <dcterms:abstract>遵循市场经济基本规律和电力工业运行客观规律,综合考虑广东电网的实际情况,本文设计了南方(以广东起步)电力现货市场机制,提出了以基于差价合约的中长期交易规避风险和全电量集中竞争现货交易发现价格的电力市场交易体系,设计了基于节点电价的两部制结算方法。将原有中长期物理交易变更为中长期差价合约交易,增加了交易种类和交易频次,有利于提高市场流动性,全电量申报、集中优化出清的日前、实时市场,可形成反映电力系统物理运行特点的电能价格信号,促进资源配置优化。</dcterms:abstract>
+        <dc:date>2018</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://link.cnki.net/doi/10.13648/j.cnki.issn1674-0629.2018.12.007</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:07:44</dcterms:dateSubmitted>
+        <dc:description>Fund: 广东电网有限责任公司科技项目(036000KK52170008)~~；
+CNKICite: 126</dc:description>
+        <bib:pages>42-48</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_281">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/281/南方( 以广东起步) 电力现货市场机制设计.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0360544211003926">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:03605442"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Li</foaf:surname>
+                        <foaf:givenName>Gong</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shi</foaf:surname>
+                        <foaf:givenName>Jing</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Qu</foaf:surname>
+                        <foaf:givenName>Xiuli</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_283"/>
+        <dc:title>Modeling methods for GenCo bidding strategy optimization in the liberalized electricity spot market–A state-of-the-art review</dc:title>
+        <dcterms:abstract>The electricity market has since 1980s been gradually evolving from a monopoly market into a liberalized one for encouraging competition and improving efﬁciency. This brings the opportunity for generation companies (GenCos) to make more proﬁts while embracing more risks of not being dispatched. Therefore, it has become a core interest for the GenCos to develop optimal bidding strategies to maximize the proﬁts and minimize the risks while participating in such a competitive market. The literature pertaining to this issue has grown rapidly in recent years, and many different modeling approaches, such as mathematical programming, game theory, and agent-based models, have been investigated under the liberalized market environment. Meanwhile, along with the increasing penetration of renewable energy, the electricity market is facing more complexity and stochasticity from both uncertain generation and dynamic demands. The intermittent and unsteady nature of these renewable power sources motivates the GenCos to further optimize their bidding strategy by considering the new constraints. This paper presents a comprehensive literature analysis on the state-of-the-art research of bidding strategy modeling methods.</dcterms:abstract>
+        <dc:date>8/2011</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0360544211003926</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:33</dcterms:dateSubmitted>
+        <dc:rights>https://www.elsevier.com/tdm/userlicense/1.0/</dc:rights>
+        <bib:pages>4686-4700</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:03605442">
+        <prism:volume>36</prism:volume>
+        <dc:title>Energy</dc:title>
+        <dc:identifier>DOI 10.1016/j.energy.2011.06.015</dc:identifier>
+        <prism:number>8</prism:number>
+        <dcterms:alternative>Energy</dcterms:alternative>
+        <dc:identifier>ISSN 03605442</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_283">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/283/Li 等 - 2011 - Modeling methods for GenCo bidding strategy optimization in the liberalized electricity spot market–.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S1367578820300079">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:13675788"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yang</foaf:surname>
+                        <foaf:givenName>Ting</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhao</foaf:surname>
+                        <foaf:givenName>Liyuan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Li</foaf:surname>
+                        <foaf:givenName>Wei</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zomaya</foaf:surname>
+                        <foaf:givenName>Albert Y.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_285"/>
+        <dc:title>Reinforcement learning in sustainable energy and electric systems: a survey</dc:title>
+        <dcterms:abstract>The dynamic nature of sustainable energy and electric systems can vary signiﬁcantly along with the environment and load change, and they represent the features of multivariate, high complexity and uncertainty of the nonlinear system. Moreover, the integration of intermittent renewable energy sources and energy consumption behaviours of households introduce more uncertainty into sustainable energy and electric systems. The operation, control and decision-making in such an environment deﬁnitely require increasing intelligence and ﬂexibility in the control and optimization to ensure the quality of service of sustainable energy and electric systems. Reinforcement learning is a wide class of optimal control strategies that uses estimating value functions from experience, simulation, or search to learn in highly dynamic, stochastic environment. The interactive context enables reinforcement learning to develop strong learning ability and high adaptability. Reinforcement learning does not require the use of the model of system dynamics, which makes it suitable for sustainable energy and electric systems with complex nonlinearity and uncertainty. The use of reinforcement learning in sustainable energy and electric systems will certainly change the traditional energy utilization mode and bring more intelligence into the system. In this survey, an overview of reinforcement learning, the demand for reinforcement learning in sustainable energy and electric systems, reinforcement learning applications in sustainable energy and electric systems, and future challenges and opportunities will be explicitly addressed.</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Reinforcement learning in sustainable energy and electric systems</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S1367578820300079</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:37</dcterms:dateSubmitted>
+        <bib:pages>145-163</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:13675788">
+        <prism:volume>49</prism:volume>
+        <dc:title>Annual Reviews in Control</dc:title>
+        <dc:identifier>DOI 10.1016/j.arcontrol.2020.03.001</dc:identifier>
+        <dcterms:alternative>Annual Reviews in Control</dcterms:alternative>
+        <dc:identifier>ISSN 13675788</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_285">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/285/Yang 等 - 2020 - Reinforcement learning in sustainable energy and electric systems a survey.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ieeexplore.ieee.org/document/1490590/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0885-8950"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cabero</foaf:surname>
+                        <foaf:givenName>J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Baillo</foaf:surname>
+                        <foaf:givenName>A.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cerisola</foaf:surname>
+                        <foaf:givenName>S.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ventosa</foaf:surname>
+                        <foaf:givenName>M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Garcia-Alcalde</foaf:surname>
+                        <foaf:givenName>A.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peran</foaf:surname>
+                        <foaf:givenName>F.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Relano</foaf:surname>
+                        <foaf:givenName>G.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_287"/>
+        <dc:title>A Medium-Term Integrated Risk Management Model for a Hydrothermal Generation Company</dc:title>
+        <dcterms:abstract>This paper presents a methodology to manage the market risk faced by a hydrothermal generation company in the medium-term (one year). This risk is due to uncertainty in fuel prices, power demand, water inﬂows, and electricity prices. The proposed methodology includes three steps: the generation of scenarios for these random parameters, the approximation of these scenarios by a multivariate scenario tree, and the optimization of the company’s operational and ﬁnancial hedging decisions under a stochastic programming framework. The optimization model permits the representation of a diversiﬁed generation portfolio and measures risk exposure by means of conditional value-at-risk. A realistic numerical example is solved to illustrate the possibilities of our approach.</dcterms:abstract>
+        <dc:date>08/2005</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/1490590/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:39</dcterms:dateSubmitted>
+        <dc:rights>https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html</dc:rights>
+        <bib:pages>1379-1388</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0885-8950">
+        <prism:volume>20</prism:volume>
+        <dc:title>IEEE Transactions on Power Systems</dc:title>
+        <dc:identifier>DOI 10.1109/TPWRS.2005.851934</dc:identifier>
+        <prism:number>3</prism:number>
+        <dcterms:alternative>IEEE Trans. Power Syst.</dcterms:alternative>
+        <dc:identifier>ISSN 0885-8950</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_287">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/287/Cabero 等 - 2005 - A Medium-Term Integrated Risk Management Model for a Hydrothermal Generation Company.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ieeexplore.ieee.org/document/1717568/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>21</prism:volume>
+                <dc:title>IEEE Transactions on Power Systems</dc:title>
+                <dc:identifier>DOI 10.1109/TPWRS.2006.879272</dc:identifier>
+                <prism:number>4</prism:number>
+                <dcterms:alternative>IEEE Trans. Power Syst.</dcterms:alternative>
+                <dc:identifier>ISSN 0885-8950</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Xu</foaf:surname>
+                        <foaf:givenName>J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Luh</foaf:surname>
+                        <foaf:givenName>P.B.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>White</foaf:surname>
+                        <foaf:givenName>F.B.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ni</foaf:surname>
+                        <foaf:givenName>E.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kasiviswanathan</foaf:surname>
+                        <foaf:givenName>K.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_289"/>
+        <dc:title>Power Portfolio Optimization in Deregulated Electricity Markets With Risk Management</dc:title>
+        <dcterms:abstract>In a deregulated electric power system, multiple markets of different time scales exist with various power supply instruments. A load serving entity (LSE) has multiple choices from these instruments to meet its load obligations. In view of the large amount of power involved, the complex market structure, the risks in such volatile markets, the stringent constraints to be satisﬁed, and the long time horizon, a power portfolio optimization problem is of critical importance for an LSE to serve its load, maximize its proﬁt, and manage its risks. In this paper, a midterm power portfolio optimization problem with risk management is presented. Key instruments are considered, risk terms based on semi-variances of spot market transactions are introduced, and penalties on load obligation violations are added to the objective function to improve algorithm convergence and constraint satisfaction. To overcome the inseparability of the resulting problem, a surrogate optimization framework is developed, enabling a decomposition and coordination approach. Numerical testing results show that our method effectively provides decisions for various instruments to maximize proﬁt and manage risks, and it is computationally efﬁcient.</dcterms:abstract>
+        <dc:date>11/2006</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/1717568/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:41</dcterms:dateSubmitted>
+        <dc:rights>https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html</dc:rights>
+        <bib:pages>1653-1662</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_289">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/289/Xu 等 - 2006 - Power Portfolio Optimization in Deregulated Electricity Markets With Risk Management.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0378779606002100">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:03787796"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Liu</foaf:surname>
+                        <foaf:givenName>Min</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wu</foaf:surname>
+                        <foaf:givenName>Felix F.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_291"/>
+        <dc:title>Portfolio optimization in electricity markets</dc:title>
+        <dcterms:abstract>In a competitive electricity market, Generation companies (Gencos) face price risk and delivery risk that affect their proﬁtability. Risk management is an important and essential part in the Genco’s decision making. In this paper, risk management through diversiﬁcation is considered. The problem of energy allocation between spot markets and bilateral contracts is formulated as a general portfolio optimization problem with a risk-free asset and n risky assets. Historical data of the PJM electricity market are used to demonstrate the approach.</dcterms:abstract>
+        <dc:date>6/2007</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0378779606002100</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:43</dcterms:dateSubmitted>
+        <dc:rights>https://www.elsevier.com/tdm/userlicense/1.0/</dc:rights>
+        <bib:pages>1000-1009</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:03787796">
+        <prism:volume>77</prism:volume>
+        <dc:title>Electric Power Systems Research</dc:title>
+        <dc:identifier>DOI 10.1016/j.epsr.2006.08.025</dc:identifier>
+        <prism:number>8</prism:number>
+        <dcterms:alternative>Electric Power Systems Research</dcterms:alternative>
+        <dc:identifier>ISSN 03787796</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_291">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/291/Liu和Wu - 2007 - Portfolio optimization in electricity markets.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0360544205000496">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>31</prism:volume>
+                <dc:title>Energy</dc:title>
+                <dc:identifier>DOI 10.1016/j.energy.2005.02.015</dc:identifier>
+                <prism:number>6-7</prism:number>
+                <dcterms:alternative>Energy</dcterms:alternative>
+                <dc:identifier>ISSN 03605442</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Deng</foaf:surname>
+                        <foaf:givenName>S</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Oren</foaf:surname>
+                        <foaf:givenName>S</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_293"/>
+        <dc:title>Electricity derivatives and risk management</dc:title>
+        <dcterms:abstract>Electricity spot prices in the emerging power markets are volatile, a consequence of the unique physical attributes of electricity production and distribution. Uncontrolled exposure to market price risks can lead to devastating consequences for market participants in the restructured electricity industry. Lessons learned from the ﬁnancial markets suggest that ﬁnancial derivatives, when well understood and properly utilized, are beneﬁcial to the sharing and controlling of undesired risks through properly structured hedging strategies. We review different types of electricity ﬁnancial instruments and the general methodology for utilizing and pricing such instruments. In particular, we highlight the roles of these electricity derivatives in mitigating market risks and structuring hedging strategies for generators, load serving entities, and power marketers in various risk management applications. Finally, we conclude by pointing out the existing challenges in current electricity markets for increasing the breadth, liquidity and use of electricity derivatives for achieving economic efﬁciency.</dcterms:abstract>
+        <dc:date>05/2006</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0360544205000496</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:45</dcterms:dateSubmitted>
+        <dc:rights>https://www.elsevier.com/tdm/userlicense/1.0/</dc:rights>
+        <bib:pages>940-953</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_293">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/293/Deng和Oren - 2006 - Electricity derivatives and risk management.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0169207014001083">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:01692070"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Weron</foaf:surname>
+                        <foaf:givenName>Rafał</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_295"/>
+        <dc:title>Electricity price forecasting: A review of the state-of-the-art with a look into the future</dc:title>
+        <dcterms:abstract>A variety of methods and ideas have been tried for electricity price forecasting (EPF) over the last 15 years, with varying degrees of success. This review article aims to explain the complexity of available solutions, their strengths and weaknesses, and the opportunities and threats that the forecasting tools offer or that may be encountered. The paper also looks ahead and speculates on the directions EPF will or should take in the next decade or so. In particular, it postulates the need for objective comparative EPF studies involving (i) the same datasets, (ii) the same robust error evaluation procedures, and (iii) statistical testing of the significance of one model’s outperformance of another.</dcterms:abstract>
+        <dc:date>10/2014</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Electricity price forecasting</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0169207014001083</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:53</dcterms:dateSubmitted>
+        <bib:pages>1030-1081</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:01692070">
+        <prism:volume>30</prism:volume>
+        <dc:title>International Journal of Forecasting</dc:title>
+        <dc:identifier>DOI 10.1016/j.ijforecast.2014.08.008</dc:identifier>
+        <prism:number>4</prism:number>
+        <dcterms:alternative>International Journal of Forecasting</dcterms:alternative>
+        <dc:identifier>ISSN 01692070</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_295">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/295/Weron - 2014 - Electricity price forecasting A review of the state-of-the-art with a look into the future.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0306261921004529">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:03062619"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lago</foaf:surname>
+                        <foaf:givenName>Jesus</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Marcjasz</foaf:surname>
+                        <foaf:givenName>Grzegorz</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>De Schutter</foaf:surname>
+                        <foaf:givenName>Bart</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Weron</foaf:surname>
+                        <foaf:givenName>Rafał</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_297"/>
+        <dc:title>Forecasting day-ahead electricity prices: A review of state-of-the-art algorithms, best practices and an open-access benchmark</dc:title>
+        <dcterms:abstract>While the field of electricity price forecasting has benefited from plenty of contributions in the last two decades, it arguably lacks a rigorous approach to evaluating new predictive algorithms. The latter are often compared using unique, not publicly available datasets and across too short and limited to one market test samples. The proposed new methods are rarely benchmarked against well established and well performing simpler models, the accuracy metrics are sometimes inadequate and testing the significance of differences in predictive performance is seldom conducted. Consequently, it is not clear which methods perform well nor what are the best practices when forecasting electricity prices. In this paper, we tackle these issues by comparing stateof-the-art statistical and deep learning methods across multiple years and markets, and by putting forward a set of best practices. In addition, we make available the considered datasets, forecasts of the state-of-the-art models, and a specifically designed python toolbox, so that new algorithms can be rigorously evaluated in future studies.</dcterms:abstract>
+        <dc:date>07/2021</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Forecasting day-ahead electricity prices</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0306261921004529</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:10:55</dcterms:dateSubmitted>
+        <bib:pages>116983</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:03062619">
+        <prism:volume>293</prism:volume>
+        <dc:title>Applied Energy</dc:title>
+        <dc:identifier>DOI 10.1016/j.apenergy.2021.116983</dc:identifier>
+        <dcterms:alternative>Applied Energy</dcterms:alternative>
+        <dc:identifier>ISSN 03062619</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_297">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/297/Lago 等 - 2021 - Forecasting day-ahead electricity prices A review of state-of-the-art algorithms, best practices an.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=9535386">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:20960042"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bao</foaf:surname>
+                        <foaf:givenName>Minglei</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_299"/>
+        <dc:title>Risk assessment and management of electricity markets: A review with suggestions</dc:title>
+        <dcterms:abstract>Power industry deregulation has changed the determination of electricity prices from administration approval to market clearing. Affected by multiple random factors, the market prices may fluctuate sharply or significantly increase under extreme conditions, jeopardizing the normal operation of markets. In order to effectively deal with market risks, it is essential to develop the corresponding risk-control mechanisms, especially for spot market pilots. Therefore, this paper presents an overview on the risk assessment and management schemes which are widely used in the electricity markets. First, the key issues for evaluating market risks through inherent uncertainties and market power are summarized, including analysis models and quantitative metrics. Moreover, a comprehensive review of risk management and market supervision in typical electricity markets is presented. Specifically, a multi-time risk-control framework utilized by regulators is introduced to demonstrate the available schemes to reduce market risks. In addition, the various derivative contracts and portfolio optimizations are reviewed to help market participants hedge against market risks. Finally, suggestions for the development of risk management measures in spot market pilots are proposed. The summarized experience in this paper can provide useful references and guidelines for developing risk-control mechanisms in electricity markets.</dcterms:abstract>
+        <dc:date>2021</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Risk assessment and management of electricity markets</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=9535386</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-03-31 09:28:12</dcterms:dateSubmitted>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:20960042">
+        <dc:title>CSEE Journal of Power and Energy Systems</dc:title>
+        <dc:identifier>DOI 10.17775/CSEEJPES.2020.04250</dc:identifier>
+        <dcterms:alternative>CSEE JPES</dcterms:alternative>
+        <dc:identifier>ISSN 20960042</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_299">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/299/Bao - 2021 - Risk assessment and management of electricity markets A review with suggestions.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.19781/j.issn.1673-9140.2020.01.005">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>35</prism:volume>
+                <dc:title>电力科学与技术学报</dc:title>
+                <dc:identifier>DOI 10.19781/j.issn.1673-9140.2020.01.005</dc:identifier>
+                <prism:number>1</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李道强</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>龚建荣</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李忠憓</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>高滢</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>文福拴</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_301"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>差价合约</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>分解算法</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>滚动修正</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>合约电量</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>优化模型</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>电力市场环境下的差价合约电量分解问题</dc:title>
+        <dcterms:abstract>差价合约是中长期金融合约,其应用于电力市场可提前锁定电力价格,规避现货市场电价波动风险。近年来,随着中国电力体制改革的深入与试点范围的扩大,电力差价合约在一些省级电力市场机制中得到应用。由于中国现阶段的电力差价合约严格而言为电量合约而非电力合约,因此必须将合约电量分解为可调度的电力曲线。首先简要论述了电力差价合约的概况,并从基于滚动修正与基于优化模型2个方面介绍并对比分析了现有的确定性合约电量分解的理论与方法。最后,展望了在本轮电力工业改革环境下与差价合约电量分解相关的若干问题,并建议了可能的解决方法。</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.19781/j.issn.1673-9140.2020.01.005</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-04-03 06:14:49</dcterms:dateSubmitted>
+        <dc:description>Fund: 国家自然科学基金(U1910216)；
+CNKICite: 35</dc:description>
+        <bib:pages>40-49</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_301">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/301/电力市场环境下的差价合约电量分解问题.pdf"/>
+        <dc:title>电力市场环境下的差价合约电量分解问题</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.13335/j.1000-3673.pst.2019.0538">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>43</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2019.0538</dc:identifier>
+                <prism:number>8</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>骆子雅</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>季天瑶</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>荆朝霞</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>何润源</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>陈皓勇</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_303"/>
+        <dc:title>电力差价合约机制设计与应用</dc:title>
+        <dc:date>2019</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>参考文献列表_重组版</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.13335/j.1000-3673.pst.2019.0538</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <bib:pages>2743-2751</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_303">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/303/电力差价合约机制设计与应用_骆子雅.pdf"/>
+        <dc:title>电力差价合约机制设计与应用_骆子雅</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://www.risk.net/journal-of-risk/technical-paper/2161159/optimization-conditional-value-risk">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:14651211"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Rockafellar</foaf:surname>
+                        <foaf:givenName>R. Tyrrell</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Uryasev</foaf:surname>
+                        <foaf:givenName>Stanislav</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_321"/>
+        <dc:title>Optimization of conditional value-at-risk</dc:title>
+        <dc:date>2000</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://www.risk.net/journal-of-risk/technical-paper/2161159/optimization-conditional-value-risk</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:11:16</dcterms:dateSubmitted>
+        <bib:pages>21-41</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:14651211">
+        <prism:volume>2</prism:volume>
+        <dc:title>The Journal of Risk</dc:title>
+        <dc:identifier>DOI 10.21314/JOR.2000.038</dc:identifier>
+        <prism:number>3</prism:number>
+        <dcterms:alternative>JOR</dcterms:alternative>
+        <dc:identifier>ISSN 14651211</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_321">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/321/Rockafellar和Uryasev - 2000 - Optimization of conditional value-at-risk.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0045782501003231">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:00457825"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Coello Coello</foaf:surname>
+                        <foaf:givenName>Carlos A</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_317"/>
+        <dc:title>Theoretical and numerical constraint-handling techniques used with evolutionary algorithms: a survey of the state of the art</dc:title>
+        <dcterms:abstract>This paper provides a comprehensive survey of the most popular constraint-handling techniques currently used with evolutionary algorithms. We review approaches that go from simple variations of a penalty function, to others, more sophisticated, that are biologically inspired on emulations of the immune system, culture or ant colonies. Besides describing brieﬂy each of these approaches (or groups of techniques), we provide some criticism regarding their highlights and drawbacks. A small comparative study is also conducted, in order to assess the performance of several penalty-based approaches with respect to a dominance-based technique proposed by the author, and with respect to some mathematical programming approaches. Finally, we provide some guidelines regarding how to select the most appropriate constraint-handling technique for a certain application, and we conclude with some of the most promising paths of future research in this area. Ó 2002 Elsevier Science B.V. All rights reserved.</dcterms:abstract>
+        <dc:date>1/2002</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Theoretical and numerical constraint-handling techniques used with evolutionary algorithms</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0045782501003231</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:11:26</dcterms:dateSubmitted>
+        <dc:rights>https://www.elsevier.com/tdm/userlicense/1.0/</dc:rights>
+        <bib:pages>1245-1287</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:00457825">
+        <prism:volume>191</prism:volume>
+        <dc:title>Computer Methods in Applied Mechanics and Engineering</dc:title>
+        <dc:identifier>DOI 10.1016/S0045-7825(01)00323-1</dc:identifier>
+        <prism:number>11-12</prism:number>
+        <dcterms:alternative>Computer Methods in Applied Mechanics and Engineering</dcterms:alternative>
+        <dc:identifier>ISSN 00457825</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_317">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/317/Coello Coello - 2002 - Theoretical and numerical constraint-handling techniques used with evolutionary algorithms a survey.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ieeexplore.ieee.org/document/4358769/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1941-0026,%201089-778X"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Del Valle</foaf:surname>
+                        <foaf:givenName>Y.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Venayagamoorthy</foaf:surname>
+                        <foaf:givenName>G.K.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mohagheghi</foaf:surname>
+                        <foaf:givenName>S.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hernandez</foaf:surname>
+                        <foaf:givenName>J.-C.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Harley</foaf:surname>
+                        <foaf:givenName>R.G.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_313"/>
+        <dc:title>Particle Swarm Optimization: Basic Concepts, Variants and Applications in Power Systems</dc:title>
+        <dcterms:abstract>Many areas in power systems require solving one or more nonlinear optimization problems. While analytical methods might suffer from slow convergence and the curse of dimensionality, heuristics-based swarm intelligence can be an efﬁcient alternative. Particle swarm optimization (PSO), part of the swarm intelligence family, is known to effectively solve large-scale nonlinear optimization problems. This paper presents a detailed overview of the basic concepts of PSO and its variants. Also, it provides a comprehensive survey on the power system applications that have beneﬁted from the powerful nature of PSO as an optimization technique. For each application, technical details that are required for applying PSO, such as its type, particle formulation (solution representation), and the most efﬁcient ﬁtness functions are also discussed.</dcterms:abstract>
+        <dc:date>04/2008</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Particle Swarm Optimization</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/4358769/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:11:38</dcterms:dateSubmitted>
+        <dc:rights>https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html</dc:rights>
+        <bib:pages>171-195</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1941-0026,%201089-778X">
+        <prism:volume>12</prism:volume>
+        <dc:title>IEEE Transactions on Evolutionary Computation</dc:title>
+        <dc:identifier>DOI 10.1109/TEVC.2007.896686</dc:identifier>
+        <prism:number>2</prism:number>
+        <dcterms:alternative>IEEE Trans. Evol. Computat.</dcterms:alternative>
+        <dc:identifier>ISSN 1941-0026, 1089-778X</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_313">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/313/Del Valle 等 - 2008 - Particle Swarm Optimization Basic Concepts, Variants and Applications in Power Systems.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://link.springer.com/10.1007/s11721-007-0002-0">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1935-3812,%201935-3820"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Poli</foaf:surname>
+                        <foaf:givenName>Riccardo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kennedy</foaf:surname>
+                        <foaf:givenName>James</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Blackwell</foaf:surname>
+                        <foaf:givenName>Tim</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_333"/>
+        <dc:title>Particle swarm optimization: An overview</dc:title>
+        <dcterms:abstract>Particle swarm optimization (PSO) has undergone many changes since its introduction in 1995. As researchers have learned about the technique, they have derived new versions, developed new applications, and published theoretical studies of the effects of the various parameters and aspects of the algorithm. This paper comprises a snapshot of particle swarming from the authors’ perspective, including variations in the algorithm, current and ongoing research, applications and open problems.</dcterms:abstract>
+        <dc:date>2007-10-17</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Particle swarm optimization</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>http://link.springer.com/10.1007/s11721-007-0002-0</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:11:48</dcterms:dateSubmitted>
+        <dc:rights>http://www.springer.com/tdm</dc:rights>
+        <bib:pages>33-57</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1935-3812,%201935-3820">
+        <prism:volume>1</prism:volume>
+        <dc:title>Swarm Intelligence</dc:title>
+        <dc:identifier>DOI 10.1007/s11721-007-0002-0</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Swarm Intell</dcterms:alternative>
+        <dc:identifier>ISSN 1935-3812, 1935-3820</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_333">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/333/Poli 等 - 2007 - Particle swarm optimization An overview.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <rdf:Description rdf:about="urn:isbn:978-0-7803-6375-5">
+        <z:itemType>conferencePaper</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>1</prism:volume>
+                <dc:identifier>ISBN 978-0-7803-6375-5</dc:identifier>
+                <dc:title>Proceedings of the 2000 Congress on Evolutionary Computation. CEC00 (Cat. No.00TH8512)</dc:title>
+                <dc:identifier>DOI 10.1109/CEC.2000.870279</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>La Jolla, CA, USA</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>IEEE</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Eberhart</foaf:surname>
+                        <foaf:givenName>R.C.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shi</foaf:surname>
+                        <foaf:givenName>Y.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_309"/>
+        <dc:title>Comparing inertia weights and constriction factors in particle swarm optimization</dc:title>
+        <dc:date>2000</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/870279/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:12:08</dcterms:dateSubmitted>
+        <bib:pages>84-88</bib:pages>
+        <bib:presentedAt>
+            <bib:Conference>
+               <dc:title>2000 Congress on Evolutionary Computation</dc:title>
+            </bib:Conference>
+        </bib:presentedAt>
+    </rdf:Description>
+    <z:Attachment rdf:about="#item_309">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/309/Eberhart和Shi - 2000 - Comparing inertia weights and constriction factors in particle swarm optimization.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <rdf:Description rdf:about="urn:isbn:978-0-7803-2768-9">
+        <z:itemType>conferencePaper</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>4</prism:volume>
+                <dc:identifier>ISBN 978-0-7803-2768-9</dc:identifier>
+                <dc:title>Proceedings of ICNN'95 - International Conference on Neural Networks</dc:title>
+                <dc:identifier>DOI 10.1109/ICNN.1995.488968</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Perth, WA, Australia</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>IEEE</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kennedy</foaf:surname>
+                        <foaf:givenName>J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Eberhart</foaf:surname>
+                        <foaf:givenName>R.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_305"/>
+        <dc:title>Particle swarm optimization</dc:title>
+        <dc:date>1995</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/488968/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:12:25</dcterms:dateSubmitted>
+        <bib:pages>1942-1948</bib:pages>
+        <bib:presentedAt>
+            <bib:Conference>
+                <dc:title>ICNN'95 - International Conference on Neural Networks</dc:title>
+            </bib:Conference>
+        </bib:presentedAt>
+    </rdf:Description>
+    <z:Attachment rdf:about="#item_305">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/305/Kennedy和Eberhart - 1995 - Particle swarm optimization.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0140988315002170">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:01409883"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Boroumand</foaf:surname>
+                        <foaf:givenName>Raphaël Homayoun</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Goutte</foaf:surname>
+                        <foaf:givenName>Stéphane</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Porcher</foaf:surname>
+                        <foaf:givenName>Simon</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Porcher</foaf:surname>
+                        <foaf:givenName>Thomas</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_323"/>
+        <dc:title>Hedging strategies in energy markets: The case of electricity retailers</dc:title>
+        <dcterms:abstract>As market intermediaries, electricity retailers buy electricity from the wholesale market or self generate for re(sale) on the retail market. Electricity retailers are uncertain about how much electricity their residential customers will use at any time of the day until they actually turn switches on. While demand uncertainty is a common feature of all commodity markets, retailers generally rely on storage to manage demand uncertainty. On electricity markets, retailers are exposed to joint quantity and price risk on an hourly basis given the physical singularity of electricity as a commodity. In the literature on electricity markets, few articles deals on intra-day hedging portfolios to manage joint price and quantity risk whereas electricity markets are hourly markets. The contributions of the article are twofold. First, we deﬁne through a VaR and CVaR model optimal portfolios for speciﬁc hours (3am, 6am, . . . ,12pm) based on electricity market data from 2001 to 2011 for the French market. We prove that the optimal hedging strategy diﬀers depending on the cluster hour. Secondly, we demonstrate the signiﬁcantly superior eﬃciency of intra-day hedging portfolios over daily (therefore weekly and yearly) portfolios. Over a decade (2001-2011), our results ∗Associate Professor, Department of Applied Economics, PSB Paris School of Business, 59 rue Nationale 75013 Paris France. †Universit´e Paris 8 (LED), 2 rue de la Libert´e, 93526 Saint-Denis Cedex, France. Researcher of the Chaire European Electricity markets (CEEM) of Paris Dauphine University. ‡London School of Economics and Political Science, Houghton Street, WC2A 2AE, London, England. This paper has beneﬁted from the support of the Chaire European Electricity Markets of the Paris Dauphine Foundation, supported by RTE, EDF and EPEX Spot. The views and opinions expressed in this Working Paper are those of the authors and do not necessarily reﬂect those of the partners of the CEEM.</dcterms:abstract>
+        <dc:date>09/2015</dc:date>
+        <z:language>en</z:language>
+        <z:shortTitle>Hedging strategies in energy markets</z:shortTitle>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0140988315002170</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:13:27</dcterms:dateSubmitted>
+        <bib:pages>503-509</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:01409883">
+        <prism:volume>51</prism:volume>
+        <dc:title>Energy Economics</dc:title>
+        <dc:identifier>DOI 10.1016/j.eneco.2015.06.021</dc:identifier>
+        <dcterms:alternative>Energy Economics</dcterms:alternative>
+        <dc:identifier>ISSN 01409883</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_323">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/323/Boroumand 等 - 2015 - Hedging strategies in energy markets The case of electricity retailers.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://linkinghub.elsevier.com/retrieve/pii/S0378779620306337">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>190</prism:volume>
+                <dc:title>Electric Power Systems Research</dc:title>
+                <dc:identifier>DOI 10.1016/j.epsr.2020.106833</dc:identifier>
+                <dcterms:alternative>Electric Power Systems Research</dcterms:alternative>
+                <dc:identifier>ISSN 03787796</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Sun</foaf:surname>
+                        <foaf:givenName>Bo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wang</foaf:surname>
+                        <foaf:givenName>Fan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Xie</foaf:surname>
+                        <foaf:givenName>Jingdong</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Sun</foaf:surname>
+                        <foaf:givenName>Xin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_325"/>
+        <dc:title>Electricity Retailer Trading Portfolio Optimization Considering Risk Assessment in Chinese Electricity Market</dc:title>
+        <dcterms:abstract>The Chinese electricity market underwent a significant reform in 2015 resulting in its complete liberalization on the sell-side. Electricity retailers now seeking to adapt to the electricity market are focused on trading portfolio optimization based on risk assessment, which can be performed by classifying and combining possible electricity purchases and sales on mid-long-term and spot markets. The scenario method is used in this study to simulate random risk variables (the real-time price and user demand), then a comprehensive decision-making/risk assessment model for electricity trading portfolio optimization is established with the goal of profit maximization. The conditional value-at-risk (CVaR) serves as the risk assessment index for electricity purchases and sales. Four combinations of electricity trading modes are assessed as a case study. The most basic trading mode is significantly affected by the risk aversion factor in regards to purchases scale and expected profit, which validates the proposed model. The time-of-use (TOU) price and real-time price guaranteeing the bottom and top price as a transaction mode are found to affect the scale of electricity purchases and the expected profit of the electricity retailer. Proportional distribution plans for three respective retail transactions are determined according to electricity retailers’ different attitudes toward risk.</dcterms:abstract>
+        <dc:date>01/2021</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://linkinghub.elsevier.com/retrieve/pii/S0378779620306337</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:13:37</dcterms:dateSubmitted>
+        <bib:pages>106833</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_325">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/325/Sun 等 - 2021 - Electricity Retailer Trading Portfolio Optimization Considering Risk Assessment in Chinese Electrici.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://d.wanfangdata.com.cn/periodical/dwjs202110022">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1000-3673"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>肖云鹏</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>关玉衡</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>张兰</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>蔡秋娜</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘思捷</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>林少华</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_345"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>风险规避</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>电力现货市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>差价合同</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>节点电价</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>结算权转让</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>金融输电权</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>阻塞管理</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>集中式电力现货市场风险规避机制机理分析及建设路径</dc:title>
+        <dcterms:abstract>电力现货市场是反映电力短期供需关系和时空价值、引导电力资源优化配置的重要工具,也是中国新一轮电力体制改革中的重要任务.集中式电力现货市场产生分时段的节点电价或分区电价,市场主体在交易中面临节点电价风险和阻塞风险.差价合同、金融输电权、结算权转让等风险规避机制是市场主体规避风险、提升交易效用的重要手段.对差价合同、金融输电权、结算权转让的机理进行了分析,说明了3者的应用会对市场主体产生相同数学形式的成本或收益变化,具有类似的金融属性.进一步对比了3种风险规避机制的等效性和差异性,分析了各自应用的场景、条件及局限性.最后,针对当前中国电力现货市场...</dcterms:abstract>
+        <dc:date>2021</dc:date>
+        <z:language>zh-CN</z:language>
+        <z:libraryCatalog>Wanfang Data</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://d.wanfangdata.com.cn/periodical/dwjs202110022</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:45:15</dcterms:dateSubmitted>
+        <dc:description>CLC: TM73(输配电工程、电力网及电力系统)</dc:description>
+        <bib:pages>3981-3991</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1000-3673">
+        <prism:volume>45</prism:volume>
+        <dc:title>电网技术</dc:title>
+        <dc:identifier>DOI 10.13335/j.1000-3673.pst.2020.1975</dc:identifier>
+        <prism:number>10</prism:number>
+        <dc:identifier>ISSN 1000-3673</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_345">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/345/集中式电力现货市场风险规避机制机理分析及建设路径.pdf"/>
+        <dc:title>集中式电力现货市场风险规避机制机理分析及建设路径</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://d.wanfangdata.com.cn/periodical/dwjs202203013">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>46</prism:volume>
+                <dc:title>电网技术</dc:title>
+                <dc:identifier>DOI 10.13335/j.1000-3673.pst.2021.1322</dc:identifier>
+                <prism:number>3</prism:number>
+                <dc:identifier>ISSN 1000-3673</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>彭一海</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘继春</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>刘俊勇</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_347"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>售电公司</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>购售电策略</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>发电商偏好</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>两级电力市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>零售套餐</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>两级电力市场环境下考虑多类型零售套餐的售电公司购售电策略</dc:title>
+        <dcterms:abstract>为推动电力资源在全国范围内的优化配置,我国正大力推进全国统一电力市场的建设.根据现有方案,在建设初期,我国将建成&quot;统一市场,两级运作&quot;的两级电力市场,并逐步允许售电公司等购电主体参与跨省跨区电力交易.如何在两级电力市场环境下考虑购售电策略间的相互影响,合理分配包括跨省跨区市场、省内市场在内多个市场的购电量,并针对用户偏好制定多种零售套餐,以实现收益最大化,成为售电公司目前亟须研究的问题.探讨了两级电力市场环境下售电公司参与跨省跨区市场的交易框架;分析了售电公司多时间尺度、多空间尺度的购电成本和风险;构建了4类典型零售套餐下的用户需求响应模型以及用...</dcterms:abstract>
+        <dc:date>2022</dc:date>
+        <z:language>zh-CN</z:language>
+        <z:libraryCatalog>Wanfang Data</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://d.wanfangdata.com.cn/periodical/dwjs202203013</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:45:56</dcterms:dateSubmitted>
+        <dc:description>CLC: TM73(输配电工程、电力网及电力系统)</dc:description>
+        <bib:pages>944-955,中插6-中插7</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_347">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/347/两级电力市场环境下考虑多类型零售套餐的售电公司购售电策略.pdf"/>
+        <dc:title>两级电力市场环境下考虑多类型零售套餐的售电公司购售电策略</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CAPJ&amp;dbname=CAPJLAST&amp;filename=DLXT20250925001">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Journal><dc:title>电力系统自动化</dc:title></bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>方宇娟</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>杨汶瑾</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>李姚旺</foaf:surname></foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                   <foaf:Person><foaf:surname>康重庆</foaf:surname></foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_331"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>碳市场</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>可再生能源电力消纳责任权重</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>绿电交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>绿证交易</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>协同机制</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>中国绿电交易市场机制研究综述及发展展望</dc:title>
+        <dcterms:abstract>随着全球气候变化加剧，能源绿色低碳转型迫在眉睫。绿电交易作为促进可再生能源发展的关键机制，是实现双碳目标的重要途径之一。然而，当前绿电交易市场面临交易价格持续下降、市场参与度低等问题，同时绿电交易市场与电力现货市场、碳市场、可再生能源电力消纳责任权重等其他相关机制缺乏有效协同，抑制了绿电交易的活力。为此，文中针对中国绿电交易市场机制，总结了其发展历程与现状，分析了绿电交易机制对多主体交易决策、优化调度以及碳核算的影响，并总结了绿电交易市场机制与电力现货市场交易机制、绿证交易市场机制、碳市场交易机制以及可再生能源电力消纳责任权重之间的协同机理，进而分析了绿电交易发展的瓶颈与挑战，提出了完善绿电交易机制的设计方案，旨在为绿电交易市场的长远发展提供决策参考。</dcterms:abstract>
+        <dc:date>2025-09-26</dc:date>
+        <z:language>zh</z:language>
+        <z:libraryCatalog>CNKI</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://kns.cnki.net/KCMS/detail/detail.aspx?dbcode=CAPJ&amp;dbname=CAPJLAST&amp;filename=DLXT20250925001</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 08:47:33</dcterms:dateSubmitted>
+        <dc:description>Status: advance online publication
+Fund: 教育部新能源电力系统智慧运行教育部重点实验室开放基金（KFKT-25LAB-01）； 国家自然科学基金委青年基金资助项目（电-碳市场协同运行下的新型电力系统演化机理研究52207114）；</dc:description>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_331">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/331/中国绿电交易市场机制研究综述及发展展望.pdf"/>
+        <dc:title>N15_Fang_2025_green_power_trading_market_review.pdf</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="#item_356">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>9</prism:volume>
+                <dc:title>Mathematical Finance</dc:title>
+                <dc:identifier>DOI 10.1111/1467-9965.00068</dc:identifier>
+                <prism:number>3</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Artzner</foaf:surname>
+                        <foaf:givenName>Philippe</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Delbaen</foaf:surname>
+                        <foaf:givenName>Freddy</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Eber</foaf:surname>
+                        <foaf:givenName>Jean-Marc</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Heath</foaf:surname>
+                        <foaf:givenName>David</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_350"/>
+        <dc:title>COHERENT MEASURES OF RISK</dc:title>
+        <dcterms:abstract>In this paper we study both market risks and nonmarket risks, without complete markets assumption, and discuss methods of measurement of these risks. We present and justify a set of four desirable properties for measures of risk, and call the measures satisfying these properties “coherent.” We examine the measures of risk provided and the related actions required by SPAN, by the SEC/NASD rules, and by quantile-based methods. We demonstrate the universality of scenario-based methods for providing coherent measures. We offer suggestions concerning the SEC method. We also suggest a method to repair the failure of subadditivity of quantile-based methods.</dcterms:abstract>
+        <dc:date>1999</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>Zotero</z:libraryCatalog>
+        <bib:pages>203-228</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_350">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/350/Artzner 等 - 1999 - COHERENT MEASURES OF RISK.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <rdf:Description rdf:about="urn:isbn:978-0-7803-4869-1">
+        <z:itemType>conferencePaper</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:identifier>ISBN 978-0-7803-4869-1</dc:identifier>
+                <dc:title>1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence (Cat. No.98TH8360)</dc:title>
+                <dc:identifier>DOI 10.1109/ICEC.1998.699146</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <dc:publisher>
+            <foaf:Organization>
+                <vcard:adr>
+                    <vcard:Address>
+                       <vcard:locality>Anchorage, AK, USA</vcard:locality>
+                    </vcard:Address>
+                </vcard:adr>
+                <foaf:name>IEEE</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shi</foaf:surname>
+                        <foaf:givenName>Y.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Eberhart</foaf:surname>
+                        <foaf:givenName>R.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_357"/>
+        <dc:title>A modified particle swarm optimizer</dc:title>
+        <dcterms:abstract>In thispaper, we introduce a new parameter, called inertia weight, into the originalparticle swarm optimizer. Simulations have been done to illustrate the signilicant and effective impact of this new parameter on theparticle swarm optimizer.</dcterms:abstract>
+        <dc:date>1998</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/699146/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 09:09:03</dcterms:dateSubmitted>
+        <bib:pages>69-73</bib:pages>
+        <bib:presentedAt>
+            <bib:Conference>
+                <dc:title>1998 IEEE International Conference on Evolutionary Computation Proceedings. IEEE World Congress on Computational Intelligence</dc:title>
+            </bib:Conference>
+        </bib:presentedAt>
+    </rdf:Description>
+    <z:Attachment rdf:about="#item_357">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/357/Shi和Eberhart - 1998 - A modified particle swarm optimizer.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="http://ieeexplore.ieee.org/document/985692/">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1089778X"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Clerc</foaf:surname>
+                        <foaf:givenName>M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kennedy</foaf:surname>
+                        <foaf:givenName>J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_311"/>
+        <dc:title>The particle swarm - explosion, stability, and convergence in a multidimensional complex space</dc:title>
+        <dcterms:abstract>The particle swarm is an algorithm for finding optimal regions of complex search spaces through the interaction of individuals in a population of particles. Even though the algorithm, which is based on a metaphor of social interaction, has been shown to perform well, researchers have not adequately explained how it works. Further, traditional versions of the algorithm have had some undesirable dynamical properties, notably the particles’ velocities needed to be limited in order to control their trajectories. The present paper analyzes a particle’s trajectory as it moves in discrete time (the algebraic view), then progresses to the view of it in continuous time (the analytical view). A five-dimensional depiction is developed, which describes the system completely. These analyses lead to a generalized model of the algorithm, containing a set of coefficients to control the system’s convergence tendencies. Some results of the particle swarm optimizer, implementing modifications derived from the analysis, suggest methods for altering the original algorithm in ways that eliminate problems and increase the ability of the particle swarm to find optima of some well-studied test functions.</dcterms:abstract>
+        <dc:date>Feb./2002</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>DOI.org (Crossref)</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>http://ieeexplore.ieee.org/document/985692/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2026-05-06 09:14:46</dcterms:dateSubmitted>
+        <dc:rights>https://ieeexplore.ieee.org/Xplorehelp/downloads/license-information/IEEE.html</dc:rights>
+        <bib:pages>58-73</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1089778X">
+        <prism:volume>6</prism:volume>
+        <dc:title>IEEE Transactions on Evolutionary Computation</dc:title>
+        <dc:identifier>DOI 10.1109/4235.985692</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>IEEE Trans. Evol. Computat.</dcterms:alternative>
+        <dc:identifier>ISSN 1089778X</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_311">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/311/Clerc和Kennedy - 2002 - The particle swarm - explosion, stability, and convergence in a multidimensional complex space.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="#item_363">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>186</prism:volume>
+                <dc:title>Computer Methods in Applied Mechanics and Engineering</dc:title>
+                <dc:identifier>DOI 10.1016/S0045-7825(99)00389-8</dc:identifier>
+                <prism:number>2-4</prism:number>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Deb</foaf:surname>
+                        <foaf:givenName>Kalyanmoy</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_315"/>
+        <dc:title>An efficient constraint handling method for genetic algorithms</dc:title>
+        <dcterms:abstract>Many real-world search and optimization problems involve inequality and/or equality constraints and are thus posed as constrained optimization problems. In trying to solve constrained optimization problems using genetic algorithms (GAs) or classical optimization methods, penalty function methods have been the most popular approach, because of their simplicity and ease of implementation. However, since the penalty function approach is generic and applicable to any type of constraint (linear or nonlinear), their performance is not always satisfactory. Thus, researchers have developed sophisticated penalty functions speciÆc to the problem at hand and the search algorithm used for optimization. However, the most diÅcult aspect of the penalty function approach is to Ænd appropriate penalty parameters needed to guide the search towards the constrained optimum. In this paper, GA's population-based approach and ability to make pair-wise comparison in tournament selection operator are exploited to devise a penalty function approach that does not require any penalty parameter. Careful comparisons among feasible and infeasible solutions are made so as to provide a search direction towards the feasible region. Once suÅcient feasible solutions are found, a niching method (along with a controlled mutation operator) is used to maintain diversity among feasible solutions. This allows a real-parameter GA's crossover operator to continuously Ænd better feasible solutions, gradually leading the search near the true optimum solution. GAs with this constraint handling approach have been tested on nine problems commonly used in the literature, including an engineering design problem. In all cases, the proposed approach has been able to repeatedly Ænd solutions closer to the true optimum solution than that reported earlier. ” 2000 Elsevier Science S.A. All rights reserved.</dcterms:abstract>
+        <dc:date>2000</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>Zotero</z:libraryCatalog>
+        <bib:pages>311-338</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_315">
+        <z:itemType>attachment</z:itemType>
+        <z:path rdf:resource="files/315/Deb - 2000 - An efficient constraint handling method for genetic algorithms.pdf"/>
+        <dc:title>PDF</dc:title>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+</rdf:RDF>
