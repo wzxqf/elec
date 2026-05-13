@@ -85,3 +85,17 @@ def build_excess_return_validation_summary(policy_metrics: pd.DataFrame, rolling
             "",
         ]
     )
+
+
+def build_hourly_spot_activation_summary(weekly_results: pd.DataFrame) -> str:
+    if weekly_results.empty or "spot_hedge_abs_mwh_w" not in weekly_results.columns:
+        return "- 小时级现货修正: 未输出激活诊断字段"
+    nonzero_hours = int(weekly_results.get("spot_hedge_nonzero_hours_w", pd.Series(dtype="float64")).sum())
+    spot_abs = float(weekly_results["spot_hedge_abs_mwh_w"].sum())
+    friction = float(weekly_results.get("friction_cost_w", pd.Series(dtype="float64")).sum())
+    return (
+        "- 小时级现货修正: "
+        f"nonzero_hours={nonzero_hours}, "
+        f"spot_abs_sum_mwh={spot_abs:.6f}, "
+        f"friction_cost_sum={friction:.6f}"
+    )

@@ -222,7 +222,14 @@ def materialize_particle_pair(
             **projection_detail,
         }
         lock_ratio_proxy = lock_ratio_final
+        hour_count = len(hour_mask[week_pos])
         valid_hour_mask = hour_mask[week_pos].astype(bool)
+        valid_hour_mask_float = hour_mask[week_pos].astype(float)
+        spot_hourly = spot_hedge[week_pos] * valid_hour_mask_float
+        spot_hedge_net = float(spot_hourly.sum())
+        spot_hedge_abs = float(np.abs(spot_hourly).sum())
+        spot_hedge_nonzero_hours = int(np.count_nonzero(np.abs(spot_hourly) > 1.0e-6))
+        spot_hedge_limit_mean = float(np.mean(spot_hedge_limit[week_pos][valid_hour_mask])) if valid_hour_mask.any() else 0.0
         if valid_hour_mask.any():
             load_shape = _aggregate_hourly_profile_to_24(hourly_tensor[week_pos, valid_hour_mask, 0])
             load_shape = load_shape / max(float(load_shape.sum()), 1.0e-6)
@@ -245,6 +252,10 @@ def materialize_particle_pair(
         weekly_row["lock_ratio_proxy_w"] = lock_ratio_proxy
         weekly_row["curve_match_score_w"] = curve_match_score
         weekly_row["stability_score_w"] = stability_score
+        weekly_row["spot_hedge_net_mwh_w"] = spot_hedge_net
+        weekly_row["spot_hedge_abs_mwh_w"] = spot_hedge_abs
+        weekly_row["spot_hedge_nonzero_hours_w"] = spot_hedge_nonzero_hours
+        weekly_row["spot_hedge_limit_mean_mwh_w"] = spot_hedge_limit_mean
         for curve_idx in range(contract_curve.shape[-1]):
             weekly_row[f"contract_curve_h{curve_idx + 1}"] = float(contract_curve[week_pos, curve_idx])
         weekly_rows.append(weekly_row)
@@ -261,17 +272,12 @@ def materialize_particle_pair(
                 }
             )
         valid_intervals = max(int(quarter_mask[week_pos].sum()), 1)
-        hour_count = len(hour_mask[week_pos])
         interval_count = len(quarter_mask[week_pos])
         interval_hour_index, intervals_per_hour = _interval_hour_mapping(interval_count, hour_count)
         hour_slots = np.arange(max(hour_count, 1)) % 24
-        valid_hour_mask_float = hour_mask[week_pos].astype(float)
         contract_hour_weight = contract_curve[week_pos, hour_slots[:hour_count]] * valid_hour_mask_float
         contract_hour_weight = contract_hour_weight / max(float(contract_hour_weight.sum()), 1.0e-6)
         contract_hourly = float(contract_position[week_pos]) * contract_hour_weight
-        spot_hourly = spot_hedge[week_pos] * valid_hour_mask_float
-        spot_hedge_net = float(spot_hourly.sum())
-        spot_hedge_abs = float(np.abs(spot_hourly).sum())
         actual_column_index = quarter_feature_lookup.get("net_load_id_mwh")
         if actual_column_index is not None and actual_column_index < price_tensor.shape[-1]:
             actual_interval_values = np.clip(price_tensor[week_pos, :, actual_column_index].astype(float), 0.0, None) * quarter_mask[week_pos]

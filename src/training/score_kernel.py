@@ -263,7 +263,8 @@ def batch_score_particles(
     hourly_bound_lookup = {name: idx for idx, name in enumerate(tensor_bundle.hourly_bound_columns)}
     hourly_share_cap = hourly_bounds[..., hourly_bound_lookup["max_hourly_hedge_share"]].view(1, 1, week_count, hour_count)
     hourly_ramp_share = hourly_bounds[..., hourly_bound_lookup["max_hourly_ramp_share"]].view(1, 1, week_count, hour_count)
-    raw_spot_hedge_limit_mwh = (exposure_band_mwh_raw.unsqueeze(-1) / max(hour_count, 1)) * (
+    hourly_limit_base_mwh = exposure_band_mwh
+    raw_spot_hedge_limit_mwh = (hourly_limit_base_mwh.unsqueeze(-1) / max(hour_count, 1)) * (
         _score_nested_cfg(config, "hourly_limit", "base_multiplier", 0.50)
         + _score_nested_cfg(config, "hourly_limit", "shrink_multiplier", 0.50) * policy_shrink
     )

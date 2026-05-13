@@ -1,5 +1,14 @@
 # 更新日志
 
+## v0.51
+
+- 将当前正式版本号更新为 `project.version: v0.51`，正式输出目录切换为 `outputs/v0.51/`，活跃测试命名同步迁移为 `test_v051_<purpose>.py`。
+- 继承 `v0.50` 的小时级现货修正激活修复，继续保留 `HYBRID_PSO_V040` 主线、强基准比较和远程 Jupyter 正式验证口径。
+- 新增 `v0.51.md`、`docs/v0.51_architecture_implementation.md` 和 `docs/v0.51_algorithm_implementation_logic.md` 作为当前活跃说明，README、约束、状态 Schema 和策略层文档同步更新到 `v0.51` 口径。
+- 补齐根目录 `run_remote_jupyter.ps1` 一键入口，默认执行 `--probe` 后再上传运行，Jupyter 密码或 token 仍只从本机环境变量读取。
+- 清理测试口径更新为适配当前 `.gitignore` 策略：活跃区继续禁止旧版本模块和旧输出，`已归档/` 作为 ignored 历史区不再要求参与默认 pytest 文件存在性校验。
+- 远程 Jupyter 已刷新 `outputs/v0.51`：完整 pipeline 返回 0；补齐远程 `pymupdf` 后，全量 pytest 返回 `104 passed`；正式滚动小时级现货修正出现 1537 个非零小时。
+
 ## v0.50
 
 - 将当前正式版本号更新为 `project.version: v0.50`，正式输出目录切换为 `outputs/v0.50/`，活跃测试命名同步迁移为 `test_v050_<purpose>.py`。
@@ -8,6 +17,9 @@
 - CSV、模型、日志、配置快照、参数布局和远程拉回记录继续按 `raw/metrics`、`raw/models`、`raw/logs`、`raw/metadata`、`raw/remote_jupyter/<run_id>` 分类保存。
 - `v0.50.md`、`docs/v0.50_architecture_implementation.md` 和 `docs/v0.50_algorithm_implementation_logic.md` 作为当前活跃说明，README、约束、状态 Schema 和策略层文档同步更新到 `v0.50` 口径。
 - 远程正式验证仍通过根目录 `run_remote_jupyter.py` / `run_remote_jupyter.ps1` 执行完整 pipeline 与 pytest，Jupyter 密码或 token 仅从本机环境变量读取。
+- 修复小时级现货修正限额基数：`raw_spot_hedge_mwh` 现在使用制度投影后的 `exposure_band_mwh` 生成原始小时交易空间，避免原始带宽被上层粒子压到 0 时屏蔽可行域 floor。
+- 新增小时级现货修正激活诊断字段，滚动周度结果可直接记录 `spot_hedge_net_mwh_w`、`spot_hedge_abs_mwh_w`、`spot_hedge_nonzero_hours_w` 和 `spot_hedge_limit_mean_mwh_w`。
+- 新增禁用状态的 `hourly_spot_experiment` 配置入口与 guardrail helper，用于后续扫描死区、温度、风险带宽、交易摩擦和 `lambda_trade`，并以强基准改善、CVaR99 和 hedge error 作为筛选约束。
 
 ## v0.48
 

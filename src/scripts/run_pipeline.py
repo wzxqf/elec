@@ -10,6 +10,7 @@ import time
 import pandas as pd
 
 from src.analysis.report_contracts import infer_date_range
+from src.analysis.reporting import build_hourly_spot_activation_summary
 from src.scripts.backtest import run_backtest
 from src.scripts.common import prepare_project_context
 from src.scripts.evaluate import run_evaluate
@@ -290,7 +291,7 @@ def _build_human_report(context: dict, training: dict, validation: dict, backtes
         "",
         "- 小时信号: `m_{w,h} = beta_spread * spread_{w,h-1} + beta_load * load_dev_{w,h-1} + beta_ren * renewable_dev_{w,h-1} + beta_abs * |spread| * session_h + beta_ren_abs * |renewable_dev| * session_h`。",
         "- 门控: `gate_{w,h} = sigmoid((|m_{w,h}| - deadband) / temperature)`，低于 deadband 的信号置零。",
-        "- 原始修正: `u_raw_{w,h} = gate_{w,h} * tanh(m_{w,h}) * B_raw_w / N_h * (limit_base + limit_shrink * shrink_policy)`。",
+        "- 原始修正: `u_raw_{w,h} = gate_{w,h} * tanh(m_{w,h}) * B_w / N_h * (limit_base + limit_shrink * shrink_policy)`。",
         "- 约束投影: `u_{w,h} = Proj_hour(u_raw_{w,h}; B_w, share_cap_{w,h}, ramp_cap_{w,h})`。",
         "- 单点上限: `|u_{w,h}| <= B_w / N_h * share_cap_{w,h}`。",
         "- 平滑上限: `|u_{w,h} - u_{w,h-1}| <= B_w / N_h * share_cap_{w,h} * ramp_cap_{w,h}`。",
@@ -454,6 +455,8 @@ def _build_human_report(context: dict, training: dict, validation: dict, backtes
     lines.extend(_frame_as_markdown(rolling_backtest_metrics))
     lines.extend(["### 滚动回测周度结果", ""])
     lines.extend(_frame_as_markdown(rolling_weekly_results, limit=20))
+    lines.extend(["### 小时级现货修正激活摘要", ""])
+    lines.extend([build_hourly_spot_activation_summary(rolling_weekly_results), ""])
     lines.extend(["### 滚动超额收益验证结果", ""])
     lines.extend(_frame_as_markdown(rolling_excess))
     lines.extend(["### 基准策略持出集结果", ""])
@@ -548,6 +551,7 @@ def _build_ai_structured_report(context: dict, training: dict, validation: dict,
             "exposure_band": "B_w = clip(B_raw_w, b_min_w*Lhat_w, b_max_w*Lhat_w)",
             "contract_curve": "pi_{w,1:24} = softmax(theta_curve @ Basis_24h)",
             "hourly_signal": "m_{w,h} combines lagged spread, load deviation, renewable deviation and session weights",
+            "hourly_raw_hedge": "u_raw_{w,h} = gate_{w,h} * tanh(m_{w,h}) * B_w/N_h * limit_multiplier",
             "hourly_projection": "u_{w,h} = Proj_hour(u_raw_{w,h}; B_w, share_cap_{w,h}, ramp_cap_{w,h})",
             "settlement": "C_{w,t} = q_sched_{w,t}*(omega_lt*p_lt_eff_w + omega_da*p_da_{w,t}) + abs(q_real_{w,t}-q_sched_{w,t})*p_id_{w,t}*eta_imbalance",
             "cvar": "CVaR_alpha(w) is the mean of the worst (1-alpha) 15-minute costs",
