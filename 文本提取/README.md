@@ -2,31 +2,25 @@
 
 本目录提供独立的论文 PDF 文本抽取工具，只做摘要与正文提取、清洗和记录，不对论文内容进行改写、概括或语义补全。
 
+## 当前结论
+
+本批 `参考文献/` PDF 已验证过 GROBID、GROBID+回退、PyMuPDF 三种路线。GROBID 对中文论文的正文边界识别明显不稳定，多个中文文献只抽出数百字或更少，整体效果低于 `文本提取/outputs/pdf_extract/` 中的 PyMuPDF 结果。
+
+当前正式文本提取口径固定为：
+
+- 默认使用 `--mode pymupdf`
+- 不启动、不安装、不依赖 GROBID
+- 原始 PDF 作为引用核验来源
+- `文本提取/outputs/pdf_extract/` 作为 GPT 深度研究的主输入
+
 ## 实现计划与边界
 
-1. `pdf_abstract_body/tei_parser.py` 解析 GROBID 返回的 TEI XML，提取标题、DOI、摘要和正文。
-2. `pdf_abstract_body/grobid_client.py` 调用本地 GROBID REST API。
-3. `pdf_abstract_body/text_cleaner.py` 执行保守清洗，保留正文完整性。
-4. `pdf_abstract_body/fallback_pymupdf.py` 在 GROBID 不可用或单篇解析失败时执行 PyMuPDF 后备提取。
-5. `extract_pdf_abstract_body.py` 作为批量命令行入口，递归扫描 PDF，输出 txt、Markdown、JSONL 和 CSV 报告。
+1. `pdf_abstract_body/fallback_pymupdf.py` 逐页提取 PDF 文本，并按关键词做摘要、正文与参考文献边界切分。
+2. `pdf_abstract_body/text_cleaner.py` 执行保守清洗，优先保留正文完整性。
+3. `extract_pdf_abstract_body.py` 作为批量命令行入口，递归扫描 PDF，输出 txt、Markdown、JSONL 和 CSV 报告。
+4. `pdf_abstract_body/tei_parser.py`、`grobid_client.py` 仅作为历史实验代码保留，不进入当前推荐流程。
 
-该工具不接入训练、建模、政策解析和正式 `outputs/v0.50/` 主链路。建议把文献抽取结果写入 `文本提取/outputs/pdf_extract/`，便于和实验产物分开管理。
-
-## 启动 GROBID
-
-PowerShell 下可直接运行 Docker：
-
-```powershell
-docker run --rm -p 8070:8070 lfoppiano/grobid:0.8.0
-```
-
-如需在 WSL 中使用 Docker：
-
-```bash
-docker run --rm -p 8070:8070 lfoppiano/grobid:0.8.0
-```
-
-镜像版本可按本机可拉取情况调整，核心脚本不硬编码版本号。
+该工具不接入训练、建模、政策解析和正式 `outputs/v0.50/` 主链路。文献抽取结果写入 `文本提取/outputs/pdf_extract/`，与实验产物分开管理。
 
 ## 批量提取
 
@@ -36,9 +30,9 @@ docker run --rm -p 8070:8070 lfoppiano/grobid:0.8.0
 python .\文本提取\extract_pdf_abstract_body.py `
   --input .\参考文献 `
   --output .\文本提取\outputs\pdf_extract `
-  --grobid-url http://localhost:8070 `
-  --mode auto `
-  --workers 2
+  --mode pymupdf `
+  --workers 4 `
+  --overwrite
 ```
 
 WSL 中可用等价路径运行：
@@ -47,12 +41,10 @@ WSL 中可用等价路径运行：
 python 文本提取/extract_pdf_abstract_body.py \
   --input 参考文献 \
   --output 文本提取/outputs/pdf_extract \
-  --grobid-url http://localhost:8070 \
-  --mode auto \
-  --workers 2
+  --mode pymupdf \
+  --workers 4 \
+  --overwrite
 ```
-
-`auto` 模式会优先使用 GROBID；服务不可用或单篇解析失败时，会尝试 PyMuPDF 后备方案，并在报告中标记 `method=pymupdf`。
 
 ## 输出
 
@@ -61,22 +53,30 @@ python 文本提取/extract_pdf_abstract_body.py \
 文本提取/outputs/pdf_extract/txt/{safe_stem}.body.txt
 文本提取/outputs/pdf_extract/md/{safe_stem}.md
 文本提取/outputs/pdf_extract/jsonl/records.jsonl
-文本提取/outputs/pdf_extract/tei/{safe_stem}.tei.xml
 文本提取/outputs/pdf_extract/extraction_report.csv
 ```
 
-若不同目录存在同名 PDF，工具会在安全文件名后追加短哈希，避免覆盖。
+当前有效结果：
+
+```text
+records: 53
+success: 37
+partial: 16
+failed: 0
+method: pymupdf
+```
+
+`partial` 表示该文献正文已提取，但摘要边界未可靠识别。做深度研究时可继续使用正文；涉及摘要原文、页码、图表、公式或关键引用时回查原始 PDF。
 
 ## 常用参数
 
-- `--mode grobid|pymupdf|auto`：默认 `auto`。
-- `--workers 2`：并发数量，建议本地 GROBID 使用 2 到 4。
+- `--mode pymupdf`：当前推荐模式。
+- `--workers 4`：并发数量。
 - `--overwrite`：覆盖已有单篇 txt/Markdown 输出。
-- `--no-save-tei`：不保存 GROBID TEI XML。
 - `--jsonl-text-mode full|paths`：默认在 JSONL 中保存全文；`paths` 只保留路径和统计字段。
 
 ## 测试
 
 ```powershell
-python -m pytest tests/test_v050_pdf_abstract_body_extraction.py -q
+D:\miniforge\envs\torch311\python.exe -m src.scripts.run_pytest tests/test_v050_pdf_abstract_body_extraction.py -q
 ```

@@ -1,7 +1,0 @@
-{
-  "stage": "训练",
-  "phase_name": "HPSO 参数训练",
-  "phase_progress": 0.0375,
-  "total_progress": 0.012499999999999999,
-  "message": "iter 3/80 best 1495365065.6466"
-}

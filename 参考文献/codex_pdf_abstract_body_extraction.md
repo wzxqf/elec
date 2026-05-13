@@ -1,60 +1,59 @@
 # Codex 任务说明：批量提取论文 PDF 的摘要与正文文本
 
+## 2026-05-13 修订结论
+
+本项目已经实测过 GROBID、GROBID+回退、PyMuPDF 三条路线。GROBID 对当前 `参考文献/` 中的中文论文版式识别效果差，多个中文文献正文只抽出数百字甚至更少，整体质量低于 `文本提取/outputs/pdf_extract/` 中的 PyMuPDF 结果。
+
+因此，当前文本提取规划改为：
+
+1. 正式抽取路线使用 PyMuPDF；
+2. 不再安装、启动或依赖 GROBID；
+3. 不再把 GROBID 失败作为报告中的错误原因；
+4. 原始 PDF 继续作为引用、页码、图表、公式和关键表述的核验来源；
+5. GPT 深度研究优先使用 `文本提取/outputs/pdf_extract/md/` 与 `文本提取/outputs/pdf_extract/jsonl/records.jsonl`。
+
 ## 任务目标
 
-请在当前仓库中实现一个可复用的批量 PDF 文本提取工具，用于从学术论文 PDF 中提取两类内容：
+在当前仓库中维护一个可复用的批量 PDF 文本提取工具，用于从学术论文 PDF 中提取两类内容：
 
 1. 摘要（abstract）；
 2. 正文（body text）。
 
-本任务只做“文本抽取与清洗”，不得进行摘要改写、内容概括、语义补全或基于模型的再生成。输出文本必须尽量忠实于 PDF 原文。若某篇 PDF 无法可靠提取，应记录失败原因，而不是编造内容。
+本任务只做文本抽取与清洗，不进行摘要改写、内容概括、语义补全或基于模型的再生成。输出文本应尽量忠实于 PDF 原文。若某篇 PDF 的摘要边界无法可靠识别，应记录为 `partial`，不得补写或猜测摘要内容。
 
-建议优先采用 GROBID 解析论文 PDF，并从其 TEI XML 中抽取摘要与正文。普通 PDF 文本提取工具可作为后备方案，但不作为首选方案。
+## 实现范围
 
----
-
-## 一、实现范围
-
-请新增一个独立工具模块和命令行入口，用于批量处理文件夹中的 PDF。
-
-推荐目录结构如下：
+当前实现位于 `文本提取/`，不接入训练、建模、政策解析和正式 `outputs/v0.50/` 主链路。
 
 ```text
-scripts/
+文本提取/
   extract_pdf_abstract_body.py
-
-src/
-  pdf_extract/
+  pdf_abstract_body/
     __init__.py
-    grobid_client.py
-    tei_parser.py
-    text_cleaner.py
     fallback_pymupdf.py
-
-outputs/
-  pdf_extract/
-    tei/
-    txt/
-    md/
-    jsonl/
-    extraction_report.csv
+    text_cleaner.py
+    runner.py
+    tei_parser.py          # 历史实验代码，当前不推荐
+    grobid_client.py       # 历史实验代码，当前不推荐
+  outputs/
+    pdf_extract/
+      txt/
+      md/
+      jsonl/
+      extraction_report.csv
 ```
 
-如果当前项目已有更合适的工具目录，可以按现有结构调整，但需要保持功能边界清晰，不要把该功能混入训练、建模或政策解析主链路中。
+## 命令行接口
 
----
+当前推荐调用方式：
 
-## 二、命令行接口要求
-
-新增脚本 `scripts/extract_pdf_abstract_body.py`，支持如下调用方式：
-
-```bash
-python scripts/extract_pdf_abstract_body.py \
-  --input papers \
-  --output outputs/pdf_extract \
-  --grobid-url http://localhost:8070 \
-  --mode auto \
-  --workers 4
+```powershell
+python .\文本提取\extract_pdf_abstract_body.py `
+  --input .\参考文献 `
+  --output .\文本提取\outputs\pdf_extract `
+  --mode pymupdf `
+  --workers 4 `
+  --overwrite
 ```
 
 参数要求：
@@ -62,51 +61,38 @@ python scripts/extract_pdf_abstract_body.py \
 ```text
 --input        PDF 文件夹路径，递归读取其中所有 .pdf 文件
 --output       输出目录
---grobid-url   GROBID 服务地址，默认 http://localhost:8070
---mode         grobid | pymupdf | auto，默认 auto
---workers      并发处理数量，默认 2 或 4，避免过高并发压垮本地 GROBID 服务
+--mode         当前使用 pymupdf；grobid/auto 仅为历史实验选项
+--workers      并发处理数量，当前可使用 4
 --overwrite    可选参数，存在时覆盖已有输出
---save-tei     可选参数，保存 GROBID 返回的 TEI XML，默认保存
 --verbose      可选参数，打印更详细日志
 ```
 
-`auto` 模式下，优先调用 GROBID。若 GROBID 服务不可用或单篇 PDF 解析失败，再尝试 PyMuPDF 后备提取，并在报告中标记该篇文献使用了 fallback。
+## 输入与输出要求
 
----
-
-## 三、输入与输出要求
-
-### 1. 输入
+### 输入
 
 输入为一个 PDF 文件夹，例如：
 
 ```text
-papers/
+参考文献/
   paper_001.pdf
   paper_002.pdf
-  subdir/
-    paper_003.pdf
 ```
 
 要求递归扫描所有 `.pdf` 文件。
 
-### 2. 每篇论文的输出
-
-对于每个 PDF，输出以下文件：
+### 每篇论文输出
 
 ```text
-outputs/pdf_extract/txt/{safe_stem}.abstract.txt
-outputs/pdf_extract/txt/{safe_stem}.body.txt
-outputs/pdf_extract/md/{safe_stem}.md
-outputs/pdf_extract/jsonl/records.jsonl
-outputs/pdf_extract/tei/{safe_stem}.tei.xml
+文本提取/outputs/pdf_extract/txt/{safe_stem}.abstract.txt
+文本提取/outputs/pdf_extract/txt/{safe_stem}.body.txt
+文本提取/outputs/pdf_extract/md/{safe_stem}.md
+文本提取/outputs/pdf_extract/jsonl/records.jsonl
 ```
 
-其中 `{safe_stem}` 应由 PDF 文件名转换得到，去除或替换不适合文件名的特殊字符。若不同目录下存在同名 PDF，应避免覆盖，可在文件名后追加短哈希。
+其中 `{safe_stem}` 由 PDF 文件名转换得到。若不同目录下存在同名 PDF，应追加短哈希，避免覆盖。
 
-### 3. Markdown 输出格式
-
-每篇论文的 `.md` 文件应采用如下格式：
+### Markdown 输出格式
 
 ```markdown
 # {title_or_filename}
@@ -114,7 +100,7 @@ outputs/pdf_extract/tei/{safe_stem}.tei.xml
 ## Metadata
 
 - source_pdf: {relative_pdf_path}
-- extraction_method: {grobid|pymupdf}
+- extraction_method: pymupdf
 - extraction_status: {success|partial|failed}
 - title: {title_if_available}
 - doi: {doi_if_available}
@@ -128,18 +114,18 @@ outputs/pdf_extract/tei/{safe_stem}.tei.xml
 {body_text}
 ```
 
-如果某项元数据不存在，保留字段但写为空字符串，不要猜测。
+如果某项元数据不存在，保留字段但写为空字符串，不通过文件名推断 DOI、标题或作者。
 
-### 4. JSONL 输出格式
+### JSONL 输出格式
 
 `records.jsonl` 每行对应一篇 PDF，字段至少包括：
 
 ```json
 {
-  "source_pdf": "papers/example.pdf",
+  "source_pdf": "参考文献/example.pdf",
   "safe_stem": "example",
   "status": "success",
-  "method": "grobid",
+  "method": "pymupdf",
   "title": "",
   "doi": "",
   "abstract": "",
@@ -150,9 +136,7 @@ outputs/pdf_extract/tei/{safe_stem}.tei.xml
 }
 ```
 
-若正文过长，也可以额外提供 `--jsonl-text-mode full|paths` 参数。默认可使用 `full`，即 JSONL 中保存全文；若实现较复杂，可先只保存全文，不强制实现该扩展参数。
-
-### 5. 提取报告
+### 提取报告
 
 生成 `extraction_report.csv`，字段至少包括：
 
@@ -160,91 +144,9 @@ outputs/pdf_extract/tei/{safe_stem}.tei.xml
 source_pdf,safe_stem,status,method,title,doi,abstract_chars,body_chars,tei_saved,error
 ```
 
-报告用于快速检查哪些 PDF 成功、哪些失败、哪些只提取到了部分内容。
+当前有效结果中，`error` 不应记录 GROBID 不可用、GROBID 回退等历史实验信息。只有 PDF 损坏、PyMuPDF 无法打开、正文为空等真实失败才写入错误原因。
 
----
-
-## 四、GROBID 解析要求
-
-### 1. 调用方式
-
-通过 REST API 调用：
-
-```text
-POST {grobid-url}/api/processFulltextDocument
-```
-
-请求中传入 PDF 文件，建议参数：
-
-```text
-consolidateHeader=0
-consolidateCitations=0
-includeRawCitations=0
-includeRawAffiliations=0
-```
-
-需要设置超时时间，例如 120 秒。单篇失败不能中断整个批处理流程。
-
-### 2. TEI XML 中的摘要抽取
-
-从 GROBID 返回的 TEI XML 中优先抽取：
-
-```text
-//tei:profileDesc/tei:abstract
-```
-
-其中段落文本来自：
-
-```text
-.//tei:p
-```
-
-如果不存在 `<p>`，则使用 abstract 节点下的全部文本。多个段落之间保留空行。
-
-### 3. TEI XML 中的正文抽取
-
-正文从以下节点抽取：
-
-```text
-//tei:text/tei:body
-```
-
-正文抽取规则：
-
-1. 保留正文中的章节标题 `<head>`；
-2. 保留正文段落 `<p>`；
-3. 保留段落顺序；
-4. 不抽取 `<back>`、`<listBibl>`、参考文献部分；
-5. 不抽取作者、单位、期刊信息等头部元数据；
-6. 图题、表题、公式、脚注可以暂不纳入正文，除非它们已经自然出现在正文段落中。
-
-建议将章节标题写成 Markdown 二级或三级标题，例如：
-
-```markdown
-### Introduction
-
-正文段落……
-```
-
-### 4. 元数据抽取
-
-在能力范围内抽取以下元数据：
-
-```text
-title: //tei:titleStmt/tei:title
-abstract: //tei:profileDesc/tei:abstract
-doi: //tei:idno[@type="DOI"]
-```
-
-只抽取明确存在的内容，不要通过文件名推断 DOI、标题或作者。
-
----
-
-## 五、PyMuPDF 后备方案要求
-
-当 GROBID 不可用或单篇解析失败时，可以使用 PyMuPDF 后备提取。后备方案只需提供尽量可用的摘要与正文，不要求达到 GROBID 的结构化效果。
-
-后备方案建议流程：
+## PyMuPDF 抽取要求
 
 1. 逐页提取文本；
 2. 合并为全文；
@@ -281,13 +183,9 @@ REFERENCES
 Bibliography
 ```
 
-注意：后备方案容易误判，因此必须在 `extraction_report.csv` 中标记 `method=pymupdf`，并允许 `status=partial`。
+PyMuPDF 对摘要边界可能误判，因此允许 `status=partial`。只要正文可用，不能把摘要缺失视为整篇失败。
 
----
-
-## 六、文本清洗规则
-
-请实现 `text_cleaner.py`，至少包含以下清洗逻辑：
+## 文本清洗规则
 
 1. 统一换行符为 `\n`；
 2. 去除连续多余空白；
@@ -295,100 +193,51 @@ Bibliography
 4. 去除明显页码行，例如单独的 `1`、`- 1 -`；
 5. 去除过短且无意义的孤立行；
 6. 处理英文断行连字符，例如 `mar-\nket` 可合并为 `market`；
-7. 不要删除中文句号、英文句号、括号中的引用编号；
-8. 不要对正文进行改写、翻译或概括。
+7. 不删除中文句号、英文句号、括号中的引用编号；
+8. 不对正文进行改写、翻译或概括。
 
 清洗应尽量保守，宁可保留少量噪声，也不要误删正文。
 
----
-
-## 七、异常处理与日志
-
-批量处理时必须满足：
+## 异常处理与日志
 
 1. 单篇 PDF 失败不影响其他 PDF；
 2. 每篇 PDF 都要在 `extraction_report.csv` 中留下记录；
-3. 捕获并记录 HTTP 错误、超时、XML 解析错误、空正文、文件损坏等异常；
+3. 捕获并记录 PyMuPDF 打开失败、空正文、文件损坏等异常；
 4. 若摘要为空但正文成功，状态记为 `partial`；
 5. 若正文为空，状态记为 `failed` 或 `partial`，并写明原因；
 6. 控制台输出进度，例如 `[12/80] success paper.pdf`。
 
----
+## 依赖管理
 
-## 八、依赖管理
-
-请根据项目现有依赖管理方式添加依赖。若项目使用 `requirements.txt`，添加：
+`requirements.txt` 至少包含：
 
 ```text
-requests
-lxml
 pymupdf
 pandas
 ```
 
-如果项目使用 `pyproject.toml`，则添加到对应依赖区。
+不要引入 OCR。扫描版 PDF 的 OCR 可作为后续扩展，不在本次任务中实现。
 
-不要引入过重依赖。不要默认引入 OCR。扫描版 PDF 的 OCR 可作为后续扩展，不在本次任务中实现。
+## 测试要求
 
----
+至少保留以下测试：
 
-## 九、测试要求
+1. PyMuPDF 端到端测试：构造最小 PDF，验证能生成摘要、正文、Markdown、JSONL、CSV；
+2. 文本清洗测试：验证页码、重复空格、英文断行连字符等基础清洗逻辑；
+3. 安全文件名测试：同名 PDF 不覆盖；
+4. 历史 TEI 解析测试可保留，用于防止旧代码损坏，但当前研究输入不采用 GROBID 输出。
 
-至少新增以下测试，若当前项目没有测试框架，可以新增简单的 `pytest` 测试。
+## 验收标准
 
-### 1. TEI 摘要抽取测试
+任务完成后，以下命令可以运行：
 
-构造一个最小 TEI XML，包含：
-
-```xml
-<profileDesc>
-  <abstract>
-    <p>abstract paragraph one</p>
-    <p>abstract paragraph two</p>
-  </abstract>
-</profileDesc>
-```
-
-验证输出包含两个摘要段落，且段落顺序正确。
-
-### 2. TEI 正文抽取测试
-
-构造一个最小 TEI XML，包含：
-
-```xml
-<body>
-  <div>
-    <head>Introduction</head>
-    <p>body paragraph one</p>
-  </div>
-  <div>
-    <head>Method</head>
-    <p>body paragraph two</p>
-  </div>
-</body>
-```
-
-验证正文包含章节标题和两个正文段落。
-
-### 3. 参考文献排除测试
-
-构造 TEI XML，确保 `<back>` 或 `<listBibl>` 中的参考文献不会进入正文输出。
-
-### 4. 清洗函数测试
-
-验证页码、重复空格、英文断行连字符等基础清洗逻辑。
-
----
-
-## 十、验收标准
-
-任务完成后，请确保以下命令可以运行：
-
-```bash
-python scripts/extract_pdf_abstract_body.py \
-  --input papers \
-  --output outputs/pdf_extract \
-  --mode auto
+```powershell
+python .\文本提取\extract_pdf_abstract_body.py `
+  --input .\参考文献 `
+  --output .\文本提取\outputs\pdf_extract `
+  --mode pymupdf `
+  --workers 4 `
+  --overwrite
 ```
 
 验收结果应满足：
@@ -397,71 +246,19 @@ python scripts/extract_pdf_abstract_body.py \
 2. 每篇 PDF 生成摘要文本、正文文本、Markdown 文件；
 3. 生成统一的 `records.jsonl`；
 4. 生成统一的 `extraction_report.csv`；
-5. GROBID 成功时优先使用 TEI XML 的 `<abstract>` 与 `<body>`；
-6. 不把参考文献当成正文；
-7. 单篇失败不影响批量任务；
-8. 失败原因可追踪；
-9. 测试通过；
-10. README 或脚本注释中说明启动 GROBID 的基本方式。
+5. 不把参考文献当成正文；
+6. 单篇失败不影响批量任务；
+7. 失败原因可追踪；
+8. 测试通过；
+9. 报告中不再出现 GROBID 失败或回退标记；
+10. 当前 `参考文献/` 的有效结果为 `53` 条记录、`failed=0`。
 
----
+## 实现注意事项
 
-## 十一、README 补充内容
-
-请在 README 或单独文档中补充简短说明：
-
-```markdown
-### 批量提取论文 PDF 摘要与正文
-
-1. 启动 GROBID：
-
-```bash
-docker run --rm -p 8070:8070 lfoppiano/grobid:0.8.0
-```
-
-2. 运行批量提取：
-
-```bash
-python scripts/extract_pdf_abstract_body.py \
-  --input papers \
-  --output outputs/pdf_extract \
-  --mode auto
-```
-
-3. 查看结果：
-
-```text
-outputs/pdf_extract/txt/
-outputs/pdf_extract/md/
-outputs/pdf_extract/jsonl/records.jsonl
-outputs/pdf_extract/extraction_report.csv
-```
-```
-
-若 Docker 镜像版本需要调整，请以本地可拉取版本为准，不要把版本号硬编码到核心逻辑中。
-
----
-
-## 十二、实现注意事项
-
-1. 不要使用大语言模型对正文进行重写或摘要生成。
-2. 不要在提取失败时用标题、文件名或参考文献信息补正文。
-3. 不要默认把参考文献、附录、作者简介纳入正文。
-4. 不要因为少量页眉页脚噪声而过度清洗，正文完整性优先。
-5. 不要在脚本中写死用户本机绝对路径。
-6. 不要改变仓库既有训练、建模和数据处理主流程。
+1. 不使用大语言模型对正文进行重写或摘要生成；
+2. 不在提取失败时用标题、文件名或参考文献信息补正文；
+3. 不默认把参考文献、附录、作者简介纳入正文；
+4. 不因少量页眉页脚噪声而过度清洗，正文完整性优先；
+5. 不在脚本中写死用户本机绝对路径；
+6. 不改变仓库既有训练、建模和数据处理主流程；
 7. 新增功能应可单独运行，便于后续把论文 PDF 提取结果接入文献综述或资料库。
-
----
-
-## 十三、建议实现顺序
-
-1. 先实现 `tei_parser.py`，完成 TEI XML 中 title、doi、abstract、body 的解析；
-2. 再实现 `grobid_client.py`，负责调用 GROBID 并保存 TEI；
-3. 实现 `text_cleaner.py`，提供保守清洗函数；
-4. 实现 `fallback_pymupdf.py`，作为后备方案；
-5. 实现命令行脚本，串联批量扫描、解析、输出和报告；
-6. 添加最小单元测试；
-7. 用少量 PDF 手动验证摘要、正文和参考文献边界。
-
-最终提交时，请给出简要变更说明，并列出新增文件、运行命令和测试命令。
