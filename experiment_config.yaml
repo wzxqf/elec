@@ -90,6 +90,11 @@ score_kernel:
   lt_settlement_weight: 0.60
   da_settlement_weight: 0.40
   hourly_signal:
+    # raw 为当前正式构造；forecast_load_normalized 用于比较按预测负荷尺度归一化后的变量构造。
+    transform: raw
+    price_spread_scale_yuan_per_mwh: 100.0
+    min_load_scale_mwh: 1.0
+    signal_clip_abs: 0.0
     spread_weight: 0.02
     load_dev_weight: 0.01
     renewable_weight: 0.01
@@ -106,6 +111,7 @@ score_kernel:
     shrink_multiplier: 0.50
   hourly_gate:
     enabled: true
+    mode: hard
     signal_deadband: 0.12
     temperature: 0.04
 
@@ -231,7 +237,7 @@ economics:
   retail_tariff_yuan_per_mwh: 430.0
   imbalance_penalty_multiplier: 1.00
   adjustment_cost_yuan_per_mwh: 0.60
-  friction_cost_yuan_per_mwh: 1.20
+  friction_cost_yuan_per_mwh: 1.50
   risk_cost_yuan_per_mwh: 0.0
   baseline_strategy: dynamic_lock_only
 
@@ -326,9 +332,19 @@ robustness:
 
 hourly_spot_experiment:
   enabled: false
+  signal_transform:
+    - raw
+    - forecast_load_normalized
+  gate_mode:
+    - hard
+    - soft
+  signal_clip_abs:
+    - 0.0
+    - 0.75
   signal_deadband:
     - 0.05
     - 0.10
+    - 0.12
     - 0.15
   temperature:
     - 0.04
@@ -342,9 +358,7 @@ hourly_spot_experiment:
     - 0.25
     - 0.50
   friction_cost_yuan_per_mwh:
-    - 0.60
-    - 1.20
-    - 2.40
+    - 1.50
   lambda_trade:
     - 0.05
     - 0.10

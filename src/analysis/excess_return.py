@@ -89,9 +89,9 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
         if guard_triggered:
             conclusion = "窗口样本不足或波动率过低，保留附录口径"
         elif active_persistent:
-            conclusion = "该窗口跑赢 dynamic_lock_only"
+            conclusion = "该窗口跑赢强基准族"
         else:
-            conclusion = "该窗口未跑赢 dynamic_lock_only"
+            conclusion = "该窗口未跑赢强基准族"
         rows.append(
             {
                 "window_name": window_name,
@@ -113,7 +113,7 @@ def summarize_rolling_excess_return(policy_metrics: pd.DataFrame, epsilon: float
                 "window_metrics_tier": "appendix_only" if guard_triggered else "main_text_safe",
                 "active_excess_return_positive": active_positive,
                 "active_excess_return_persistent": active_persistent,
-                "dynamic_lock_only_outperformed": float(excess.mean()) > 0.0,
+                "strong_baseline_family_outperformed": float(excess.mean()) > 0.0,
                 "excess_return_conclusion": conclusion,
             }
         )

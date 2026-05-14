@@ -99,6 +99,10 @@ def _normalize_score_kernel(score_kernel: dict[str, Any]) -> None:
             "lt_settlement_weight": float(score_kernel.get("lt_settlement_weight", 0.60)),
             "da_settlement_weight": float(score_kernel.get("da_settlement_weight", 0.40)),
             "hourly_signal": {
+                "transform": str(hourly_signal.get("transform", "raw")),
+                "price_spread_scale_yuan_per_mwh": float(hourly_signal.get("price_spread_scale_yuan_per_mwh", 100.0)),
+                "min_load_scale_mwh": float(hourly_signal.get("min_load_scale_mwh", 1.0)),
+                "signal_clip_abs": float(hourly_signal.get("signal_clip_abs", 0.0)),
                 "spread_weight": float(hourly_signal.get("spread_weight", 0.02)),
                 "load_dev_weight": float(hourly_signal.get("load_dev_weight", 0.01)),
                 "renewable_weight": float(hourly_signal.get("renewable_weight", 0.01)),
@@ -211,6 +215,7 @@ def load_runtime_config(project_root: str | Path, filename: str = "experiment_co
         "sensitivity",
         "robustness",
         "search",
+        "hourly_spot_experiment",
         "hpso",
         "policy",
         "analysis_v035",

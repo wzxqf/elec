@@ -290,6 +290,118 @@ def test_hourly_no_trade_gate_suppresses_small_signals() -> None:
     assert torch.count_nonzero(result.spot_hedge_mwh.abs() > 1.0e-6).item() == 0
 
 
+def test_hourly_signal_forecast_load_normalization_reduces_scale_dominated_signal() -> None:
+    bundle = _bundle()
+    config = _config()
+    base_score_kernel = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.25,
+        "hourly_signal": {
+            "spread_weight": 0.02,
+            "load_dev_weight": 0.00,
+            "renewable_weight": 0.00,
+            "spread_abs_weight": 0.00,
+            "renewable_abs_weight": 0.00,
+        },
+        "hourly_limit": {
+            "base_multiplier": 1.00,
+            "shrink_multiplier": 0.00,
+        },
+        "hourly_gate": {
+            "enabled": False,
+        },
+    }
+    bundle["hourly"]["price_spread"] = [200.0, 200.0]
+    bundle["hourly"]["price_spread_lag1"] = [200.0, 200.0]
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.ones((1, layout.lower.total_dimension), dtype=torch.float32)
+
+    config["score_kernel"] = base_score_kernel
+    raw_result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    normalized_config = _config()
+    normalized_config["score_kernel"] = {
+        **base_score_kernel,
+        "hourly_signal": {
+            **base_score_kernel["hourly_signal"],
+            "transform": "forecast_load_normalized",
+            "price_spread_scale_yuan_per_mwh": 100.0,
+            "min_load_scale_mwh": 1.0,
+        },
+    }
+    normalized_result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=normalized_config,
+        compiled_layout=layout,
+    )
+
+    assert raw_result.spot_hedge_mwh.abs().sum() > normalized_result.spot_hedge_mwh.abs().sum()
+    assert normalized_result.spot_hedge_mwh.abs().sum() > 0.0
+
+
+def test_hourly_gate_soft_mode_keeps_sub_deadband_small_signal() -> None:
+    bundle = _bundle()
+    config = _config()
+    config["score_kernel"] = {
+        "contract_position_base_ratio": 0.60,
+        "exposure_band_base_ratio": 0.20,
+        "hourly_signal": {
+            "spread_weight": 0.001,
+            "load_dev_weight": 0.000,
+            "renewable_weight": 0.000,
+            "spread_abs_weight": 0.000,
+            "renewable_abs_weight": 0.000,
+        },
+        "hourly_limit": {
+            "base_multiplier": 1.00,
+            "shrink_multiplier": 0.00,
+        },
+        "hourly_gate": {
+            "enabled": True,
+            "mode": "soft",
+            "signal_deadband": 0.10,
+            "temperature": 0.02,
+        },
+    }
+    bundle["feasible_domain"] = compile_feasible_domain(
+        config=config,
+        weekly_metadata=bundle["weekly_metadata"],
+        policy_state_trace=bundle["policy_state_trace"],
+    )
+    layout = compile_parameter_layout(config=config, bundle=bundle)
+    tensor_bundle = compile_training_tensor_bundle(bundle, device="cpu")
+    upper = torch.zeros((1, layout.upper.total_dimension), dtype=torch.float32)
+    lower = torch.ones((1, layout.lower.total_dimension), dtype=torch.float32)
+
+    result = batch_score_particles(
+        tensor_bundle=tensor_bundle,
+        upper_particles=upper,
+        lower_particles=lower,
+        device="cpu",
+        config=config,
+        compiled_layout=layout,
+    )
+
+    assert torch.count_nonzero(result.spot_hedge_mwh.abs() > 1.0e-9).item() > 0
+
+
 def test_hourly_score_kernel_uses_lagged_decision_signals() -> None:
     bundle = _bundle()
     config = _config()

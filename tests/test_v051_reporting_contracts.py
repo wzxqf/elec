@@ -320,14 +320,16 @@ def test_excess_return_summary_does_not_label_partial_wins_as_persistent() -> No
         policy_metrics=pd.DataFrame({"excess_profit_w": [1.0], "policy_risk_penalty_w": [0.0], "policy_risk_adjusted_excess_return_w": [1.0]}),
         rolling_metrics=pd.DataFrame(
             {
-                "active_excess_return_persistent": [True, False],
+                "strong_baseline_family_outperformed": [True, False],
+                "active_excess_return_persistent": [False, False],
                 "window_policy_risk_adjusted_sharpe": [0.0, 0.0],
             }
         ),
     )
 
-    assert "部分滚动窗口跑赢 dynamic_lock_only" in text
-    assert "结论: 持续跑赢 dynamic_lock_only" not in text
+    assert "跑赢强基准族窗口数: 1/2" in text
+    assert "持续超额收益窗口数: 0/2" in text
+    assert "部分滚动窗口跑赢强基准族，但未满足持续性口径" in text
 
 
 def test_build_hourly_spot_activation_summary_reports_nonzero_hours() -> None:

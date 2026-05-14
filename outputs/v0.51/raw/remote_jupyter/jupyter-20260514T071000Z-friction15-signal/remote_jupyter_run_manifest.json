@@ -1,0 +1,36 @@
+{
+  "run_id": "jupyter-20260514T071000Z-friction15-signal",
+  "version": "v0.51",
+  "project_dir": "elec_remote_runs/v0.51/jupyter-20260514T071000Z-friction15-signal/project",
+  "output_dir": "elec_remote_runs/v0.51/jupyter-20260514T071000Z-friction15-signal/project/outputs/v0.51",
+  "pytest_dir": "elec_remote_runs/v0.51/jupyter-20260514T071000Z-friction15-signal/project/.cache/tests/pytest",
+  "commands": [
+    {
+      "name": "pipeline",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "run_all.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 799.0776484012604
+    },
+    {
+      "name": "pytest",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "-m",
+        "src.scripts.run_pytest",
+        "tests",
+        "-q"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 27.53347682952881
+    }
+  ],
+  "remote_env": "torch311",
+  "remote_python": [
+    "/research/miniforge3/envs/torch311/bin/python"
+  ],
+  "returncode": 0,
+  "artifact_path": "elec_remote_runs/v0.51/jupyter-20260514T071000Z-friction15-signal/artifacts.zip"
+}

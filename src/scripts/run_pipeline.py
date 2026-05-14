@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import hashlib
+import gc
 import os
 from pathlib import Path
 import shutil
@@ -165,7 +166,7 @@ def _json_safe_value(value: object) -> object:
 
 def _clean_reports_dir(reports_dir: Path, keep_names: set[str]) -> None:
     reports_dir.mkdir(parents=True, exist_ok=True)
-    for child in reports_dir.iterdir():
+    for child in list(reports_dir.iterdir()):
         if child.name in keep_names:
             continue
         _remove_report_path(child)
@@ -179,7 +180,7 @@ def _remove_report_path(path: Path) -> None:
             pass
         function(failing_path)
 
-    for attempt in range(5):
+    for attempt in range(20):
         try:
             if path.is_dir():
                 shutil.rmtree(path, onerror=_retry_remove)
@@ -188,9 +189,10 @@ def _remove_report_path(path: Path) -> None:
                 path.unlink()
             return
         except PermissionError:
-            if attempt == 4:
+            if attempt == 19:
                 raise
-            time.sleep(0.05)
+            gc.collect()
+            time.sleep(0.10)
 
 
 def _build_human_report(context: dict, training: dict, validation: dict, backtest: dict) -> str:
@@ -209,6 +211,9 @@ def _build_human_report(context: dict, training: dict, validation: dict, backtes
     rule_table = context.get("bundle", {}).get("policy_rule_table", pd.DataFrame())
     policy_inventory = context.get("bundle", {}).get("policy_inventory", pd.DataFrame())
     policy_failures = context.get("bundle", {}).get("policy_failures", pd.DataFrame())
+    strong_baseline_windows = int(
+        rolling_excess.get("strong_baseline_family_outperformed", pd.Series(dtype="bool")).astype(bool).sum()
+    )
     persistent_windows = int(rolling_excess.get("active_excess_return_persistent", pd.Series(dtype="bool")).astype(bool).sum())
     rolling_window_range = infer_date_range(backtest.get("rolling_weekly_results", pd.DataFrame()))
     validation_metrics = validation.get("metrics", {})
@@ -385,7 +390,8 @@ def _build_human_report(context: dict, training: dict, validation: dict, backtes
             f"- 滚动平均采购成本: {_format_number(rolling_aggregate.get('mean_total_procurement_cost', 0.0))}",
             f"- 滚动平均收益: {_format_number(rolling_aggregate.get('mean_total_profit', 0.0))}",
             f"- 滚动平均 CVaR99: {_format_number(rolling_aggregate.get('mean_cvar99', 0.0))}",
-            f"- 跑赢 dynamic_lock_only 的滚动窗口数: {persistent_windows}",
+            f"- 跑赢强基准族的滚动窗口数: {strong_baseline_windows}",
+            f"- 满足持续超额收益口径的滚动窗口数: {persistent_windows}",
             "",
             "### 训练运行结果",
             "",
@@ -535,6 +541,7 @@ def _build_ai_structured_report(context: dict, training: dict, validation: dict,
             "decision_framework": "周度中长期底仓决策 + 小时级现货边际风险修正 + 15分钟代理结算回测",
             "market_scope": ["中长期市场", "日前现货市场", "日内/实时现货市场"],
             "strong_baseline": "dynamic_lock_only",
+            "scoring_baseline_family": config.get("reward", {}).get("baseline_position_ratios", []),
         },
         "implementation_logic": [
             "experiment_config.yaml resolves versioned output paths",

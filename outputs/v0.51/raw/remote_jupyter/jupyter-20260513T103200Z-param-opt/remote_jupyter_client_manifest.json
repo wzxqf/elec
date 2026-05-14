@@ -1,0 +1,68 @@
+{
+  "jupyter_url": "http://10.26.27.72:9007/",
+  "kernel": "python3",
+  "source_archive": {
+    "archive_path": "D:\\elec\\.cache\\remote_jupyter\\v0.51\\jupyter-20260513T103200Z-param-opt\\source.zip",
+    "file_count": 481,
+    "byte_count": 74070600,
+    "include_outputs": false
+  },
+  "remote_manifest": {
+    "run_id": "jupyter-20260513T103200Z-param-opt",
+    "version": "v0.51",
+    "project_dir": "elec_remote_runs/v0.51/jupyter-20260513T103200Z-param-opt/project",
+    "output_dir": "elec_remote_runs/v0.51/jupyter-20260513T103200Z-param-opt/project/outputs/v0.51",
+    "pytest_dir": "elec_remote_runs/v0.51/jupyter-20260513T103200Z-param-opt/project/.cache/tests/pytest",
+    "commands": [
+      {
+        "name": "pipeline",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "run_all.py"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 800.3751335144043
+      },
+      {
+        "name": "pytest",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "-m",
+          "src.scripts.run_pytest",
+          "tests",
+          "-q"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 26.196049213409424
+      }
+    ],
+    "remote_env": "torch311",
+    "remote_python": [
+      "/research/miniforge3/envs/torch311/bin/python"
+    ],
+    "returncode": 0,
+    "artifact_path": "elec_remote_runs/v0.51/jupyter-20260513T103200Z-param-opt/artifacts.zip"
+  },
+  "local_output_sync": {
+    "source_output_dir": "D:\\elec\\.cache\\remote_jupyter_sync_preserve\\52f9b58cc8eb49879ea2b2199d87c71f\\source_output",
+    "target_output_dir": "D:\\elec\\outputs\\v0.51",
+    "preserved_names": [
+      "raw/remote_jupyter"
+    ],
+    "removed_names": [
+      "artifact_index.md",
+      "raw",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_names": [
+      "artifact_index.md",
+      "raw",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_files": 46
+  }
+}

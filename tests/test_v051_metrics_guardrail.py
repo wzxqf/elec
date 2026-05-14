@@ -24,3 +24,20 @@ def test_summarize_rolling_excess_return_emits_guardrail_statistics() -> None:
     assert bool(summary.loc[0, "window_sharpe_guard_triggered"]) is True
     assert summary.loc[0, "window_metrics_tier"] == "appendix_only"
     assert summary.loc[0, "excess_return_conclusion"] == "窗口样本不足或波动率过低，保留附录口径"
+
+
+def test_summarize_rolling_excess_return_names_scoring_baseline_family() -> None:
+    policy_metrics = pd.DataFrame(
+        {
+            "window_name": ["window_01", "window_01", "window_01"],
+            "policy_risk_adjusted_excess_return_w": [1.0, 2.0, 3.0],
+            "excess_profit_w": [10.0, 20.0, 30.0],
+        }
+    )
+
+    summary = summarize_rolling_excess_return(policy_metrics, epsilon=1.0e-6)
+
+    assert "strong_baseline_family_outperformed" in summary.columns
+    assert "dynamic_lock_only_outperformed" not in summary.columns
+    assert bool(summary.loc[0, "strong_baseline_family_outperformed"]) is True
+    assert summary.loc[0, "excess_return_conclusion"] == "该窗口跑赢强基准族"

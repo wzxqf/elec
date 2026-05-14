@@ -7,7 +7,12 @@
 - 新增 `v0.51.md`、`docs/v0.51_architecture_implementation.md` 和 `docs/v0.51_algorithm_implementation_logic.md` 作为当前活跃说明，README、约束、状态 Schema 和策略层文档同步更新到 `v0.51` 口径。
 - 补齐根目录 `run_remote_jupyter.ps1` 一键入口，默认执行 `--probe` 后再上传运行，Jupyter 密码或 token 仍只从本机环境变量读取。
 - 清理测试口径更新为适配当前 `.gitignore` 策略：活跃区继续禁止旧版本模块和旧输出，`已归档/` 作为 ignored 历史区不再要求参与默认 pytest 文件存在性校验。
-- 远程 Jupyter 已刷新 `outputs/v0.51`：完整 pipeline 返回 0；补齐远程 `pymupdf` 后，全量 pytest 返回 `104 passed`；正式滚动小时级现货修正出现 1537 个非零小时。
+- 远程 Jupyter 已刷新 `outputs/v0.51`：完整 pipeline 返回 0；全量 pytest 返回 `108 passed`；正式滚动小时级现货修正出现 1535 个非零小时。
+- 修正滚动超额收益报告口径：`excess_profit_w` 来自 `[0.50, 0.55, 0.60]` 强基准族，人工报告和 raw 指标不再把该字段误写成单一 `dynamic_lock_only` 比较。
+- 人工报告新增持续性计数：当前正式输出为 6/10 个窗口跑赢强基准族，0/10 个窗口满足持续超额收益口径，收益优势仍按不稳定处理。
+- 按政策口径将 `friction_cost_yuan_per_mwh` 从 `1.20` 调整为 `1.50`，即 1.5 厘/kWh 折算为 1.50 元/MWh；该项进入评分核摩擦成本和小时级现货扫描。
+- 新增 `src.scripts.hourly_spot_param_search` 只读扫描工具，并扩展变量构造与算法形式维度：`raw` 与 `forecast_load_normalized` 信号构造、`hard` 与 `soft` 门控、信号裁剪、死区、温度、小时带宽和 `lambda_trade`。
+- 本轮保存粒子扫描共评估 1728 个候选，108 个通过 guardrail；结果显示 `forecast_load_normalized` 构造未优于原始构造，`soft` 门控有可行候选但未超过最优 `hard` 门控。扫描最优候选在完整远程重训中外推不稳，滚动超额收益合计为 `-442,243,128`、跑赢窗口为 5/10；最终正式入口保留 `signal_transform=raw`、`gate_mode=hard`、`signal_clip_abs=0.0`、`signal_deadband=0.12`、`hourly_limit.shrink_multiplier=0.50`，在摩擦 `1.50` 下滚动超额收益合计为 `-435,130,988`、跑赢窗口为 6/10。
 
 ## v0.50
 

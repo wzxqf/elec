@@ -1,0 +1,9 @@
+scenario_group,scenario_name,scenario_value,scenario_settlement_method,total_profit,total_procurement_cost,mean_cvar99,mean_hedge_error,week_count,settlement_record_count,robustness_rank
+contract_ratio_shift,contract_ratio_shift_-0.10,-0.1,rerun_materialize_particle_pair,2044306448.0,13602236992.0,4279042.85,0.6750976145267487,10,6528,4.0
+policy_cutoff,policy_cutoff_2026-02-01,2026-02-01,rerun_materialize_particle_pair,718991519.0,9281242304.0,3183651.175,0.3652260422706604,7,4512,5.0
+forecast_error_scale,forecast_error_scale_1.20,1.2,rerun_materialize_particle_pair,2289278668.0,16487203712.0,5187081.325,0.6463582396507264,10,6528,6.0
+contract_ratio_shift,contract_ratio_shift_+0.00,0.0,rerun_materialize_particle_pair,1311220487.0,14335322944.0,4621638.55,0.5756298780441285,10,6528,7.0
+forecast_error_scale,forecast_error_scale_1.00,1.0,rerun_materialize_particle_pair,1311220487.0,14335322944.0,4621638.55,0.5756298780441285,10,6528,7.0
+policy_cutoff,policy_cutoff_2026-01-01,2026-01-01,rerun_materialize_particle_pair,1311220487.0,14335322944.0,4621638.55,0.5756298780441285,10,6528,7.0
+forecast_error_scale,forecast_error_scale_0.80,0.8,rerun_materialize_particle_pair,-383894126.75,12900499968.0,4468648.6,0.4695373445749283,10,6528,8.0
+contract_ratio_shift,contract_ratio_shift_+0.10,0.1,rerun_materialize_particle_pair,-426620181.0,16073163584.0,5598884.3,0.4761126160621643,10,6528,12.0

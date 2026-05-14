@@ -20,6 +20,7 @@ def test_config_uses_hybrid_pso() -> None:
     assert "hourly_feature_groups" in config["parameter_compiler"]["lower"]
     assert "policy_projection" in config
     assert "policy_feasible_domain" in config
+    assert "hourly_spot_experiment" in config
     assert "upper_strategy" in config
     assert "lower_strategy" in config
     assert "economics" in config
@@ -66,3 +67,12 @@ def test_runtime_sections_include_hybrid_optimizer_and_score_kernel() -> None:
     assert score_kernel["exposure_band_base_ratio"] == 0.20
     assert score_kernel["lt_settlement_weight"] == 0.60
     assert score_kernel["da_settlement_weight"] == 0.40
+    assert score_kernel["hourly_signal"]["transform"] == "raw"
+    assert score_kernel["hourly_signal"]["price_spread_scale_yuan_per_mwh"] == 100.0
+    assert score_kernel["hourly_signal"]["signal_clip_abs"] == 0.0
+    assert score_kernel["hourly_limit"]["base_multiplier"] == 0.50
+    assert score_kernel["hourly_limit"]["shrink_multiplier"] == 0.50
+    assert score_kernel["hourly_gate"]["mode"] == "hard"
+    assert score_kernel["hourly_gate"]["signal_deadband"] == 0.12
+    assert score_kernel["hourly_gate"]["temperature"] == 0.04
+    assert config["economics"]["friction_cost_yuan_per_mwh"] == 1.50

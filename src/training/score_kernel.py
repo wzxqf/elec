@@ -274,16 +274,39 @@ def batch_score_particles(
         + _score_nested_cfg(config, "session_weights", "peak_hour", 0.30) * peak_hour_flag
         + _score_nested_cfg(config, "session_weights", "valley_hour", -0.20) * valley_hour_flag
     )
+    signal_cfg = config.get("score_kernel", {}).get("hourly_signal", {}) if isinstance(config, dict) else {}
+    signal_transform = str(signal_cfg.get("transform", "raw")).lower()
+    if signal_transform in {"forecast_load_normalized", "normalized"}:
+        price_scale = max(float(signal_cfg.get("price_spread_scale_yuan_per_mwh", 100.0)), 1.0e-6)
+        min_load_scale = max(float(signal_cfg.get("min_load_scale_mwh", 1.0)), 1.0e-6)
+        valid_hours_for_signal = hour_mask.sum(dim=-1).clamp_min(1.0)
+        hourly_load_scale = (
+            forecast_load.view(1, 1, week_count, 1) / valid_hours_for_signal.unsqueeze(-1)
+        ).clamp_min(min_load_scale)
+        spread_signal = spread / price_scale
+        spread_abs_signal = spread_abs / price_scale
+        load_dev_signal = load_dev / hourly_load_scale
+        renewable_dev_signal = renewable_dev / hourly_load_scale
+        renewable_dev_abs_signal = renewable_dev_abs / hourly_load_scale
+    else:
+        spread_signal = spread
+        spread_abs_signal = spread_abs
+        load_dev_signal = load_dev
+        renewable_dev_signal = renewable_dev
+        renewable_dev_abs_signal = renewable_dev_abs
     raw_hourly_signal = (
-        _score_nested_cfg(config, "hourly_signal", "spread_weight", 0.02) * spread_coef * spread
-        + _score_nested_cfg(config, "hourly_signal", "load_dev_weight", 0.01) * load_coef * load_dev
-        + _score_nested_cfg(config, "hourly_signal", "renewable_weight", 0.01) * renewable_coef * renewable_dev
+        _score_nested_cfg(config, "hourly_signal", "spread_weight", 0.02) * spread_coef * spread_signal
+        + _score_nested_cfg(config, "hourly_signal", "load_dev_weight", 0.01) * load_coef * load_dev_signal
+        + _score_nested_cfg(config, "hourly_signal", "renewable_weight", 0.01) * renewable_coef * renewable_dev_signal
     )
-    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "spread_abs_weight", 0.005) * spread_coef * spread_abs * session_signal
-    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "renewable_abs_weight", 0.004) * renewable_coef * renewable_dev_abs * (
+    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "spread_abs_weight", 0.005) * spread_coef * spread_abs_signal * session_signal
+    raw_hourly_signal = raw_hourly_signal + _score_nested_cfg(config, "hourly_signal", "renewable_abs_weight", 0.004) * renewable_coef * renewable_dev_abs_signal * (
         _score_nested_cfg(config, "session_weights", "renewable_valley_mix", 0.50) * valley_hour_flag
         + _score_nested_cfg(config, "session_weights", "renewable_business_mix", 0.50) * business_hour_flag
     )
+    signal_clip_abs = float(signal_cfg.get("signal_clip_abs", 0.0))
+    if signal_clip_abs > 0.0:
+        raw_hourly_signal = torch.clamp(raw_hourly_signal, min=-signal_clip_abs, max=signal_clip_abs)
     raw_hourly_signal = raw_hourly_signal * torch.where(
         settlement_effective_flag > 0.0,
         torch.ones_like(settlement_effective_flag),
@@ -295,7 +318,11 @@ def batch_score_particles(
         gate_temperature = max(float(gate_cfg.get("temperature", 0.05)), 1.0e-6)
         signal_edge = raw_hourly_signal.abs()
         soft_gate = torch.sigmoid((signal_edge - signal_deadband) / gate_temperature)
-        hard_gate = torch.where(signal_edge >= signal_deadband, soft_gate, torch.zeros_like(soft_gate))
+        gate_mode = str(gate_cfg.get("mode", "hard")).lower()
+        if gate_mode == "soft":
+            hard_gate = soft_gate
+        else:
+            hard_gate = torch.where(signal_edge >= signal_deadband, soft_gate, torch.zeros_like(soft_gate))
     else:
         hard_gate = torch.ones_like(raw_hourly_signal)
     raw_spot_hedge_mwh = hard_gate * torch.tanh(raw_hourly_signal) * raw_spot_hedge_limit_mwh * hour_mask
