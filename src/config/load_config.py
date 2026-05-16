@@ -86,6 +86,7 @@ def _normalize_score_kernel(score_kernel: dict[str, Any]) -> None:
     hourly_signal = dict(score_kernel.get("hourly_signal", {}))
     session_weights = dict(score_kernel.get("session_weights", {}))
     hourly_limit = dict(score_kernel.get("hourly_limit", {}))
+    curve_guard = dict(score_kernel.get("contract_curve_guard", {}))
     score_kernel.update(
         {
             "contract_adjustment_scale_ratio": float(score_kernel.get("contract_adjustment_scale_ratio", 0.30)),
@@ -119,6 +120,12 @@ def _normalize_score_kernel(score_kernel: dict[str, Any]) -> None:
             "hourly_limit": {
                 "base_multiplier": float(hourly_limit.get("base_multiplier", 0.50)),
                 "shrink_multiplier": float(hourly_limit.get("shrink_multiplier", 0.50)),
+            },
+            "contract_curve_guard": {
+                "enabled": bool(curve_guard.get("enabled", False)),
+                "policy_column": str(curve_guard.get("policy_column", "lt_price_linked_active")),
+                "uniform_blend": float(curve_guard.get("uniform_blend", 0.0)),
+                "also_bind_feasible_domain": bool(curve_guard.get("also_bind_feasible_domain", False)),
             },
         }
     )

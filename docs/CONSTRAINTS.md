@@ -1,8 +1,8 @@
 # CONSTRAINTS.md
 
-## v0.51 生效约束
+## v0.52 生效约束
 
-本文件只保留当前版本有效约束，所有条目均服务于 `v0.51 + HYBRID_PSO_V040 + outputs/v0.51/` 的正式实现。
+本文件只保留当前版本有效约束，所有条目均服务于 `v0.52 + HYBRID_PSO_V040 + outputs/v0.52/` 的正式实现。
 
 ## 研究对象边界
 
@@ -47,7 +47,7 @@
 - 主回测必须采用滚动窗或扩展窗再训练
 - 报告阶段只生成最终人工报告和 AI 结构化报告
 - 运行后必须输出参数快照、特征清单和滚动验证数据
-- 每次完整 pipeline 运行后必须输出 `reports/v0.51_human_report.md` 与 `reports/v0.51_ai_structured_report.json`，供人工阅读和 AI 深度复核
+- 每次完整 pipeline 运行后必须输出 `reports/v0.52_human_report.md` 与 `reports/v0.52_ai_structured_report.json`，供人工阅读和 AI 深度复核
 
 ## 收益、风险与基准边界
 
@@ -68,8 +68,8 @@
 - `release_manifest.json`
 - `run_manifest.json`
 - `artifact_index.md`
-- `reports/v0.51_human_report.md`
-- `reports/v0.51_ai_structured_report.json`
+- `reports/v0.52_human_report.md`
+- `reports/v0.52_ai_structured_report.json`
 - `raw/metadata/train_config_snapshot.yaml`
 - `raw/metadata/compiled_parameter_layout.json`
 - `raw/metadata/training_runtime_summary.json`

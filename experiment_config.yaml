@@ -1,5 +1,5 @@
 project:
-  version: v0.51
+  version: v0.52
   project_root: .
 
 data:
@@ -67,12 +67,12 @@ rolling_retrain:
 reward:
   baseline_strategy: dynamic_lock_only
   baseline_position_ratios:
-    - 0.50
-    - 0.55
-    - 0.60
+    - 0.48
   cvar_alpha: 0.99
   lambda_tail: 0.65
   lambda_hedge: 0.18
+  lambda_lock_deviation: 0.0
+  lambda_positive_lock_deviation: 10000000000.0
   lambda_trade: 0.10
   lambda_violate: 1.00
   robust_eps: 1.0e-6
@@ -84,11 +84,22 @@ score_kernel:
   contract_adjustment_policy_scale: 0.05
   exposure_band_base_ratio: 0.20
   exposure_band_feature_scale: 0.10
-  contract_position_base_ratio: 0.60
-  baseline_position_ratio: 0.55
+  contract_position_base_ratio: 0.48
+  baseline_position_ratio: 0.48
   baseline_projection_penalty_scale: 0.05
   lt_settlement_weight: 0.60
   da_settlement_weight: 0.40
+  weekly_feature_scaling:
+    enabled: true
+    price_scale_yuan_per_mwh: 500.0
+    forward_days_scale: 60.0
+    clip_abs: 5.0
+  contract_curve_guard:
+    # v0.52 正式策略防护：仅在中长期价格联动生效后收缩已学习的 24 小时合约曲线。
+    enabled: true
+    policy_column: lt_price_linked_active
+    uniform_blend: 0.85
+    also_bind_feasible_domain: false
   hourly_signal:
     # raw 为当前正式构造；forecast_load_normalized 用于比较按预测负荷尺度归一化后的变量构造。
     transform: raw
@@ -108,11 +119,11 @@ score_kernel:
     renewable_business_mix: 0.50
   hourly_limit:
     base_multiplier: 0.50
-    shrink_multiplier: 0.50
+    shrink_multiplier: 0.00
   hourly_gate:
     enabled: true
     mode: hard
-    signal_deadband: 0.12
+    signal_deadband: 0.05
     temperature: 0.04
 
 training:
@@ -138,11 +149,11 @@ parameter_compiler:
           - forward_mechanism_execution_days
           - forward_ancillary_coupling_days
           - forward_info_forecast_boundary_days
-      # 正式参数：v0.51 balanced
+      # 正式参数：v0.52 balanced
       # explore 备选（未升格正式入口）：size = 24
       contract_curve_latent:
         size: 20
-      # 正式参数：v0.51 balanced
+      # 正式参数：v0.52 balanced
       # explore 备选（未升格正式入口）：size = 10
       action_head:
         size: 8
@@ -416,7 +427,7 @@ search:
 hybrid_pso:
   seed: 42
   optimizer:
-    # 正式参数：v0.51 balanced
+    # 正式参数：v0.52 balanced
     # explore 备选（未升格正式入口）：init_scale = 0.14
     init_scale: 0.12
     # explore 备选（未升格正式入口）：inertia = 0.72

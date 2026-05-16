@@ -1,5 +1,17 @@
 # 更新日志
 
+## v0.52
+
+- 将当前正式版本号更新为 `project.version: v0.52`，正式输出目录切换为 `outputs/v0.52/`，活跃测试命名同步迁移为 `test_v052_<purpose>.py`。
+- 将周度锁仓基准、评分基准和基准比较中的 `dynamic_lock_only` 合约比例统一为 `0.48`，`reward.baseline_position_ratios` 收口为 `[0.48]`。
+- 新增上层周度特征语义缩放：周度 MWh 总量按预测周负荷缩放，小时负荷/扰动按平均小时负荷缩放，价格和前瞻天数字段分别按配置尺度缩放，比例、旗标和计数字段保持原尺度，避免残差动作层因大尺度输入退化到 `tanh` 边界。
+- 新增锁仓残差惩罚接口并启用正向偏离惩罚：`lambda_lock_deviation = 0.0`、`lambda_positive_lock_deviation = 10000000000.0`，用于抑制在 48% 基准上继续向上加仓的滚动外推。
+- 新增远程 Jupyter 自定义命令入口和 `hourly_spot_param_search --workers` 并行扫描能力；`v052-lock48-param-search-w8-r2` 在远程 `torch311` 下以 8 workers 扫描 1728 个候选，150 个通过 guardrail。
+- 在 48% 锁仓口径下固化保存粒子扫描最优候选：`signal_transform=raw`、`gate_mode=hard`、`signal_clip_abs=0.0`、`signal_deadband=0.05`、`hourly_limit.base_multiplier=0.50`、`hourly_limit.shrink_multiplier=0.00`、`lambda_trade=0.10`。
+- 固化 `contract_curve_guard`：仅当 `lt_price_linked_active` 已生效时，将 HPSO 学到的 24 小时中长期合约曲线按 `uniform_blend=0.85` 向均匀曲线收缩，用于降低 2026 年 2 月价格联动制度下的曲线外推风险。
+- 曲线防护本身不改变政策文本解析、政策生效时点、可行域边界或 15 分钟结算口径。
+- 远程 Jupyter 参数候选 `1e9 / 3e9 / 5e9 / 10e9` 均完成完整 pipeline 与远程 pytest；最终干净重跑 `v052-clean-rerun-final` 完整 pipeline 返回 0，远程 pytest 为 `120 passed`。滚动超额收益合计从修复前负值转为 `149,728,712`，1 月合计超额收益为 `20,237,952`，最高滚动锁仓比例从 78% 问题区间压回 `48.12%`，跑赢强基准窗口为 `7/10`。
+
 ## v0.51
 
 - 将当前正式版本号更新为 `project.version: v0.51`，正式输出目录切换为 `outputs/v0.51/`，活跃测试命名同步迁移为 `test_v051_<purpose>.py`。

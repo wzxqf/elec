@@ -9,6 +9,7 @@ import torch
 from src.model_layout.schema import CompiledParameterLayout, ParameterBlockSpec
 from src.policy.projection import project_hourly_hedge_tensor
 from src.training.tensor_bundle import TrainingTensorBundle
+from src.training.weekly_feature_scaling import scale_weekly_upper_features
 
 
 @dataclass(frozen=True)
@@ -94,6 +95,22 @@ def _column_indices(available_columns: list[str], required_columns: list[str]) -
     return [lookup[column] for column in required_columns]
 
 
+def _policy_indicator(
+    *,
+    policy_columns: list[str],
+    policy_tensor: torch.Tensor,
+    column: str,
+    score_device: str,
+) -> torch.Tensor:
+    if not column:
+        return torch.zeros((policy_tensor.shape[0],), dtype=torch.float32, device=score_device)
+    try:
+        column_idx = policy_columns.index(column)
+    except ValueError:
+        return torch.zeros((policy_tensor.shape[0],), dtype=torch.float32, device=score_device)
+    return (policy_tensor[:, column_idx] > 0.5).float()
+
+
 def _curve_basis(curve_dim: int, device: str) -> torch.Tensor:
     hours = torch.linspace(0.0, 1.0, steps=24, device=device, dtype=torch.float32)
     components: list[torch.Tensor] = []
@@ -169,6 +186,13 @@ def batch_score_particles(
         weekly_block = _find_block(compiled_layout.upper.blocks, "weekly_feature_weights")
         weekly_indices = _column_indices(tensor_bundle.weekly_feature_columns, weekly_block.columns)
         weekly_feature_matrix = weekly_features[:, weekly_indices]
+        weekly_feature_matrix = scale_weekly_upper_features(
+            weekly_feature_matrix,
+            columns=weekly_block.columns,
+            forecast_weekly_load=forecast_load,
+            valid_hours=tensor_bundle.hourly_valid_mask.sum(dim=1).to(score_device, dtype=torch.float32),
+            config=config.get("score_kernel", {}).get("weekly_feature_scaling", {}) if isinstance(config, dict) else {},
+        )
         weekly_weight_block = _block_slice(upper, weekly_block)
         feature_signal = weekly_feature_matrix @ weekly_weight_block.T
         feature_signal = feature_signal.transpose(0, 1).unsqueeze(1).expand(upper_count, lower_count, week_count)
@@ -242,6 +266,22 @@ def batch_score_particles(
     )
 
     contract_curve = torch.softmax(contract_curve_logits, dim=-1).unsqueeze(1).unsqueeze(2).expand(upper_count, lower_count, week_count, 24)
+    curve_guard_cfg = config.get("score_kernel", {}).get("contract_curve_guard", {}) if isinstance(config, dict) else {}
+    if bool(curve_guard_cfg.get("enabled", False)):
+        uniform_blend = min(max(float(curve_guard_cfg.get("uniform_blend", 0.0)), 0.0), 1.0)
+        if uniform_blend > 0.0:
+            guard_column = str(curve_guard_cfg.get("policy_column", "lt_price_linked_active"))
+            guard_active = _policy_indicator(
+                policy_columns=tensor_bundle.policy_columns,
+                policy_tensor=policy_tensor,
+                column=guard_column,
+                score_device=score_device,
+            ).view(1, 1, week_count, 1)
+            if bool(curve_guard_cfg.get("also_bind_feasible_domain", False)):
+                guard_active = torch.maximum(guard_active, feasible_domain_triggered.view(1, 1, week_count, 1))
+            guard_weight = uniform_blend * guard_active
+            uniform_curve = torch.full_like(contract_curve, 1.0 / 24.0)
+            contract_curve = contract_curve * (1.0 - guard_weight) + uniform_curve * guard_weight
 
     hourly_feature_lookup = {name: idx for idx, name in enumerate(tensor_bundle.hourly_feature_columns)}
 
@@ -435,10 +475,14 @@ def batch_score_particles(
     profit_baseline = retail_revenue - baseline_procurement_cost
     excess_profit = profit - profit_baseline
     hedge_error = imbalance_energy / actual_load_settlement.clamp_min(1.0)
+    lock_deviation = torch.abs(contract_adjustment_mwh_exec) / forecast_load.view(1, 1, week_count).clamp_min(1.0)
+    positive_lock_deviation = torch.relu(contract_adjustment_mwh_exec) / forecast_load.view(1, 1, week_count).clamp_min(1.0)
     reward = (
         excess_profit
         - _cfg(config, ["reward", "lambda_tail"], 0.65) * cvar99
         - _cfg(config, ["reward", "lambda_hedge"], 0.18) * hedge_error
+        - _cfg(config, ["reward", "lambda_lock_deviation"], 0.0) * lock_deviation
+        - _cfg(config, ["reward", "lambda_positive_lock_deviation"], 0.0) * positive_lock_deviation
         - _cfg(config, ["reward", "lambda_trade"], 0.10) * friction_cost
         - _cfg(config, ["reward", "lambda_violate"], 1.0) * policy_violation_penalty
     )

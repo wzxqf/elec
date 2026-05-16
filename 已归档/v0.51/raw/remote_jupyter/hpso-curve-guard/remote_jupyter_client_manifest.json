@@ -1,0 +1,68 @@
+{
+  "jupyter_url": "http://10.26.27.72:9007/",
+  "kernel": "python3",
+  "source_archive": {
+    "archive_path": "D:\\elec\\.cache\\remote_jupyter\\v0.51\\hpso-curve-guard\\source.zip",
+    "file_count": 486,
+    "byte_count": 74356205,
+    "include_outputs": false
+  },
+  "remote_manifest": {
+    "run_id": "hpso-curve-guard",
+    "version": "v0.51",
+    "project_dir": "elec_remote_runs/v0.51/hpso-curve-guard/project",
+    "output_dir": "elec_remote_runs/v0.51/hpso-curve-guard/project/outputs/v0.51",
+    "pytest_dir": "elec_remote_runs/v0.51/hpso-curve-guard/project/.cache/tests/pytest",
+    "commands": [
+      {
+        "name": "pipeline",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "run_all.py"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 975.2274079322815
+      },
+      {
+        "name": "pytest",
+        "argv": [
+          "/research/miniforge3/envs/torch311/bin/python",
+          "-m",
+          "src.scripts.run_pytest",
+          "tests",
+          "-q"
+        ],
+        "returncode": 0,
+        "elapsed_seconds": 28.186990976333618
+      }
+    ],
+    "remote_env": "torch311",
+    "remote_python": [
+      "/research/miniforge3/envs/torch311/bin/python"
+    ],
+    "returncode": 0,
+    "artifact_path": "elec_remote_runs/v0.51/hpso-curve-guard/artifacts.zip"
+  },
+  "local_output_sync": {
+    "source_output_dir": "D:\\elec\\.cache\\remote_jupyter_sync_preserve\\c26925b8ba814046bce0f164107f3b81\\source_output",
+    "target_output_dir": "D:\\elec\\outputs\\v0.51",
+    "preserved_names": [
+      "raw/remote_jupyter"
+    ],
+    "removed_names": [
+      "artifact_index.md",
+      "raw",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_names": [
+      "artifact_index.md",
+      "raw",
+      "release_manifest.json",
+      "reports",
+      "run_manifest.json"
+    ],
+    "synced_files": 46
+  }
+}

@@ -107,11 +107,13 @@ def _max_drawdown(series: pd.Series) -> float:
 def evaluate_benchmark_strategies(bundle: dict[str, Any], config: dict[str, Any]) -> pd.DataFrame:
     tensor_bundle: TrainingTensorBundle = bundle["tensor_bundle"]
     economics = config.get("economics", {})
+    score_cfg = config.get("score_kernel", {})
+    dynamic_contract_ratio = float(score_cfg.get("baseline_position_ratio", 0.55))
     rows = [
-        _evaluate_strategy(tensor_bundle, strategy_name="dynamic_lock_only", contract_ratio=0.55, simple_hedge=False, economics=economics),
+        _evaluate_strategy(tensor_bundle, strategy_name="dynamic_lock_only", contract_ratio=dynamic_contract_ratio, simple_hedge=False, economics=economics),
         _evaluate_strategy(tensor_bundle, strategy_name="fixed_holding_60", contract_ratio=0.60, simple_hedge=False, economics=economics),
         _evaluate_strategy(tensor_bundle, strategy_name="static_no_spot_adjustment", contract_ratio=0.50, simple_hedge=False, economics=economics),
-        _evaluate_strategy(tensor_bundle, strategy_name="simple_rolling_hedge", contract_ratio=0.55, simple_hedge=True, economics=economics),
+        _evaluate_strategy(tensor_bundle, strategy_name="simple_rolling_hedge", contract_ratio=dynamic_contract_ratio, simple_hedge=True, economics=economics),
     ]
     result = pd.DataFrame(rows)
     baseline_profit = float(result.loc[result["strategy_name"] == "dynamic_lock_only", "total_profit"].iloc[0])

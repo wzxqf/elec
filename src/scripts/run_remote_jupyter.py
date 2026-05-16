@@ -75,6 +75,7 @@ class RemoteRunSpec:
     remote_python: str | None = None
     run_pipeline: bool = True
     run_tests: bool = True
+    custom_commands: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -110,11 +111,35 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--http-timeout", type=int, default=DEFAULT_HTTP_TIMEOUT_SECONDS)
     parser.add_argument("--execution-timeout", type=int, default=DEFAULT_EXECUTION_TIMEOUT_SECONDS)
     parser.add_argument(
+        "--remote-command-json",
+        action="append",
+        default=[],
+        help=(
+            "Custom remote Python command as JSON, e.g. "
+            "{\"name\":\"param_search\",\"argv\":[\"-m\",\"src.scripts.hourly_spot_param_search\"]}. "
+            "The remote project Python is prepended to argv."
+        ),
+    )
+    parser.add_argument(
         "--pytest-args",
         nargs=argparse.REMAINDER,
         help="Arguments passed to src.scripts.run_pytest on Jupyter. Must be last. Defaults to: tests -q",
     )
     return parser.parse_args(argv)
+
+
+def parse_remote_command_json(values: list[str] | None) -> list[dict[str, Any]]:
+    commands: list[dict[str, Any]] = []
+    for raw_value in values or []:
+        parsed = json.loads(raw_value)
+        if not isinstance(parsed, dict):
+            raise ValueError("--remote-command-json must decode to an object")
+        name = str(parsed.get("name") or f"custom_{len(commands) + 1}")
+        argv = parsed.get("argv")
+        if not isinstance(argv, list) or not argv or not all(isinstance(item, str) for item in argv):
+            raise ValueError("--remote-command-json argv must be a non-empty string list")
+        commands.append({"name": name, "argv": list(argv)})
+    return commands
 
 
 def build_connection_config(args: argparse.Namespace) -> ConnectionConfig:
@@ -328,6 +353,7 @@ def build_remote_execution_code(spec: RemoteRunSpec) -> str:
         "remote_python": spec.remote_python,
         "run_pipeline": spec.run_pipeline,
         "run_tests": spec.run_tests,
+        "custom_commands": spec.custom_commands,
         "result_marker": REMOTE_RESULT_MARKER,
     }
     config_json = json.dumps(config, ensure_ascii=False, indent=2)
@@ -393,6 +419,9 @@ if returncode == 0 and CONFIG["run_pipeline"]:
     commands.append({{"name": "pipeline", "argv": [*remote_python, "run_all.py"]}})
 if returncode == 0 and CONFIG["run_tests"]:
     commands.append({{"name": "pytest", "argv": [*remote_python, "-m", "src.scripts.run_pytest", *CONFIG["pytest_args"]]}})
+if returncode == 0:
+    for custom_command in CONFIG["custom_commands"]:
+        commands.append({{"name": custom_command["name"], "argv": [*remote_python, *custom_command["argv"]]}})
 for command in commands:
     started = time.time()
     print(":: remote command start:", command["name"], " ".join(command["argv"]), flush=True)
@@ -900,6 +929,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         source_manifest = build_source_archive(project_root, local_archive_path, include_outputs=args.include_outputs)
     pytest_args = args.pytest_args if args.pytest_args is not None else ["tests", "-q"]
+    custom_commands = parse_remote_command_json(args.remote_command_json)
     spec = RemoteRunSpec(
         run_id=run_id,
         version=version,
@@ -911,6 +941,7 @@ def main(argv: list[str] | None = None) -> int:
         remote_python=remote_python,
         run_pipeline=not args.skip_pipeline,
         run_tests=not args.skip_tests,
+        custom_commands=custom_commands,
     )
     download_dir = Path(args.download_dir).resolve() if args.download_dir else default_download_dir(project_root, version, run_id)
 

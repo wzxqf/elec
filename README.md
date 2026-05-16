@@ -1,19 +1,20 @@
 # elec
 
-面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前唯一正式口径是 `v0.51`，核心主线固定为：
+面向湖南电力市场售电公司论文实验的多时间尺度采购策略工程。当前唯一正式口径是 `v0.52`，核心主线固定为：
 
 - 周度中长期头寸参数化搜索
 - 小时级现货边际修正
 - 15 分钟代理结算回测
 - 政策文件清单、结构化规则表、制度状态轨迹和可行域审计
+- 中长期价格联动生效周的合约曲线防护
 - `dynamic_lock_only` 强基准、滚动验证、基准比较、消融和稳健性情景结算重跑报告
 
 ## 当前正式入口
 
 - 唯一人工配置入口：`experiment_config.yaml`
-- 唯一正式版本号：`project.version: v0.51`
+- 唯一正式版本号：`project.version: v0.52`
 - 唯一正式训练主线：`training.algorithm: HYBRID_PSO_V040`
-- 唯一正式输出目录：`outputs/v0.51/`
+- 唯一正式输出目录：`outputs/v0.52/`
 
 历史试验 YAML、旧版本结果和旧规划文档均已迁入 `已归档/`，不再作为当前运行依据。
 
@@ -56,16 +57,16 @@ python -m src.scripts.diagnostics
 
 运行后正式产物写入：
 
-- `outputs/v0.51/reports/`
-- `outputs/v0.51/raw/`
+- `outputs/v0.52/reports/`
+- `outputs/v0.52/raw/`
 
 关键产物包括：
 
 - `release_manifest.json`
 - `run_manifest.json`
 - `artifact_index.md`
-- `reports/v0.51_human_report.md`
-- `reports/v0.51_ai_structured_report.json`
+- `reports/v0.52_human_report.md`
+- `reports/v0.52_ai_structured_report.json`
 - `raw/metadata/train_config_snapshot.yaml`
 - `raw/metadata/compiled_parameter_layout.json`
 - `raw/metadata/training_runtime_summary.json`
@@ -91,7 +92,7 @@ python -m src.scripts.diagnostics
 
 - 正式版本迭代后的验证不再在本地直接跑 pytest，而是上传当前工作区到 Jupyter 后在服务器 `torch311` kernel 内执行。
 - `pytest` 缓存、临时目录和结果统一写入 `.cache/tests/pytest/`
-- 当前版本测试文件统一命名为 `test_v051_<purpose>.py`
+- 当前版本测试文件统一命名为 `test_v052_<purpose>.py`
 - `tests/` 主目录只保留当前版本有效测试脚本
 - 历史测试与说明统一归档到 `已归档/tests/`
 
@@ -101,12 +102,12 @@ python -m src.scripts.diagnostics
 .\run_remote_jupyter.ps1
 ```
 
-该命令会自动解析本机 `D:\miniforge\envs\torch311\python.exe` 等候选解释器，补齐 Jupyter URL、kernel 和远程环境的非敏感默认值，先执行 `--probe` 核对远程 `torch311` Python，再打包上传当前仓库。Jupyter 侧默认依次执行 `python run_all.py` 与 `python -m src.scripts.run_pytest tests -q`，把服务器结果拉回 `outputs/v0.51/raw/remote_jupyter/<run_id>/`，并在完整远程 pipeline 返回码为 0 时用拉回的 `outputs/v0.51` 覆盖本地正式结果区；`raw/remote_jupyter/` 运行记录会保留。密码或 token 仍只通过 `ELEC_JUPYTER_PASSWORD` 或 `ELEC_JUPYTER_TOKEN` 提供。当前服务器返回的 Jupyter kernel spec 为 `python3`；当前已纳入自动发现的远程实测路径为 `/research/miniforge3/envs/torch311/bin/python`；如路径变化，可在 PowerShell 入口中使用 `-RemotePython /path/to/torch311/bin/python` 覆盖自动发现。`src.scripts.run_pytest` 仍保留为服务器内部测试入口，本地只在调试远程运行器本身时使用。`-ProbeOnly` 只检查连接和解释器，`-SkipProbe` 跳过预检，`-DryRun` 只打印本地与远程运行计划。
+该命令会自动解析本机 `D:\miniforge\envs\torch311\python.exe` 等候选解释器，补齐 Jupyter URL、kernel 和远程环境的非敏感默认值，先执行 `--probe` 核对远程 `torch311` Python，再打包上传当前仓库。Jupyter 侧默认依次执行 `python run_all.py` 与 `python -m src.scripts.run_pytest tests -q`，把服务器结果拉回 `outputs/v0.52/raw/remote_jupyter/<run_id>/`，并在完整远程 pipeline 返回码为 0 时用拉回的 `outputs/v0.52` 覆盖本地正式结果区；`raw/remote_jupyter/` 运行记录会保留。密码或 token 仍只通过 `ELEC_JUPYTER_PASSWORD` 或 `ELEC_JUPYTER_TOKEN` 提供。当前服务器返回的 Jupyter kernel spec 为 `python3`；当前已纳入自动发现的远程实测路径为 `/research/miniforge3/envs/torch311/bin/python`；如路径变化，可在 PowerShell 入口中使用 `-RemotePython /path/to/torch311/bin/python` 覆盖自动发现。`src.scripts.run_pytest` 仍保留为服务器内部测试入口，本地只在调试远程运行器本身时使用。`-ProbeOnly` 只检查连接和解释器，`-SkipProbe` 跳过预检，`-DryRun` 只打印本地与远程运行计划。
 
 ## 文档入口
 
-- 总体架构与实现机理：`docs/v0.51_architecture_implementation.md`
+- 总体架构与实现机理：`docs/v0.52_architecture_implementation.md`
 - 当前架构索引：`docs/ARCHITECTURE.md`
 - 当前约束边界：`docs/CONSTRAINTS.md`
 - 当前状态结构：`docs/STATE_SCHEMA.md`
-- 当前版本发布说明：`v0.51.md`
+- 当前版本发布说明：`v0.52.md`

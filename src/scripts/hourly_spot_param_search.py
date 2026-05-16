@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import ast
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -138,7 +139,26 @@ def _evaluate_candidate(
     return row
 
 
-def run_search(project_root: Path, *, output_root: Path, top: int) -> Path:
+def _evaluate_candidates(
+    *,
+    context: dict[str, Any],
+    snapshots: pd.DataFrame,
+    candidates: list[HourlySpotExperimentCandidate],
+    workers: int,
+) -> list[dict[str, Any]]:
+    worker_count = max(int(workers), 1)
+    if worker_count == 1:
+        return [_evaluate_candidate(context=context, snapshots=snapshots, candidate=candidate) for candidate in candidates]
+
+    with ThreadPoolExecutor(max_workers=worker_count) as executor:
+        futures = [
+            executor.submit(_evaluate_candidate, context=context, snapshots=snapshots, candidate=candidate)
+            for candidate in candidates
+        ]
+        return [future.result() for future in futures]
+
+
+def run_search(project_root: Path, *, output_root: Path, top: int, workers: int = 1) -> Path:
     config_path = project_root / "experiment_config.yaml"
     isolated_config = _write_isolated_config(project_root, config_path, output_root)
     context = prepare_project_context(project_root, logger_name="hourly_spot_param_search", config_path=isolated_config)
@@ -147,7 +167,7 @@ def run_search(project_root: Path, *, output_root: Path, top: int) -> Path:
     snapshots = pd.read_csv(snapshots_path)
     candidates = build_hourly_spot_experiment_grid(context["config"])
     guardrails = context["config"].get("hourly_spot_experiment", {}).get("guardrails", {})
-    rows = [_evaluate_candidate(context=context, snapshots=snapshots, candidate=candidate) for candidate in candidates]
+    rows = _evaluate_candidates(context=context, snapshots=snapshots, candidates=candidates, workers=workers)
     result_frame = pd.DataFrame(rows)
     baseline = derive_hourly_spot_baseline(
         result_frame,
@@ -166,6 +186,7 @@ def run_search(project_root: Path, *, output_root: Path, top: int) -> Path:
         "# 小时级现货参数扫描",
         "",
         f"- candidate_count: {len(result)}",
+        f"- workers: {max(int(workers), 1)}",
         f"- baseline_sum_excess_profit_w: {baseline['sum_excess_profit_w']:.6f}",
         f"- baseline_mean_cvar99_w: {baseline['mean_cvar99_w']:.6f}",
         f"- baseline_mean_hedge_error_w: {baseline['mean_hedge_error_w']:.6f}",
@@ -184,8 +205,9 @@ def main() -> None:
     parser.add_argument("--project-root", default=".", help="Project root path.")
     parser.add_argument("--output-root", default=".cache/param_search_outputs", help="Isolated output root.")
     parser.add_argument("--top", type=int, default=12, help="Rows to include in the markdown summary.")
+    parser.add_argument("--workers", type=int, default=1, help="Parallel worker count for candidate evaluation.")
     args = parser.parse_args()
-    run_search(Path(args.project_root).resolve(), output_root=Path(args.output_root).resolve(), top=args.top)
+    run_search(Path(args.project_root).resolve(), output_root=Path(args.output_root).resolve(), top=args.top, workers=args.workers)
 
 
 if __name__ == "__main__":

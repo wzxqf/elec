@@ -1,0 +1,36 @@
+{
+  "run_id": "v052-clean-rerun-final",
+  "version": "v0.52",
+  "project_dir": "elec_remote_runs/v0.52/v052-clean-rerun-final/project",
+  "output_dir": "elec_remote_runs/v0.52/v052-clean-rerun-final/project/outputs/v0.52",
+  "pytest_dir": "elec_remote_runs/v0.52/v052-clean-rerun-final/project/.cache/tests/pytest",
+  "commands": [
+    {
+      "name": "pipeline",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "run_all.py"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 812.0785043239594
+    },
+    {
+      "name": "pytest",
+      "argv": [
+        "/research/miniforge3/envs/torch311/bin/python",
+        "-m",
+        "src.scripts.run_pytest",
+        "tests",
+        "-q"
+      ],
+      "returncode": 0,
+      "elapsed_seconds": 26.361074686050415
+    }
+  ],
+  "remote_env": "torch311",
+  "remote_python": [
+    "/research/miniforge3/envs/torch311/bin/python"
+  ],
+  "returncode": 0,
+  "artifact_path": "elec_remote_runs/v0.52/v052-clean-rerun-final/artifacts.zip"
+}
