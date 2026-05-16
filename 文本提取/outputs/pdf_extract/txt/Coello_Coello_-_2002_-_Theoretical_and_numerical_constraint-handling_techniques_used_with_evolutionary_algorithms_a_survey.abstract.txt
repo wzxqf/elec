@@ -1,6 +1,0 @@
-This paper provides a comprehensive survey of the most popular constraint-handling techniques currently used with evolutionary
-algorithms. We review approaches that go from simple variations of a penalty function, to others, more sophisticated, that are biologically inspired on emulations of the immune system, culture or ant colonies. Besides describing brieﬂy each of these approaches (or
-groups of techniques), we provide some criticism regarding their highlights and drawbacks. A small comparative study is also conducted, in order to assess the performance of several penalty-based approaches with respect to a dominance-based technique proposed
-by the author, and with respect to some mathematical programming approaches. Finally, we provide some guidelines regarding how to
-select the most appropriate constraint-handling technique for a certain application, and we conclude with some of the most promising
-paths of future research in this area.  2002 Elsevier Science B.V. All rights reserved.

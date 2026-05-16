@@ -1,5 +1,0 @@
-In this paper, we introduce a new parameter, called
-inertia weight, into the original particle swarm
-optimizer. Simulations have been done to illustrate the
-signilicant and effective impact of this new parameter on
-the particle swarm optimizer.

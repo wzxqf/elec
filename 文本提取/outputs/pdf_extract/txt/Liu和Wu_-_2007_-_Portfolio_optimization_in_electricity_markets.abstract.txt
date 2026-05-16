@@ -1,5 +1,0 @@
-In a competitive electricity market, Generation companies (Gencos) face price risk and delivery risk that affect their proﬁtability. Risk management
-is an important and essential part in the Genco’s decision making. In this paper, risk management through diversiﬁcation is considered. The problem
-of energy allocation between spot markets and bilateral contracts is formulated as a general portfolio optimization problem with a risk-free asset
-and n risky assets. Historical data of the PJM electricity market are used to demonstrate the approach.
-© 2006 Elsevier B.V. All rights reserved.
